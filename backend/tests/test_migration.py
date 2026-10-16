@@ -26,7 +26,10 @@ EXPECTED_TABLES = {
 
 
 def _alembic_cfg() -> Config:
-    cfg = Config("alembic.ini")
+    from pathlib import Path
+
+    ini = Path(__file__).resolve().parent.parent / "alembic.ini"
+    cfg = Config(str(ini))
     cfg.set_main_option("sqlalchemy.url", LIVE_DB_URL)
     return cfg
 
