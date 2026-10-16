@@ -3,7 +3,7 @@
 Last updated: 2026-10-16 / Ref: 9d82519 (M0 seed committed)
 
 ## In progress (max 1–2)
-- [ ] M0 locks + remaining technology/*.md (on `dev`)
+- [ ] M1 plan proposal (migrations + RBAC design — Rule 4 approval before code)
 
 ## Todo (M0 → M1 order)
 - [x] M0 locks + technology/*.md (requirements.lock 84 pins, package-lock.json, 12 tech files)
