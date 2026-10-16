@@ -17,6 +17,8 @@ unapproved decision immediately with revert/approve options.
 6. **Zero skipped warnings (Rule 6):** no warning/error/diagnostic/highlight skipped. Fix root
    cause. Any suppression needs owner approval + decision record + scoped allowlist + expiry.
    CI enforces `-Werror` equivalents.
+7. **CI-green after every push (Rule 7):** after every push, check CI; if red, stop new work,
+   fix properly on `dev`, re-push, re-verify green. Never stack work on red CI.
 
 ## Where to start (every session)
 1. Read this file, then `docs/brain/README.md`.
@@ -37,4 +39,4 @@ unapproved decision immediately with revert/approve options.
 
 ## Definition of Done (every commit/push)
 Code meets Rule 2 + Rule 6 checks; `docs/` + `brain/` updated same commit; changelog entry;
-CI gates pass; every decision owner-approved + recorded.
+CI gates pass **and CI status verified green after push (Rule 7)**; every decision owner-approved + recorded.
