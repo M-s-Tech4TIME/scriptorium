@@ -3,7 +3,14 @@
 Last updated: 2026-10-16 / Ref: 9d82519 (M0 seed committed)
 
 ## Was doing
-Executed owner-ordered byte-identical move of all 55 M0 files into `scriptorium/` (`git mv`, 0 sha256 mismatches). Root now holds only `.git` + `scriptorium/`.
+Bootstrapping public repo: re-rooted git to `scriptorium/` (`deb5eb1`, pure renames),
+added NOTICE/README/0013/0014, creating `M-s-Tech4TIME/scriptorium` (public) + pushing
+`main` + `dev` identical.
+
+## Next steps (in order)
+1. Commit bootstrap files + push `main` + `dev` (same SHA), verify identical.
+2. Apply `main` protection (linear history, no force/delete).
+3. Resume M0 locks + remaining `technology/*.md` on `dev`.
 
 ## Next steps (in order)
 1. Commit the move + 0012 + Q-001 + doc updates (this commit).

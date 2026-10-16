@@ -3,7 +3,7 @@
 Last updated: 2026-10-16 / Ref: 9d82519 (M0 seed committed)
 
 ## In progress (max 1–2)
-- [ ] Subdir-move commit + await Q-001 (CI shim) owner answer
+- [ ] Bootstrap commit + push main+dev identical + main protection
 
 ## Todo (M0 → M1 order)
 - [ ] Decision records 0001–0010 + technology pins + matrix
@@ -14,4 +14,4 @@ Last updated: 2026-10-16 / Ref: 9d82519 (M0 seed committed)
 - [x] Q1–Q23 approvals (2026-10-16, owner)
 
 ## Blocked
-- Q-001 (CI shim for moved `.github/`) — awaiting owner (see OPEN-QUESTIONS.md)
+- (none — Q-001 closed as moot by re-root Q-002A)

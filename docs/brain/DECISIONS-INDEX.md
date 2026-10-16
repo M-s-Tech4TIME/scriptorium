@@ -16,6 +16,8 @@ Last updated: 2026-10-16 / Ref: uncommitted (M0 seed)
 | 0010 | Arch/data-model/threat Q20–Q22 (JSON canonical, tree schema) | accepted | 2026-10-16 | owner |
 | 0011 | Roadmap Q23 (M0–M5 + A/B) | accepted | 2026-10-16 | owner |
 | 0012 | Work under scriptorium/ subdir (amends 0001 layout; .github issue → Q-001) | accepted | 2026-10-16 | owner |
+| 0013 | Branching: ff-only release promotion (amends 0008; main+dev identical) | accepted | 2026-10-16 | owner |
+| 0014 | Proprietary license (NOTICE), public-for-CI, Tech4TIME attribution | accepted | 2026-10-16 | owner |
 
 Full records: `docs/decisions/0001-*.md` … `0011-*.md` (to be written next).
 Pending: none.

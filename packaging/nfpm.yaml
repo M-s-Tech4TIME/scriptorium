@@ -3,9 +3,9 @@ arch: "amd64"
 platform: "linux"
 version: "0.0.0"
 release: "1"
-maintainer: "Scriptorium"
+maintainer: "M/s. Tech4TIME"
 description: "Scriptorium docs platform (M0 skeleton)"
-license: "TBD (owner decision required)"
+license: "Proprietary"
 contents:
   - src: ../backend
     dst: /opt/scriptorium/backend
