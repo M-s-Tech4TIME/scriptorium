@@ -8,7 +8,7 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - run: pip install ruff mypy pytest
-      - run: ruff check backend/ 2>/dev/null || echo "M1: backend code pending"
+      - run: 'ruff check backend/ 2>/dev/null || echo "M1: backend code pending"'
   docs-brain:
     runs-on: ubuntu-latest
     steps:
