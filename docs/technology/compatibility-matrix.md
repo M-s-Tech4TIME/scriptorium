@@ -1,4 +1,4 @@
-# Compatibility matrix (frozen set, verified 2026-10-16)
+# Compatibility matrix (frozen set, verified 2026-10-16; auth libs added 2026-10-16)
 
 | Component | Pinned | Latest stable seen | Support | Verified source |
 |---|---|---|---|---|
@@ -10,6 +10,9 @@
 | SQLAlchemy | 2.1.4 | 2.1.4 (2026-10-07) | needs Py ≥3.11 | PyPI/GitHub |
 | Alembic | 1.20.0 | 1.20.0 (2026-09-11) | needs SQLA ≥2.0 | PyPI |
 | Celery | 5.6.3 | 5.6.3 (5.7b1 excluded) | mature | PyPI/changelog |
+| argon2-cffi | 25.1.0 | 25.1.0 | current | PyPI |
+| PyJWT | 2.15.1 | 2.15.1 | current | PyPI |
+| httpx (dev) | 0.28.1 | 0.28.1 | current | PyPI |
 | Dramatiq (rejected alt) | 2.2.1 | 2.2.1 (2026-09-02) | active | PyPI |
 | Node (build) | 24.x LTS (24.21.0) | 24 LTS / 26 Current | 24 to ~2028 | nodejs.org |
 | React | 19.3.x | 19.3.1 | 19 supported, 18 security-only | npm/react.dev |
