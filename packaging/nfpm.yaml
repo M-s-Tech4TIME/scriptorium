@@ -1,0 +1,25 @@
+name: "scriptorium"
+arch: "amd64"
+platform: "linux"
+version: "0.0.0"
+release: "1"
+maintainer: "Scriptorium"
+description: "Scriptorium docs platform (M0 skeleton)"
+license: "TBD (owner decision required)"
+contents:
+  - src: ../backend
+    dst: /opt/scriptorium/backend
+  - src: ../frontend/dist
+    dst: /opt/scriptorium/frontend-dist
+  - src: ./systemd/scriptorium-web.service
+    dst: /lib/systemd/system/scriptorium-web.service
+  - src: ./systemd/scriptorium-worker.service
+    dst: /lib/systemd/system/scriptorium-worker.service
+overrides:
+  deb:
+    depends: ["python3.12", "postgresql-client", "redis"]
+  rpm:
+    depends: ["python3.12", "postgresql", "redis"]
+scripts:
+  postinstall: ./scripts/postinst.sh
+  preremove: ./scripts/prerm.sh

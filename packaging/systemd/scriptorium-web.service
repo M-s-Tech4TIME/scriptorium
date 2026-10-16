@@ -1,0 +1,14 @@
+[Unit]
+Description=Scriptorium web (FastAPI gunicorn+uvicorn)
+After=network.target postgresql.service redis.service
+[Service]
+User=scriptorium
+Group=scriptorium
+WorkingDirectory=/opt/scriptorium/backend
+EnvironmentFile=/etc/scriptorium/config.env
+ExecStart=/opt/scriptorium/backend/.venv/bin/gunicorn app.main:app -k uvicorn.workers.UvicornWorker --bind 127.0.0.1:8470 --workers 3
+Restart=on-failure
+NoNewPrivileges=true
+PrivateTmp=true
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,8 @@
+name: packaging
+on: [push, pull_request]
+jobs:
+  nfpm-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: test -f packaging/nfpm.yaml && test -f packaging/systemd/scriptorium-web.service && test -f packaging/systemd/scriptorium-worker.service && echo "packaging skeleton OK"

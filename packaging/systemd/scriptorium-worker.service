@@ -1,0 +1,14 @@
+[Unit]
+Description=Scriptorium worker (Celery build queue)
+After=network.target postgresql.service redis.service scriptorium-web.service
+[Service]
+User=scriptorium
+Group=scriptorium
+WorkingDirectory=/opt/scriptorium/backend
+EnvironmentFile=/etc/scriptorium/config.env
+ExecStart=/opt/scriptorium/backend/.venv/bin/celery -A app.worker worker --loglevel=INFO --concurrency=2
+Restart=on-failure
+NoNewPrivileges=true
+PrivateTmp=true
+[Install]
+WantedBy=multi-user.target
