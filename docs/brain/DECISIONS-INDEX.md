@@ -19,6 +19,7 @@ Last updated: 2026-10-16 / Ref: uncommitted (M0 seed)
 | 0013 | Branching: ff-only release promotion (amends 0008; main+dev identical) | accepted | 2026-10-16 | owner |
 | 0014 | Proprietary license (NOTICE), public-for-CI, Tech4TIME attribution | accepted | 2026-10-16 | owner |
 | 0015 | Standing Rule 7: CI-green after every push | accepted | 2026-10-16 | owner |
+| 0016 | Authorship: author=alsechemist + Co-authored-by OpenCode | accepted | 2026-10-16 | owner |
 
 Full records: `docs/decisions/0001-*.md` … `0011-*.md` (to be written next).
 Pending: none.
