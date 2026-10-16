@@ -3,7 +3,7 @@
 Last updated: 2026-10-16 / Ref: 9d82519 (M0 seed committed)
 
 ## In progress (max 1–2)
-- [ ] Bootstrap commit + push main+dev identical + main protection
+- [ ] M0 locks + remaining technology/*.md (on `dev`)
 
 ## Todo (M0 → M1 order)
 - [ ] Decision records 0001–0010 + technology pins + matrix

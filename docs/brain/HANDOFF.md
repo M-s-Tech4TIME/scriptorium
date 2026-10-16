@@ -3,9 +3,12 @@
 Last updated: 2026-10-16 / Ref: 9d82519 (M0 seed committed)
 
 ## Was doing
-Bootstrapping public repo: re-rooted git to `scriptorium/` (`deb5eb1`, pure renames),
-added NOTICE/README/0013/0014, creating `M-s-Tech4TIME/scriptorium` (public) + pushing
-`main` + `dev` identical.
+Repo live at `M-s-Tech4TIME/scriptorium` (public, proprietary NOTICE). `main`+`dev`
+pushed identical (`03f9466`); `main` protected (linear/no-force/no-delete). Now on `dev`.
+
+## Next steps (in order)
+1. Push this brain-sync commit on `dev` (working branch; `main` stays at release point).
+2. Resume M0 locks (`uv.lock`/`package-lock.json`) + remaining `technology/*.md` on `dev`.
 
 ## Next steps (in order)
 1. Commit bootstrap files + push `main` + `dev` (same SHA), verify identical.
