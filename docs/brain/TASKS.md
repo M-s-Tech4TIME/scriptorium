@@ -6,9 +6,8 @@ Last updated: 2026-10-16 / Ref: 9d82519 (M0 seed committed)
 - [ ] M0 locks + remaining technology/*.md (on `dev`)
 
 ## Todo (M0 → M1 order)
-- [ ] Decision records 0001–0010 + technology pins + matrix
-- [ ] Backend/frontend/packaging/CI skeletons + validators pass
-- [ ] M1 migrations + RBAC + IDOR tests (blocked until M0 green)
+- [x] M0 locks + technology/*.md (requirements.lock 84 pins, package-lock.json, 12 tech files)
+- [ ] M1 migrations + RBAC + IDOR tests
 
 ## Done
 - [x] Q1–Q23 approvals (2026-10-16, owner)

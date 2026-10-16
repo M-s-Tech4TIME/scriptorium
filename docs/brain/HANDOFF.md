@@ -3,8 +3,12 @@
 Last updated: 2026-10-16 / Ref: 9d82519 (M0 seed committed)
 
 ## Was doing
-Repo live at `M-s-Tech4TIME/scriptorium` (public, proprietary NOTICE). `main`+`dev`
-pushed identical (`03f9466`); `main` protected (linear/no-force/no-delete). Now on `dev`.
+M0 locks + technology docs on `dev`: `requirements.lock` (84 pins, uv-resolved),
+`package-lock.json`, 9 new `technology/*.md` (12 total with matrix).
+
+## Next steps (in order)
+1. Commit + push on `dev`, verify CI green (Rule 7).
+2. Begin M1 (migrations + RBAC + IDOR tests) — needs plan proposal first (Rule 4).
 
 ## Next steps (in order)
 1. Push this brain-sync commit on `dev` (working branch; `main` stays at release point).
