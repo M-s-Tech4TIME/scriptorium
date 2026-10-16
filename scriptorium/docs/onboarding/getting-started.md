@@ -7,7 +7,7 @@ Python 3.12.x, Node 24 LTS, PostgreSQL 18, Redis 7+, nfpm 2.x, git.
 
 ## Clone + run (M0 skeleton → M1)
 ```bash
-git clone <repo> && cd project-scriptorium
+git clone <repo> && cd project-scriptorium/scriptorium
 docker compose up -d db redis   # PG18 + Redis, see docker-compose.yml (M0)
 cd backend && python3.12 -m venv .venv && source .venv/bin/activate
 pip install -e .[dev]           # pins in backend/pyproject.toml (M0)

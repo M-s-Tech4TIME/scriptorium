@@ -3,8 +3,12 @@
 Last updated: 2026-10-16 / Ref: 9d82519 (M0 seed committed)
 
 ## Was doing
-Seeding M0 foundation after owner approved Q1–Q23 + Rule 6 + roadmap. Git repo
-initialized on `main`; writing `AGENTS.md`, `docs/`, `brain/` skeletons.
+Executed owner-ordered byte-identical move of all 55 M0 files into `scriptorium/` (`git mv`, 0 sha256 mismatches). Root now holds only `.git` + `scriptorium/`.
+
+## Next steps (in order)
+1. Commit the move + 0012 + Q-001 + doc updates (this commit).
+2. Await owner answer on Q-001 (CI shim) — no workaround without approval.
+3. Resume M0 locks (`uv.lock`/`package-lock.json`) + remaining `technology/*.md`.
 
 ## Next steps (in order)
 1. ~~Commit this seed~~ Done (`9d82519`).

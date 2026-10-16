@@ -3,7 +3,7 @@
 Last updated: 2026-10-16 / Ref: 9d82519 (M0 seed committed)
 
 ## In progress (max 1–2)
-- [x] M0 seed commit (docs + brain + AGENTS) — `9d82519`
+- [ ] Subdir-move commit + await Q-001 (CI shim) owner answer
 
 ## Todo (M0 → M1 order)
 - [ ] Decision records 0001–0010 + technology pins + matrix
@@ -14,4 +14,4 @@ Last updated: 2026-10-16 / Ref: 9d82519 (M0 seed committed)
 - [x] Q1–Q23 approvals (2026-10-16, owner)
 
 ## Blocked
-- (none — OPEN-QUESTIONS.md empty)
+- Q-001 (CI shim for moved `.github/`) — awaiting owner (see OPEN-QUESTIONS.md)
