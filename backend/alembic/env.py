@@ -7,7 +7,6 @@ Offline SQL generation is unsupported (no sync driver installed by design);
 from __future__ import annotations
 
 import asyncio
-from typing import Any
 
 from alembic import context
 from sqlalchemy import Connection
@@ -25,8 +24,10 @@ def run_migrations_offline() -> None:
     )
 
 
-def _run_sync(connection: Connection, **kw: Any) -> None:
-    context.configure(connection=connection, target_metadata=target_metadata, **kw)
+def _run_sync(connection: Connection) -> None:
+    context.configure(connection=connection, target_metadata=target_metadata)
+    with context.begin_transaction():
+        context.run_migrations()
 
 
 async def run_migrations_online() -> None:
