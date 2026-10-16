@@ -30,7 +30,7 @@ def _alembic_cfg() -> Config:
 
     ini = Path(__file__).resolve().parent.parent / "alembic.ini"
     cfg = Config(str(ini))
-    cfg.set_main_option("script_location", str(ini.parent))
+    cfg.set_main_option("script_location", str(ini.parent / "alembic"))
     cfg.set_main_option("sqlalchemy.url", LIVE_DB_URL)
     return cfg
 
