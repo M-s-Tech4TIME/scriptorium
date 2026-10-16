@@ -1,12 +1,12 @@
 # CURRENT-STATE
 
-Last updated: 2026-10-16 / Ref: 9d82519 (M0 seed committed)
+Last updated: 2026-10-16 / Ref: 11c710a (Rule 7 docs, on dev)
 
 - **Phase:** M0 Foundation (roadmap Q23 approved 2026-10-16).
-- **Done:** Plan-mode approvals Q1–Q23 + Rules 1–6. Git init on `main`. This seed.
-- **In progress:** Repo bootstrap: re-root (Q-002A) + proprietary notice + GitHub create + main/dev identical push.
-- **Broken/known:** None. Q-001 closed as moot (workflows at repo root after re-root).
-- **Broken/known:** Nothing runnable yet. No backend/frontend code. No CI runs yet.
+- **Done:** Q1–Q23 + Rules 1–7 (0015). Repo live `M-s-Tech4TIME/scriptorium` (public, proprietary).
+  Bootstrap red CI fixed on `dev` — `9714cf1` green (lint-type-test, security, packaging).
+- **In progress:** M0 locks + remaining technology/*.md (on `dev`).
+- **Broken/known:** Nothing runnable yet (skeletons only). No backend/frontend code yet.
 - **Last commit:** `03f9466` bootstrap (on `main` + `dev` identical at push).
 - **Remote:** `git@github.com:M-s-Tech4TIME/scriptorium.git` (public).
   `main` = `dev` = `03f9466` at bootstrap push. `main` protection: linear history on,
