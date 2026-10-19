@@ -36,3 +36,10 @@ target-version = "py312"
 python_version = "3.12"
 strict = true
 warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+# docutils has no type stubs / py.typed; conversion probes validated the API
+# surface we use (decision 0017).
+module = "docutils.*"
+ignore_missing_imports = true
+follow_imports = "skip"

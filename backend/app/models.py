@@ -7,6 +7,7 @@ timestamptz created/updated, per-project cascade deletes, SET NULL for audit tra
 from __future__ import annotations
 
 import uuid
+from typing import Any
 from datetime import datetime
 
 from sqlalchemy import (
@@ -184,7 +185,7 @@ class Document(Base):
     node_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("nodes.id", ondelete="CASCADE"), unique=True, nullable=False
     )
-    tiptap_json: Mapped[dict] = mapped_column(
+    tiptap_json: Mapped[dict[str, Any]] = mapped_column(
         JSONB, nullable=False, server_default=text("'{}'::jsonb")
     )
     source_text: Mapped[str] = mapped_column(Text, nullable=False, server_default="")
@@ -213,7 +214,7 @@ class DocumentHistory(Base):
         ForeignKey("documents.id", ondelete="CASCADE"), nullable=False, index=True
     )
     version: Mapped[int] = mapped_column(Integer, nullable=False)
-    tiptap_json: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    tiptap_json: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
     source_text: Mapped[str] = mapped_column(Text, nullable=False)
     author: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("users.id", ondelete="SET NULL"), nullable=True
@@ -264,6 +265,6 @@ class AuditLog(Base):
         ForeignKey("projects.id", ondelete="SET NULL"), nullable=True
     )
     at: Mapped[datetime] = _now()
-    meta: Mapped[dict] = mapped_column(
+    meta: Mapped[dict[str, Any]] = mapped_column(
         JSONB, nullable=False, server_default=text("'{}'::jsonb")
     )

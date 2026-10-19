@@ -1,40 +1,31 @@
 # HANDOFF
 
-Last updated: 2026-10-16 / Ref: 9d82519 (M0 seed committed)
+Last updated: 2026-10-20 / on `dev`, commit C (M2 conversion) staged with this sync
 
 ## Was doing
-M0 locks + technology docs on `dev`: `requirements.lock` (84 pins, uv-resolved),
-`package-lock.json`, 9 new `technology/*.md` (12 total with matrix).
+M2 commit C: conversion layer (`backend/app/conversion/` —
+`tiptap.py`, `import_doc.py`, `export_rst.py`, `export_myst.py`),
+`tests/test_roundtrip.py` (40 cases), mypy override made effective
+(`mypy --config-file backend/pyproject.toml backend/` in CI + 3 typed
+JSONB columns), docs (`docs/technology/conversion.md`, changelog
+2026-10-20-m2-conversion.md) + this brain sync.
 
 ## Next steps (in order)
-1. Commit + push on `dev`, verify CI green (Rule 7).
-2. Begin M1 (migrations + RBAC + IDOR tests) — needs plan proposal first (Rule 4).
+1. Commit on `dev` (Conventional Commits + Co-authored-by trailer), push,
+   verify CI green ×3 via `gh run list` (Rule 7; packaging slowest).
+2. M3 plan proposal for owner approval (Rule 4): REST endpoints design —
+   routers, permissions matrix, IDOR strategy, working-copy semantics.
+3. Only after approval: implement M3 on `dev`.
 
-## Next steps (in order)
-1. Push this brain-sync commit on `dev` (working branch; `main` stays at release point).
-2. Resume M0 locks (`uv.lock`/`package-lock.json`) + remaining `technology/*.md` on `dev`.
-
-## Next steps (in order)
-1. Commit bootstrap files + push `main` + `dev` (same SHA), verify identical.
-2. Apply `main` protection (linear history, no force/delete).
-3. Resume M0 locks + remaining `technology/*.md` on `dev`.
-
-## Next steps (in order)
-1. Commit the move + 0012 + Q-001 + doc updates (this commit).
-2. Await owner answer on Q-001 (CI shim) — no workaround without approval.
-3. Resume M0 locks (`uv.lock`/`package-lock.json`) + remaining `technology/*.md`.
-
-## Next steps (in order)
-1. ~~Commit this seed~~ Done (`9d82519`).
-2. Add M0 locks (`uv.lock`/`package-lock.json`) + remaining `technology/*.md` + validators pass.
-3. Add M0 skeletons: `backend/pyproject.toml`, `frontend/package.json`, `packaging/nfpm.yaml`,
-   `docker-compose.yml`, `.github/workflows/*.yml`, `.pre-commit-config.yaml`.
-4. Run validators (docs/brain structure + link check) and record session log.
-
-## Half-finished / uncommitted
-All files in this seed are uncommitted until step 1.
-
-## Gotchas
-- Plan-mode restrictions lifted (build mode active 2026-10-16).
-- TS 7.0.2 is owner override (Q16) vs LTS/proven rule — pin exact + explicit tsconfig.
-- PG 18.x exclusive — dev compose must use `postgres:18`.
+## Gotchas (carried)
+- docutils 0.22.4 inline markup never nests; heading levels are sequential;
+  title/subtitle docinfo convention — all probed, encoded in 0017 +
+  `docs/technology/conversion.md`.
+- CI mypy MUST use `--config-file backend/pyproject.toml` (overrides live
+  there); ruff/pytest steps unchanged.
+- Live-DB tests skip offline; need PG18 with schema at migration head
+  `0002_refresh_tokens`.
+- Two earlier sessions derailed into corrupted output after long numbered
+  plans — keep per-step work small; write files one at a time.
+- `gh run list --repo M-s-Tech4TIME/scriptorium --limit 3` verifies CI;
+  ~5–10 min per push.

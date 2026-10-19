@@ -1,6 +1,6 @@
 # PROJECT-SUMMARY (brain map, not a copy)
 
-Last updated: 2026-10-16 / Ref: uncommitted (M0 seed)
+Last updated: 2026-10-20 / Ref: d5fb5cc + M2 conversion commit
 
 - **What:** Scriptorium — self-hosted docs platform. Browser WYSIWYG (TipTap) → valid
   Sphinx source (RST default, MyST opt-in) → sandboxed background build → served HTML.
@@ -12,3 +12,6 @@ Last updated: 2026-10-16 / Ref: uncommitted (M0 seed)
   TipTap-JSON canonical (`tiptap@1`); DB tree `nodes` drives `toctree`; isolated Sphinx venv.
 - **Conventions:** Conventional Commits, trunk `main` + `feat/*`, 5 CI gates, Rule 6 zero-skip.
 - **Depth:** `docs/architecture/`, `docs/decisions/`, `docs/technology/compatibility-matrix.md`.
+- **M2 (conversion) key facts:** docutils 0.22.4 inline markup never nests —
+  RST export = one mark per run + fail-loud matrix; MyST carries the editor
+  set via HTML paths. See `docs/technology/conversion.md` + 0017.
