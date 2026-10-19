@@ -58,6 +58,45 @@ class User(Base):
     created_at: Mapped[datetime] = _now()
 
 
+class RefreshToken(Base):
+    """Server-side refresh-token record — family-based reuse detection (0017).
+
+    Only identifiers/state are stored; token material itself never is (Rule 2).
+    revoked_reason: 'rotated' (normal rotation), 'reuse' (chain burned),
+    'logout', 'expired'.
+    """
+
+    __tablename__ = "refresh_tokens"
+
+    id: Mapped[uuid.UUID] = _uuid_pk()
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    family: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True), nullable=False, index=True
+    )
+    jti: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True), unique=True, nullable=False
+    )
+    parent_jti: Mapped[uuid.UUID | None] = mapped_column(
+        PG_UUID(as_uuid=True), nullable=True
+    )
+    expires_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False
+    )
+    created_at: Mapped[datetime] = _now()
+    revoked_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    revoked_reason: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    __table_args__ = (
+        CheckConstraint(
+            "revoked_reason IN ('rotated', 'reuse', 'logout', 'expired')",
+            name="ck_refresh_tokens_reason",
+        ),
+    )
+
+
 class Membership(Base):
     __tablename__ = "memberships"
 

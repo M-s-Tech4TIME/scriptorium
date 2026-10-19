@@ -35,14 +35,14 @@ def test_password_roundtrip() -> None:
 
 def test_token_pair_roundtrip() -> None:
     user_id = uuid.uuid4()
-    access, refresh = create_token_pair(user_id, SECRET)
+    access, refresh, _fam, _jti = create_token_pair(user_id, SECRET)
     assert decode_token(access, SECRET, "access") == user_id
     assert decode_token(refresh, SECRET, "refresh") == user_id
 
 
 def test_wrong_type_rejected() -> None:
     user_id = uuid.uuid4()
-    access, _ = create_token_pair(user_id, SECRET)
+    access, _refresh, _fam, _jti = create_token_pair(user_id, SECRET)
     with pytest.raises(AuthError):
         decode_token(access, SECRET, "refresh")
 
@@ -55,7 +55,7 @@ def test_expired_rejected() -> None:
 
 def test_tampered_rejected() -> None:
     user_id = uuid.uuid4()
-    access, _ = create_token_pair(user_id, SECRET)
+    access, _refresh, _fam, _jti = create_token_pair(user_id, SECRET)
     with pytest.raises(AuthError):
         decode_token(access + "x", SECRET, "access")
     with pytest.raises(AuthError):

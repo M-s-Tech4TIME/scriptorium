@@ -10,6 +10,9 @@ Last updated: 2026-10-16 / Ref: uncommitted
 - `document_history(id UUID PK, document_id FK, version INT, tiptap_json JSONB, source_text TEXT, author FK, at)` — single-editor history; Phase A keys versions here.
 - `builds(id UUID PK, project_id FK, status queued|running|ok|failed, triggered_by FK, started, finished, log_path, artifact_path)`
 - `audit_log(id BIGSERIAL PK, actor FK, action, project_id FK NULL, at, meta JSONB)`
+- `refresh_tokens(id UUID PK, user_id FK CASCADE, family UUID, jti UUID UNIQUE, parent_jti UUID NULL, expires_at, created_at, revoked_at NULL, revoked_reason NULL CHECK rotated|reuse|logout|expired)` — family-based refresh reuse detection (0017): presented-but-already-rotated/unknown `jti` ⇒ revoke whole `family`, force re-login. Never stores token material.
+
+Last updated: 2026-10-19 / Ref: ba153e9
 
 Slugs allowlisted `[a-z0-9-]+`; all content paths jailed to `/var/lib/scriptorium/sources/<project>/`.
 Rejected alternative: literal `categories/branches/sub_branches` tables (rigid).

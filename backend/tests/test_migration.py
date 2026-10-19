@@ -22,6 +22,7 @@ EXPECTED_TABLES = {
     "document_history",
     "builds",
     "audit_log",
+    "refresh_tokens",
 }
 
 
