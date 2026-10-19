@@ -1,6 +1,6 @@
 # DECISIONS-INDEX
 
-Last updated: 2026-10-16 / Ref: uncommitted (M0 seed)
+Last updated: 2026-10-19 / Ref: 9ed590a (M1 auth green)
 
 | ID | One-line | Status | Date | Approver |
 |---|---|---|---|---|
@@ -20,6 +20,7 @@ Last updated: 2026-10-16 / Ref: uncommitted (M0 seed)
 | 0014 | Proprietary license (NOTICE), public-for-CI, Tech4TIME attribution | accepted | 2026-10-16 | owner |
 | 0015 | Standing Rule 7: CI-green after every push | accepted | 2026-10-16 | owner |
 | 0016 | Authorship: author=alsechemist + Co-authored-by OpenCode | accepted | 2026-10-16 | owner |
+| 0017 | M2 design (retro 404/squash; refresh family store; starter-kit scope; MyST HTML markers) | accepted | 2026-10-19 | owner |
 
-Full records: `docs/decisions/0001-*.md` … `0011-*.md` (to be written next).
+Full records: `docs/decisions/0001-*.md` … `0017-*.md`. 
 Pending: none.
