@@ -24,7 +24,6 @@ depends_on = None
 
 def upgrade() -> None:
     op.rename_table("projects", "grimoires")
-    op.execute("ALTER TABLE grimoires RENAME COLUMN project_id TO grimoire_id")
     op.execute(
         "ALTER TABLE grimoires RENAME CONSTRAINT ck_projects_format "
         "TO ck_grimoires_format"
@@ -131,5 +130,4 @@ def downgrade() -> None:
         "ALTER TABLE grimoires RENAME CONSTRAINT ck_grimoires_format "
         "TO ck_projects_format"
     )
-    op.execute("ALTER TABLE grimoires RENAME COLUMN grimoire_id TO project_id")
     op.rename_table("grimoires", "projects")
