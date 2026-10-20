@@ -1,31 +1,27 @@
 # HANDOFF
 
-Last updated: 2026-10-20 / on `dev`, commit C (M2 conversion) staged with this sync
+Last updated: 2026-10-20 / M3 C1 staged with this sync (on `dev`, CI verify pending)
 
 ## Was doing
-M2 commit C: conversion layer (`backend/app/conversion/` —
-`tiptap.py`, `import_doc.py`, `export_rst.py`, `export_myst.py`),
-`tests/test_roundtrip.py` (40 cases), mypy override made effective
-(`mypy --config-file backend/pyproject.toml backend/` in CI + 3 typed
-JSONB columns), docs (`docs/technology/conversion.md`, changelog
-2026-10-20-m2-conversion.md) + this brain sync.
+M3 commit C1: decision 0018 record, migration `0003_grimoires_categories`
+(full projects→grimoires rename incl. column/constraint/index renames +
+per-user `grimoire_categories` + `grimoires.category_id`), model renames
+(`Grimoire`/`GrimoireCategory`, `grimoire_id` columns), `test_migration`
+10 tables, docs (data-model.md, postgresql.md, changelog).
 
 ## Next steps (in order)
-1. Commit on `dev` (Conventional Commits + Co-authored-by trailer), push,
-   verify CI green ×3 via `gh run list` (Rule 7; packaging slowest).
-2. M3 plan proposal for owner approval (Rule 4): REST endpoints design —
-   routers, permissions matrix, IDOR strategy, working-copy semantics.
-3. Only after approval: implement M3 on `dev`.
+1. Commit `feat: grimoire rename + categories schema (0018)`, push,
+   verify CI green ×3 (Rule 7).
+2. C2 auth/session endpoints (login/refresh/logout; rotating refresh
+   cookies; family store wired) + `test_auth_api.py` (live PG).
+3. C3 categories + grimoires + memberships (+audit rows) endpoints.
+4. C4 tree endpoints (atomic sibling reorder; slug invariants).
+5. C5 document endpoints (expected_version→409, history append,
+   import-from-source→422).
 
 ## Gotchas (carried)
-- docutils 0.22.4 inline markup never nests; heading levels are sequential;
-  title/subtitle docinfo convention — all probed, encoded in 0017 +
-  `docs/technology/conversion.md`.
-- CI mypy MUST use `--config-file backend/pyproject.toml` (overrides live
-  there); ruff/pytest steps unchanged.
-- Live-DB tests skip offline; need PG18 with schema at migration head
-  `0002_refresh_tokens`.
-- Two earlier sessions derailed into corrupted output after long numbered
-  plans — keep per-step work small; write files one at a time.
-- `gh run list --repo M-s-Tech4TIME/scriptorium --limit 3` verifies CI;
-  ~5–10 min per push.
+- Migrate head now `0003grimoire`; live DB must migrate before C1 live tests.
+- CI mypy MUST use `--config-file backend/pyproject.toml` (0018 ratified).
+- docutils 0.22.4 inline markup never nests; heading levels sequential —
+  encoded in 0017 + conversion.md.
+- Keep per-step work small; write files one at a time (past derailments).

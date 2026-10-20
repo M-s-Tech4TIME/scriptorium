@@ -1,7 +1,7 @@
-"""SQLAlchemy 2.x models — schema per decision 0010 / Q21 (generic ordered tree).
+"""SQLAlchemy 2.x models — schema per decisions 0010 (tree) / 0018 (grimoire).
 
 Conventions: UUID PKs (Python-side uuid4 + PG gen_random_uuid() server default),
-timestamptz created/updated, per-project cascade deletes, SET NULL for audit trails.
+timestamptz created/updated, per-grimoire cascade deletes, SET NULL for audit trails.
 """
 
 from __future__ import annotations
@@ -20,6 +20,7 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    UniqueConstraint,
     func,
     text,
 )
@@ -98,27 +99,38 @@ class RefreshToken(Base):
     )
 
 
-class Membership(Base):
-    __tablename__ = "memberships"
+class GrimoireCategory(Base):
+    """User-defined grouping bucket for grimoires (0018, Q-M3-6=A).
 
-    user_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
-    )
-    project_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("projects.id", ondelete="CASCADE"), primary_key=True
-    )
-    role: Mapped[str] = mapped_column(String(16), nullable=False)
-    __table_args__ = (
-        CheckConstraint(
-            "role IN ('owner', 'editor', 'viewer')", name="ck_memberships_role"
-        ),
-    )
+    Per-user: each user curates their own sidebar sections. Deleting a
+    category leaves its grimoires with NULL category (Uncategorized).
+    """
 
-
-class Project(Base):
-    __tablename__ = "projects"
+    __tablename__ = "grimoire_categories"
 
     id: Mapped[uuid.UUID] = _uuid_pk()
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
+    position: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    created_at: Mapped[datetime] = _now()
+    __table_args__ = (
+        UniqueConstraint("user_id", "name", name="uq_grimoire_categories_name"),
+    )
+
+
+class Grimoire(Base):
+    """One self-contained documentation set (renamed from "project", 0018)."""
+
+    __tablename__ = "grimoires"
+
+    id: Mapped[uuid.UUID] = _uuid_pk()
+    category_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("grimoire_categories.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
     slug: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     source_format: Mapped[str] = mapped_column(
@@ -132,12 +144,29 @@ class Project(Base):
     )
     created_at: Mapped[datetime] = _now()
     __table_args__ = (
-        CheckConstraint("source_format IN ('rst', 'myst')", name="ck_projects_format"),
+        CheckConstraint("source_format IN ('rst', 'myst')", name="ck_grimoires_format"),
+    )
+
+
+class Membership(Base):
+    __tablename__ = "memberships"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    grimoire_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("grimoires.id", ondelete="CASCADE"), primary_key=True
+    )
+    role: Mapped[str] = mapped_column(String(16), nullable=False)
+    __table_args__ = (
+        CheckConstraint(
+            "role IN ('owner', 'editor', 'viewer')", name="ck_memberships_role"
+        ),
     )
 
 
 class Node(Base):
-    """One ordered-tree row (kind category|page) driving TOC + toctree (decision 0010).
+    """One ordered-tree row (kind category|page) driving TOC + toctree (0010).
 
     Root rows have parent_id NULL. Slug uniqueness is enforced per sibling set via
     partial indexes (plain UNIQUE would let NULL parent_ids collide in PG).
@@ -146,8 +175,8 @@ class Node(Base):
     __tablename__ = "nodes"
 
     id: Mapped[uuid.UUID] = _uuid_pk()
-    project_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("projects.id", ondelete="CASCADE"), nullable=False, index=True
+    grimoire_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("grimoires.id", ondelete="CASCADE"), nullable=False, index=True
     )
     parent_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("nodes.id", ondelete="CASCADE"), nullable=True, index=True
@@ -160,14 +189,14 @@ class Node(Base):
         CheckConstraint("kind IN ('category', 'page')", name="ck_nodes_kind"),
         Index(
             "uq_nodes_root_slug",
-            "project_id",
+            "grimoire_id",
             "slug",
             unique=True,
             postgresql_where=text("parent_id IS NULL"),
         ),
         Index(
             "uq_nodes_child_slug",
-            "project_id",
+            "grimoire_id",
             "parent_id",
             "slug",
             unique=True,
@@ -229,8 +258,8 @@ class Build(Base):
     __tablename__ = "builds"
 
     id: Mapped[uuid.UUID] = _uuid_pk()
-    project_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("projects.id", ondelete="CASCADE"), nullable=False, index=True
+    grimoire_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("grimoires.id", ondelete="CASCADE"), nullable=False, index=True
     )
     status: Mapped[str] = mapped_column(
         String(16), nullable=False, server_default="queued"
@@ -261,8 +290,8 @@ class AuditLog(Base):
         ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
     action: Mapped[str] = mapped_column(String(80), nullable=False)
-    project_id: Mapped[uuid.UUID | None] = mapped_column(
-        ForeignKey("projects.id", ondelete="SET NULL"), nullable=True
+    grimoire_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("grimoires.id", ondelete="SET NULL"), nullable=True
     )
     at: Mapped[datetime] = _now()
     meta: Mapped[dict[str, Any]] = mapped_column(

@@ -1,7 +1,7 @@
 """RBAC/IDOR tests against live PG18 (runs in CI via postgres:18 service).
 
-Member of a project passes; any non-member (including random UUIDs) gets the
-same 404 — project existence is never leaked.
+Member of a grimoire passes; any non-member (including random UUIDs) gets
+the same 404 — grimoire existence is never leaked.
 """
 
 from __future__ import annotations
@@ -13,7 +13,7 @@ from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.auth import require_membership
-from app.models import Membership, Project, User
+from app.models import Grimoire, Membership, User
 from tests.conftest import LIVE_DB_URL, needs_db
 
 
@@ -36,18 +36,20 @@ async def _scenario() -> None:
             stranger = User(
                 email=f"stranger-{tag}@example.test", pw_hash="x", display="Stranger"
             )
-            project = Project(
-                slug=f"secret-project-{tag}", title="Secret", created_by=None
+            grimoire = Grimoire(
+                slug=f"secret-grimoire-{tag}", title="Secret", created_by=None
             )
-            session.add_all([me, stranger, project])
+            session.add_all([me, stranger, grimoire])
             await session.flush()
-            session.add(Membership(user_id=me.id, project_id=project.id, role="owner"))
+            session.add(
+                Membership(user_id=me.id, grimoire_id=grimoire.id, role="owner")
+            )
             await session.commit()
 
-            assert await require_membership(project.id, me.id, session) == "owner"
+            assert await require_membership(grimoire.id, me.id, session) == "owner"
 
             with pytest.raises(HTTPException) as exc:
-                await require_membership(project.id, stranger.id, session)
+                await require_membership(grimoire.id, stranger.id, session)
             assert exc.value.status_code == 404
 
             with pytest.raises(HTTPException) as exc2:

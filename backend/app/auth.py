@@ -1,4 +1,4 @@
-"""Authentication + per-project RBAC (decision 0005/0010, Q22, 0017).
+"""Authentication + per-grimoire RBAC (decision 0005/0010, Q22, 0017/0018).
 
 - Passwords: Argon2id via argon2-cffi (never MD5/SHA/bcrypt downgrade).
 - Tokens: short-lived access JWT + rotating refresh JWT (PyJWT, HS256, 0017).
@@ -8,7 +8,7 @@
   whole token family and forces re-login.
 - Cookies (HttpOnly/Secure/SameSite) are set at the router layer (M3); this
   module mints/verifies token strings and performs rotation state changes.
-- Non-members get HTTP 404 (not 403) so project existence is not leaked (IDOR,
+- Non-members get HTTP 404 (not 403) so grimoire existence is not leaked (IDOR,
   retro-approved 0017).
 """
 
@@ -237,14 +237,14 @@ async def get_current_user_id(
 
 
 async def require_membership(
-    project_id: uuid.UUID,
+    grimoire_id: uuid.UUID,
     user_id: uuid.UUID,
     session: AsyncSession,
 ) -> str:
-    """Return the member's role, or raise 404 (hides project existence from outsiders)."""
+    """Return the member's role, or raise 404 (hides grimoire existence from outsiders)."""
     role = await session.scalar(
         select(Membership.role).where(
-            Membership.user_id == user_id, Membership.project_id == project_id
+            Membership.user_id == user_id, Membership.grimoire_id == grimoire_id
         )
     )
     if role is None:

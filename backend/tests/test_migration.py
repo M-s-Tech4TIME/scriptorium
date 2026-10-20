@@ -16,7 +16,8 @@ from tests.conftest import LIVE_DB_URL, needs_db
 EXPECTED_TABLES = {
     "users",
     "memberships",
-    "projects",
+    "grimoires",
+    "grimoire_categories",
     "nodes",
     "documents",
     "document_history",
