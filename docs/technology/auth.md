@@ -2,9 +2,30 @@
 
 - Versions (locked): argon2-cffi 25.1.0, PyJWT (`pyjwt`) 2.15.1; httpx 0.28.1 (dev/test).
 - Why: Argon2id (OWASP-recommended) for passwords; minimal proven JWT for
-  short-lived access + rotating refresh (Q22); httpx is Starlette TestClient's transport.
-- Used: `backend/app/auth.py` (hash/verify, mint/decode, `require_membership` 404-on-outsider).
-  Keys ≥32 bytes enforced by PyJWT (surfaced via `-W error` in tests).
-- Known gap (parked for M2): server-side refresh-reuse detection needs a token store
-  (schema addition — owner call).
-- Verified: 2026-10-16 (PyPI; lock resolved 2026-10-16).
+  short-lived access + rotating refresh (Q22); httpx 0.28.1 also drives
+  in-process ASGI tests (`httpx.ASGITransport` — `starlette.testclient` is
+  deprecated in this stack and its import raises a Rule-6 warning).
+- Used: `backend/app/auth.py` (hash/verify + `verify_dummy` enumeration
+  guard, mint/decode, family store, `require_membership` 404-on-outsider);
+  `backend/app/routers/auth.py` (M3 C2 endpoints, decision 0018 Q-M3-1=A).
+- Keys ≥32 bytes enforced by PyJWT (surfaced via `-W error` in tests).
+
+## M3 auth/session endpoints (C2)
+
+- `POST /api/v1/auth/login` — email+password → `{"access_token", "token_type":
+  "bearer"}` + `Set-Cookie: scriptorium_refresh` (HttpOnly, SameSite=Lax,
+  path=/, 7 d max-age, Secure when `SCRIPTORIUM_COOKIE_SECURE` truthy).
+  Unknown email burns an argon2 dummy verify (timing-uniform, no account
+  enumeration); bad credentials → uniform `401 {"detail": "Invalid credentials."}`.
+- `POST /api/v1/auth/refresh` — rotates the cookie through the M2 family
+  store; reuse of any rotated-out cookie → `401` and the whole family is
+  burned (0017). Missing cookie → `401`.
+- `POST /api/v1/auth/logout` — revokes the refresh family (`reason=logout`),
+  clears the cookie, `204`; junk/expired cookie still clears (idempotent).
+- Users are seeded by CLI only — no open registration (Q-M3-1=A).
+- Tests: `backend/tests/test_auth_api.py` (live PG18 in CI; rotation,
+  reuse-burn, logout revocation, enumeration-shape 401s).
+
+- Known gap (parked for M4+): no per-IP login rate limiting yet — tracked
+  in `docs/brain/OPEN-QUESTIONS.md` for an owner call before M4.
+- Verified: 2026-10-16 (PyPI; lock resolved 2026-10-16); endpoints 2026-10-20.

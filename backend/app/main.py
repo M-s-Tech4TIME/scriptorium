@@ -4,11 +4,14 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 
+from app.routers import auth as auth_router
+
 APP_VERSION = "0.0.0"
 
 
 def create_app() -> FastAPI:
     app = FastAPI(title="Scriptorium", version=APP_VERSION)
+    app.include_router(auth_router.router)
 
     @app.get("/api/v1/health")
     def health() -> dict[str, str]:

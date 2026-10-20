@@ -1,6 +1,6 @@
 # PROJECT-SUMMARY (brain map, not a copy)
 
-Last updated: 2026-10-20 / Ref: d5fb5cc + M2 conversion commit
+Last updated: 2026-10-20 / Ref: c26cd7e (M3 C1 green) + C2 staged
 
 - **What:** Scriptorium — self-hosted docs platform. Browser WYSIWYG (TipTap) → valid
   Sphinx source (RST default, MyST opt-in) → sandboxed background build → served HTML.
@@ -15,3 +15,8 @@ Last updated: 2026-10-20 / Ref: d5fb5cc + M2 conversion commit
 - **M2 (conversion) key facts:** docutils 0.22.4 inline markup never nests —
   RST export = one mark per run + fail-loud matrix; MyST carries the editor
   set via HTML paths. See `docs/technology/conversion.md` + 0017.
+- **M3 status (as of this sync):** C1 green (grimoire rename + categories,
+  migration head `0003grimoire`); C2 staged (auth/session endpoints);
+  C3–C5 next. Terminology: "grimoire" everywhere (0018). Auth surface =
+  login/refresh/logout only. Live API tests drive the app via
+  `httpx.ASGITransport` (starlette.testclient import warns → Rule 6).

@@ -1,27 +1,26 @@
 # HANDOFF
 
-Last updated: 2026-10-20 / M3 C1 staged with this sync (on `dev`, CI verify pending)
+Last updated: 2026-10-20 / M3 C1 green (c26cd7e) + C2 staged with this sync
 
 ## Was doing
-M3 commit C1: decision 0018 record, migration `0003_grimoires_categories`
-(full projects→grimoires rename incl. column/constraint/index renames +
-per-user `grimoire_categories` + `grimoires.category_id`), model renames
-(`Grimoire`/`GrimoireCategory`, `grimoire_id` columns), `test_migration`
-10 tables, docs (data-model.md, postgresql.md, changelog).
+M3 C2: auth/session endpoints — `app/routers/auth.py` (login/refresh/
+logout, rotating HttpOnly refresh cookie wired to the M2 family store),
+`verify_dummy` enumeration guard, `test_auth_api.py` (5 live cases via
+`httpx.ASGITransport`), docs (auth.md, changelog, OPEN-QUESTIONS Q-002).
 
 ## Next steps (in order)
-1. Commit `feat: grimoire rename + categories schema (0018)`, push,
-   verify CI green ×3 (Rule 7).
-2. C2 auth/session endpoints (login/refresh/logout; rotating refresh
-   cookies; family store wired) + `test_auth_api.py` (live PG).
-3. C3 categories + grimoires + memberships (+audit rows) endpoints.
-4. C4 tree endpoints (atomic sibling reorder; slug invariants).
-5. C5 document endpoints (expected_version→409, history append,
+1. Commit C2, push, verify CI green ×3 (Rule 7).
+2. C3 categories + grimoires + memberships (+audit rows) endpoints
+   (routers: grimoire_categories → 404-on-outsider rules live).
+3. C4 tree endpoints (atomic sibling reorder; slug invariants).
+4. C5 document endpoints (expected_version→409, history append,
    import-from-source→422).
 
 ## Gotchas (carried)
-- Migrate head now `0003grimoire`; live DB must migrate before C1 live tests.
+- Migrate head `0003grimoire`; **do NOT** rename columns on tables that
+  never had them (C1's CI lesson: verify SQL against 0001 definitions).
 - CI mypy MUST use `--config-file backend/pyproject.toml` (0018 ratified).
-- docutils 0.22.4 inline markup never nests; heading levels sequential —
-  encoded in 0017 + conversion.md.
+- starlette.testclient import deprecation-warns → use httpx.ASGITransport
+  in tests (Rule 6 under -W error).
+- docutils 0.22.4 fail-loud matrix = 0017 + conversion.md.
 - Keep per-step work small; write files one at a time (past derailments).

@@ -58,6 +58,14 @@ def verify_password(stored_hash: str, plain: str) -> bool:
         return False
 
 
+_dummy_hash = _ph.hash("scriptorium-timing-equalizer-no-such-account")
+
+
+def verify_dummy(plain: str) -> bool:
+    """Burn argon2 work when the account does not exist (enumeration guard)."""
+    return verify_password(_dummy_hash, plain)
+
+
 def _mint(
     user_id: uuid.UUID,
     secret: str,
