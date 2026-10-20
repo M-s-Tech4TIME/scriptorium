@@ -13,7 +13,7 @@ from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.auth import require_membership
-from app.models import Grimoire, Membership, User
+from app.models import Athenaeum, Grimoire, Membership, User
 from tests.conftest import LIVE_DB_URL, needs_db
 
 
@@ -36,10 +36,16 @@ async def _scenario() -> None:
             stranger = User(
                 email=f"stranger-{tag}@example.test", pw_hash="x", display="Stranger"
             )
+            lib = Athenaeum(owner_id=me.id, slug=f"secret-athen-{tag}", title="Secrets")
+            session.add_all([me, stranger, lib])
+            await session.flush()
             grimoire = Grimoire(
-                slug=f"secret-grimoire-{tag}", title="Secret", created_by=None
+                athenaeum_id=lib.id,
+                slug=f"secret-grimoire-{tag}",
+                title="Secret",
+                created_by=None,
             )
-            session.add_all([me, stranger, grimoire])
+            session.add(grimoire)
             await session.flush()
             session.add(
                 Membership(user_id=me.id, grimoire_id=grimoire.id, role="owner")

@@ -226,9 +226,16 @@ def test_grimoire_create_validation_and_creator_membership() -> None:
             dup = await client.post(
                 "/api/v1/grimoires",
                 json={"athenaeum_id": aid, "slug": "research-notes", "title": "second"},
-                headers=_headers(stranger),
+                headers=_headers(me),
             )
             assert dup.status_code == 409  # slug uniqueness is global
+
+            stranger_create = await client.post(
+                "/api/v1/grimoires",
+                json={"athenaeum_id": aid, "slug": "other-slug", "title": "x"},
+                headers=_headers(stranger),
+            )
+            assert stranger_create.status_code == 404  # foreign athenaeum
 
             listing = await client.get("/api/v1/grimoires", headers=_headers(stranger))
             assert listing.json() == []  # outsider sees nothing (IDOR)
