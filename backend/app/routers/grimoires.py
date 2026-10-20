@@ -27,7 +27,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.audit import add_audit
 from app.auth import get_current_user_id, require_membership
 from app.db import get_session
-from app.models import Grimoire, GrimoireCategory, Membership, Node, User
+from app.models import Athenaeum, Grimoire, GrimoireCategory, Membership, Node, User
 
 router = APIRouter(prefix="/api/v1/grimoires", tags=["grimoires"])
 
@@ -35,6 +35,8 @@ _SLUG_RE = re.compile(r"[a-z0-9-]+")
 
 
 class GrimoireIn(BaseModel):
+    # native hierarchy (0020 Q-M3-10=A): every grimoire lives in an Athenaeum
+    athenaeum_id: uuid.UUID
     slug: str = Field(min_length=1, max_length=120)
     title: str = Field(min_length=1, max_length=200)
     source_format: Literal["rst", "myst"] = "rst"
@@ -45,6 +47,7 @@ class GrimoireIn(BaseModel):
 class GrimoirePatch(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=200)
     theme: str | None = Field(default=None, min_length=1, max_length=80)
+    athenaeum_id: uuid.UUID | None = None  # cross-Athenaeum move (owner of target)
     category_id: uuid.UUID | None = None  # `None` present in body clears it
 
 
@@ -69,6 +72,7 @@ def _check_slug(slug: str) -> str:
 def _grimoire_body(row: Grimoire, role: str) -> dict[str, object]:
     return {
         "id": str(row.id),
+        "athenaeum_id": str(row.athenaeum_id),
         "slug": row.slug,
         "title": row.title,
         "source_format": row.source_format,
@@ -88,15 +92,29 @@ async def _own_grimoire_by_slug_or_conflict(slug: str, session: AsyncSession) ->
 
 
 async def _verify_category(
-    category_id: uuid.UUID | None, user_id: uuid.UUID, session: AsyncSession
+    athenaeum_id: uuid.UUID,
+    category_id: uuid.UUID | None,
+    session: AsyncSession,
 ) -> None:
     if category_id is None:
         return
     category = await session.get(GrimoireCategory, category_id)
-    if category is None or category.user_id != user_id:
+    if category is None or category.athenaeum_id != athenaeum_id:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Category not found."
         )
+
+
+async def _own_athenaeum(
+    athenaeum_id: uuid.UUID, user_id: uuid.UUID, session: AsyncSession
+) -> Athenaeum:
+    row = await session.get(Athenaeum, athenaeum_id)
+    if row is None or row.owner_id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Athenaeum not found.",
+        )
+    return row
 
 
 @router.get("")
@@ -119,10 +137,12 @@ async def create_grimoire(
     user_id: uuid.UUID = Depends(get_current_user_id),
     session: AsyncSession = Depends(get_session),
 ) -> dict[str, object]:
+    await _own_athenaeum(body.athenaeum_id, user_id, session)
     _check_slug(body.slug)
     await _own_grimoire_by_slug_or_conflict(body.slug, session)
-    await _verify_category(body.category_id, user_id, session)
+    await _verify_category(body.athenaeum_id, body.category_id, session)
     grimoire = Grimoire(
+        athenaeum_id=body.athenaeum_id,
         slug=body.slug,
         title=body.title,
         source_format=body.source_format,
@@ -189,8 +209,21 @@ async def patch_grimoire(
         grimoire_id, user_id, session, need_owner=True
     )
     provided = body.model_fields_set
+    moved = False
+    if "athenaeum_id" in provided:
+        target = body.athenaeum_id
+        if target is None:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="athenaeum_id is required — grimoires cannot float.",
+            )
+        if target != grimoire.athenaeum_id:
+            await _own_athenaeum(target, user_id, session)
+            grimoire.athenaeum_id = target
+            moved = True
     if "category_id" in provided:
-        await _verify_category(body.category_id, user_id, session)
+        scope = grimoire.athenaeum_id
+        await _verify_category(scope, body.category_id, session)
         grimoire.category_id = body.category_id  # explicit None ⇒ Uncategorized
     if body.title is not None:
         grimoire.title = body.title
@@ -199,9 +232,12 @@ async def patch_grimoire(
     add_audit(
         session,
         actor=user_id,
-        action="grimoire_patched",
+        action="grimoire_moved" if moved else "grimoire_patched",
         grimoire_id=grimoire_id,
-        meta={"changes": sorted(provided)},
+        meta={
+            "changes": sorted(provided),
+            "to_athenaeum": str(body.athenaeum_id) if moved else None,
+        },
     )
     await session.commit()
     return _grimoire_body(grimoire, role)

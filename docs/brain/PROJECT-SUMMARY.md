@@ -1,6 +1,6 @@
 # PROJECT-SUMMARY (brain map, not a copy)
 
-Last updated: 2026-10-20 / Ref: aee1872 (C2 green) + C3 staged
+Last updated: 2026-10-21 / Ref: d62784e (C3 green) + C3.5 staged (0020)
 
 - **What:** Scriptorium — self-hosted docs platform. Browser WYSIWYG (TipTap) → valid
   Sphinx source (RST default, MyST opt-in) → sandboxed background build → served HTML.
@@ -15,11 +15,15 @@ Last updated: 2026-10-20 / Ref: aee1872 (C2 green) + C3 staged
 - **M2 (conversion) key facts:** docutils 0.22.4 inline markup never nests —
   RST export = one mark per run + fail-loud matrix; MyST carries the editor
   set via HTML paths. See `docs/technology/conversion.md` + 0017.
-- **M3 status (as of this sync):** C1 green (grimoire rename + categories,
-  migration head `0003grimoire`); C2 green (auth endpoints); C2.5 staged
-  (login rate limiter, decision 0019 — Redis fixed window, fail-closed);
-  C3–C5 next. Terminology: "grimoire" everywhere (0018). Auth surface =
-  login/refresh/logout only. Live API tests drive the app via
+- **M3 status (as of this sync):** C1–C3 green; **C3.5 staged — decision
+  0020 athenaeum layer (owner 2026-10-21):** native hierarchy
+  `user → Athenaeums → categories (per-Athenaeum, user_id dropped) →
+  grimoires (athenaeum_id NOT NULL)`, migration `0004athenaeum` backfills a
+  "Default" per user; delete refuses 409 while grimoires remain; nested
+  sidebar endpoint; sharing stays grimoire-level. Category/grimoire paths
+  re-homed under `/api/v1/athenaeums/{id}/…`; C4 (tree) + C5 (documents)
+  next, then M3 done. Terminology: "grimoire" everywhere (0018). Auth
+  surface = login/refresh/logout only. Live API tests drive the app via
   `httpx.ASGITransport` (starlette.testclient import warns → Rule 6).
 - **Config keys (auth path):** `SECRET_KEY` (JWT), `SCRIPTORIUM_COOKIE_SECURE`
   (prod sets Secure), `REDIS_URL` (limiter, fail-closed when missing),

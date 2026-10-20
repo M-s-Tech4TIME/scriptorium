@@ -1,6 +1,6 @@
 # Architecture (Q20–Q22, Section 10)
 
-Last updated: 2026-10-16 / Ref: uncommitted
+Last updated: 2026-10-21 / Ref: 0020 athenaeum layer
 
 ```
 [Browser: React19 TipTap3] --REST /api/v1--> [FastAPI 0.143 web@gunicorn+uvicorn]
@@ -16,6 +16,7 @@ Last updated: 2026-10-16 / Ref: uncommitted
                                               /var/lib/scriptorium/builds -> served HTML (Furo-extended grimoire theme)
 ```
 
+- **Canonical org model (0020):** native hierarchy `user → Athenaeums (libraries) → categories (sections) → grimoires (books)`; grimoire-level sharing only. Detail in `data-model.md` + `api.md`.
 - **Canonical:** TipTap JSON `tiptap@1`; export RST/MyST deterministic; DB tree `nodes` → `toctree`; `conf.py` generated (allowlisted extensions only).
 - **Module boundaries:** `convert/` (pure), `sphinx/` adapter (generation+theming), `worker/` (queue only),
   `routers/` (RBAC per request), `editor/` (schema v1). Third-party behind adapters (Rule 5.4).

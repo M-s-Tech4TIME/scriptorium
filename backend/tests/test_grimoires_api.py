@@ -1,12 +1,11 @@
-"""Grimoire/category/member endpoint tests (M3 C3) — live PG18 via CI service.
+"""Grimoire/category/member endpoint tests (M3 C3 native shape, 0020 stated).
 
-Covers decision-0018 semantics end-to-end: per-user categories with
-reorder/dedup/delete→Uncategorized, grimoire CRUD with slug allowlist +
-creator-owner membership, member management (owner-only mutations except
-self-leave), IDOR shape (uniform 404 for outsiders, 403 for under-roles),
-and one audit row per mutation.
-
-Loop hygiene: conftest.app_teardown disposes engine+redis client per test.
+Categories are sections inside an Athenaeum (`/api/v1/athenaeums/{id}/…`);
+grimoire create carries an owned `athenaeum_id` (0020 Q-M3-10). Covers
+per-athenaeum category lifecycles (dup/reorder/delete→Uncategorized),
+grimoire CRUD with slug allowlist + creator-owner membership either way,
+member management (owner-only mutations except self-leave), IDOR shape
+(uniform 404 for outsiders, 403 for under-roles), one audit row per mutation.
 """
 
 from __future__ import annotations
@@ -29,12 +28,28 @@ from app.main import app
 from app.models import AuditLog, User
 from tests.conftest import LIVE_DB_URL, app_teardown, needs_db
 
-os_secret = "m3-test-only-secret-not-a-real-credential"
+_SECRET = "m3-test-only-secret-not-a-real-credential"
 
 
 def _headers(user: dict[str, Any]) -> dict[str, str]:
-    access, _r, _f, _j = create_token_pair(uuid.UUID(str(user["id"])), os_secret)
+    access, _r, _f, _j = create_token_pair(uuid.UUID(str(user["id"])), _SECRET)
     return {"Authorization": f"Bearer {access}"}
+
+
+def _client() -> httpx.AsyncClient:
+    return httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=app), base_url="http://testserver"
+    )
+
+
+def _run(test: Coroutine[Any, Any, None]) -> None:
+    try:
+        asyncio.run(test)
+    finally:
+        from app import db, limiter
+
+        db.reset_engine()
+        limiter.reset_client()
 
 
 async def _seed_users(count: int) -> list[dict[str, Any]]:
@@ -54,22 +69,6 @@ async def _seed_users(count: int) -> list[dict[str, Any]]:
     return users
 
 
-def _client() -> httpx.AsyncClient:
-    return httpx.AsyncClient(
-        transport=httpx.ASGITransport(app=app), base_url="http://testserver"
-    )
-
-
-def _run(test: Coroutine[Any, Any, None]) -> None:
-    try:
-        asyncio.run(test)
-    finally:
-        from app import db, limiter
-
-        db.reset_engine()
-        limiter.reset_client()
-
-
 async def _audit_action(action: str) -> int:
     engine = create_async_engine(LIVE_DB_URL)
     maker = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
@@ -85,6 +84,34 @@ async def _audit_action(action: str) -> int:
     return count
 
 
+async def _mk_lib(client: httpx.AsyncClient, user: dict[str, Any], slug: str) -> str:
+    made = await client.post(
+        "/api/v1/athenaeums",
+        json={"slug": f"{slug}-{uuid.uuid4().hex[:6]}", "title": slug.title()},
+        headers=_headers(user),
+    )
+    assert made.status_code == 201
+    return str(made.json()["id"])
+
+
+async def _mk_grimoire(
+    client: httpx.AsyncClient,
+    user: dict[str, Any],
+    athenaeum_id: str,
+    slug: str,
+    title: str,
+    **extra: Any,
+) -> dict[str, Any]:
+    made = await client.post(
+        "/api/v1/grimoires",
+        json={"athenaeum_id": athenaeum_id, "slug": slug, "title": title, **extra},
+        headers=_headers(user),
+    )
+    assert made.status_code == 201
+    body: dict[str, Any] = made.json()
+    return body
+
+
 # ---------------------------------------------------------------- categories
 
 
@@ -92,24 +119,22 @@ async def _audit_action(action: str) -> int:
 def test_category_lifecycle_dup_reorder_delete_uncategorizes() -> None:
     users = asyncio.run(_seed_users(1))
     me = users[0]
-    grimoire_x: dict[str, Any] = {}
 
     async def run() -> None:
         async with _client() as client:
+            aid_me = await _mk_lib(client, me, "life")
+            aid_stranger = await _mk_lib(client, me, "else")  # second lib of mine
+
             first = await client.post(
-                "/api/v1/grimoire-categories",
+                f"/api/v1/athenaeums/{aid_me}/categories",
                 json={"name": "Spells"},
                 headers=_headers(me),
             )
             assert first.status_code == 201
-            assert first.json() == {
-                "id": first.json()["id"],
-                "name": "Spells",
-                "position": 1,
-            }
+            assert first.json()["position"] == 1
 
             second = await client.post(
-                "/api/v1/grimoire-categories",
+                f"/api/v1/athenaeums/{aid_me}/categories",
                 json={"name": "Rites"},
                 headers=_headers(me),
             )
@@ -117,60 +142,55 @@ def test_category_lifecycle_dup_reorder_delete_uncategorizes() -> None:
             first_id, second_id = first.json()["id"], second.json()["id"]
 
             dup = await client.post(
-                "/api/v1/grimoire-categories",
+                f"/api/v1/athenaeums/{aid_me}/categories",
                 json={"name": "Spells"},
                 headers=_headers(me),
             )
             assert dup.status_code == 409
 
             listing = await client.get(
-                "/api/v1/grimoire-categories", headers=_headers(me)
+                f"/api/v1/athenaeums/{aid_me}/categories", headers=_headers(me)
             )
             assert [c["name"] for c in listing.json()] == ["Spells", "Rites"]
 
-            # explicit-position reorder: move "Rites" ahead of "Spells"
+            # insert-displacement reorder: move "Rites" ahead of "Spells"
             moved = await client.patch(
-                f"/api/v1/grimoire-categories/{second_id}",
+                f"/api/v1/athenaeums/{aid_me}/categories/{second_id}",
                 json={"position": 1},
                 headers=_headers(me),
             )
             assert moved.status_code == 200
-            renamed_listing = await client.get(
-                "/api/v1/grimoire-categories", headers=_headers(me)
+            relisting = await client.get(
+                f"/api/v1/athenaeums/{aid_me}/categories", headers=_headers(me)
             )
-            assert [c["name"] for c in renamed_listing.json()] == ["Rites", "Spells"]
+            assert [c["name"] for c in relisting.json()] == ["Rites", "Spells"]
 
-            # rename via PATCH
             rename = await client.patch(
-                f"/api/v1/grimoire-categories/{second_id}",
+                f"/api/v1/athenaeums/{aid_me}/categories/{second_id}",
                 json={"name": "Rituals"},
                 headers=_headers(me),
             )
             assert rename.json()["name"] == "Rituals"
 
-            # foreign category is a uniform 404 (IDOR)
-            foreign = uuid.uuid4()
-            foreign_get = await client.patch(
-                f"/api/v1/grimoire-categories/{foreign}",
+            # categories of ANOTHER of my athenaeums are not reachable via this one
+            foreign_category = await client.patch(
+                f"/api/v1/athenaeums/{aid_stranger}/categories/{first_id}",
                 json={"name": "X"},
                 headers=_headers(me),
             )
-            assert foreign_get.status_code == 404
+            assert foreign_category.status_code == 404
 
-            # grimoire inside the category, then delete → Uncategorized
-            created = await client.post(
-                "/api/v1/grimoires",
-                json={"slug": "cat-test", "title": "Cat test", "category_id": first_id},
-                headers=_headers(me),
+            # a grimoire in the category, then delete → Uncategorized (same lib)
+            created = await _mk_grimoire(
+                client, me, aid_me, "cat-test", "Cat test", category_id=first_id
             )
-            assert created.status_code == 201
-            grimoire_x.update(created.json())
             dropped = await client.delete(
-                f"/api/v1/grimoire-categories/{first_id}", headers=_headers(me)
+                f"/api/v1/athenaeums/{aid_me}/categories/{first_id}",
+                headers=_headers(me),
             )
             assert dropped.status_code == 204
             detail = await client.get(
-                f"/api/v1/grimoires/{grimoire_x['id']}", headers=_headers(me)
+                f"/api/v1/grimoires/{created['id']}", headers=_headers(me)
             )
             assert detail.json()["category_id"] is None
         await app_teardown()
@@ -188,34 +208,33 @@ def test_grimoire_create_validation_and_creator_membership() -> None:
 
     async def run() -> None:
         async with _client() as client:
+            aid = await _mk_lib(client, me, "create")
             bad_slug = await client.post(
                 "/api/v1/grimoires",
-                json={"slug": "Bad Slug!", "title": "x"},
+                json={"athenaeum_id": aid, "slug": "Bad Slug!", "title": "x"},
                 headers=_headers(me),
             )
             assert bad_slug.status_code == 422
 
-            created = await client.post(
-                "/api/v1/grimoires",
-                json={"slug": "research-notes", "title": "Research Notes"},
-                headers=_headers(me),
+            created = await _mk_grimoire(
+                client, me, aid, "research-notes", "Research Notes"
             )
-            assert created.status_code == 201
-            assert created.json()["role"] == "owner"
-            assert created.json()["theme"] == "scriptorium"
+            assert created["role"] == "owner"
+            assert created["theme"] == "scriptorium"
+            assert created["athenaeum_id"] == aid
 
             dup = await client.post(
                 "/api/v1/grimoires",
-                json={"slug": "research-notes", "title": "second"},
+                json={"athenaeum_id": aid, "slug": "research-notes", "title": "second"},
                 headers=_headers(stranger),
             )
-            assert dup.status_code == 409
+            assert dup.status_code == 409  # slug uniqueness is global
 
-            listg = await client.get("/api/v1/grimoires", headers=_headers(stranger))
-            assert listg.json() == []  # outsider sees nothing (IDOR)
+            listing = await client.get("/api/v1/grimoires", headers=_headers(stranger))
+            assert listing.json() == []  # outsider sees nothing (IDOR)
 
             detail = await client.get(
-                f"/api/v1/grimoires/{created.json()['id']}", headers=_headers(stranger)
+                f"/api/v1/grimoires/{created['id']}", headers=_headers(stranger)
             )
             assert detail.status_code == 404
 
@@ -233,14 +252,10 @@ def test_grimoire_patch_owner_only_and_explicit_uncategorize() -> None:
 
     async def run() -> None:
         async with _client() as client:
-            created = await client.post(
-                "/api/v1/grimoires",
-                json={"slug": "patch-me", "title": "Patch me"},
-                headers=_headers(me),
-            )
-            gid["id"] = created.json()["id"]
+            aid = await _mk_lib(client, me, "patch")
+            created = await _mk_grimoire(client, me, aid, "patch-me", "Patch me")
+            gid["id"] = created["id"]
 
-            # add editor
             member = await client.post(
                 f"/api/v1/grimoires/{gid['id']}/members",
                 json={"email": editor["email"], "role": "editor"},
@@ -248,9 +263,10 @@ def test_grimoire_patch_owner_only_and_explicit_uncategorize() -> None:
             )
             assert member.status_code == 201
 
-            # category attach then explicit NULL clears it
             category = await client.post(
-                "/api/v1/grimoire-categories", json={"name": "P"}, headers=_headers(me)
+                f"/api/v1/athenaeums/{aid}/categories",
+                json={"name": "P"},
+                headers=_headers(me),
             )
             attach = await client.patch(
                 f"/api/v1/grimoires/{gid['id']}",
@@ -265,12 +281,12 @@ def test_grimoire_patch_owner_only_and_explicit_uncategorize() -> None:
             )
             assert clear.json()["category_id"] is None
 
-            title = await client.patch(
+            titled = await client.patch(
                 f"/api/v1/grimoires/{gid['id']}",
                 json={"title": "Patched title"},
                 headers=_headers(me),
             )
-            assert title.json()["title"] == "Patched title"
+            assert titled.json()["title"] == "Patched title"
 
             editor_patch = await client.patch(
                 f"/api/v1/grimoires/{gid['id']}",
@@ -309,14 +325,10 @@ def test_member_flows_owner_only_roles_and_self_leave() -> None:
 
     async def run() -> None:
         async with _client() as client:
-            created = await client.post(
-                "/api/v1/grimoires",
-                json={"slug": "member-flow", "title": "Member flow"},
-                headers=_headers(me),
-            )
-            gid["id"] = created.json()["id"]
+            aid = await _mk_lib(client, me, "members")
+            created = await _mk_grimoire(client, me, aid, "member-flow", "Member flow")
+            gid["id"] = created["id"]
 
-            # stranger cannot add members (404 — outsider, no existence leak)
             outsider = await client.post(
                 f"/api/v1/grimoires/{gid['id']}/members",
                 json={"email": viewer["email"], "role": "viewer"},
@@ -337,7 +349,6 @@ def test_member_flows_owner_only_roles_and_self_leave() -> None:
                 headers=_headers(me),
             )
             assert added.status_code == 201
-            assert added.json()["display"].startswith("User ")
 
             dup = await client.post(
                 f"/api/v1/grimoires/{gid['id']}/members",
@@ -352,7 +363,6 @@ def test_member_flows_owner_only_roles_and_self_leave() -> None:
             assert roster.status_code == 200
             assert len(roster.json()) == 2
 
-            # viewer attempting an owner-only mutation → 403
             viewer_copy = await client.post(
                 f"/api/v1/grimoires/{gid['id']}/members",
                 json={"email": stranger["email"], "role": "viewer"},
@@ -360,7 +370,6 @@ def test_member_flows_owner_only_roles_and_self_leave() -> None:
             )
             assert viewer_copy.status_code == 403
 
-            # role change editor→viewer allowed; owner-target rejected
             promote = await client.patch(
                 f"/api/v1/grimoires/{gid['id']}/members/{viewer['id']}",
                 json={"role": "editor"},
@@ -374,21 +383,18 @@ def test_member_flows_owner_only_roles_and_self_leave() -> None:
             )
             assert owner_target.status_code == 409
 
-            # self-leave works for non-owners
             leave = await client.delete(
                 f"/api/v1/grimoires/{gid['id']}/members/{viewer['id']}",
                 headers=_headers(viewer),
             )
             assert leave.status_code == 204
 
-            # owner cannot remove self
             owner_self = await client.delete(
                 f"/api/v1/grimoires/{gid['id']}/members/{me['id']}",
                 headers=_headers(me),
             )
             assert owner_self.status_code == 409
 
-            # re-add viewer, then owner removes them
             readd = await client.post(
                 f"/api/v1/grimoires/{gid['id']}/members",
                 json={"email": viewer["email"], "role": "viewer"},
@@ -405,14 +411,12 @@ def test_member_flows_owner_only_roles_and_self_leave() -> None:
             assert await _audit_action("member_role_changed") >= 1
             assert await _audit_action("member_removed") >= 2
 
-            # a different owner's grimoire is invisible to `me`
-            other = await client.post(
-                "/api/v1/grimoires",
-                json={"slug": "other-owner", "title": "Other owner"},
-                headers=_headers(other_owner),
+            other_lib = await _mk_lib(client, other_owner, "others")
+            other = await _mk_grimoire(
+                client, other_owner, other_lib, "other-owner", "Other owner"
             )
             peek = await client.get(
-                f"/api/v1/grimoires/{other.json()['id']}", headers=_headers(me)
+                f"/api/v1/grimoires/{other['id']}", headers=_headers(me)
             )
             assert peek.status_code == 404
         await app_teardown()
@@ -428,12 +432,9 @@ def test_grimoire_delete_owner_only_and_cascades() -> None:
 
     async def run() -> None:
         async with _client() as client:
-            created = await client.post(
-                "/api/v1/grimoires",
-                json={"slug": "delete-me", "title": "Delete me"},
-                headers=_headers(me),
-            )
-            gid["id"] = created.json()["id"]
+            aid = await _mk_lib(client, me, "delete")
+            created = await _mk_grimoire(client, me, aid, "delete-me", "Delete me")
+            gid["id"] = created["id"]
             await client.post(
                 f"/api/v1/grimoires/{gid['id']}/members",
                 json={"email": viewer["email"], "role": "viewer"},

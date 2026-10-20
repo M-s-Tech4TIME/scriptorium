@@ -99,33 +99,58 @@ class RefreshToken(Base):
     )
 
 
-class GrimoireCategory(Base):
-    """User-defined grouping bucket for grimoires (0018, Q-M3-6=A).
+class Athenaeum(Base):
+    """One library — a complete documentation project for a product (0020).
 
-    Per-user: each user curates their own sidebar sections. Deleting a
-    category leaves its grimoires with NULL category (Uncategorized).
+    Native hierarchy: user → Athenaeums → categories → grimoires.
+    Slug uniqueness is per owner (every user may own slug `default`).
+    """
+
+    __tablename__ = "athenaeums"
+
+    id: Mapped[uuid.UUID] = _uuid_pk()
+    owner_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    slug: Mapped[str] = mapped_column(String(120), nullable=False)
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    created_at: Mapped[datetime] = _now()
+    __table_args__ = (
+        UniqueConstraint("owner_id", "slug", name="uq_athenaeums_owner_slug"),
+    )
+
+
+class GrimoireCategory(Base):
+    """A section inside an Athenaeum grouping grimoires (0020 Q-M3-9=A).
+
+    Scoped to one Athenaeum (ownership flows via the Athenaeum's owner).
+    Deleting a category leaves its grimoires with NULL category
+    (Uncategorized) inside the same Athenaeum.
     """
 
     __tablename__ = "grimoire_categories"
 
     id: Mapped[uuid.UUID] = _uuid_pk()
-    user_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    athenaeum_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("athenaeums.id", ondelete="CASCADE"), nullable=False, index=True
     )
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     position: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
     created_at: Mapped[datetime] = _now()
     __table_args__ = (
-        UniqueConstraint("user_id", "name", name="uq_grimoire_categories_name"),
+        UniqueConstraint("athenaeum_id", "name", name="uq_grimoire_categories_name"),
     )
 
 
 class Grimoire(Base):
-    """One self-contained documentation set (renamed from "project", 0018)."""
+    """One self-contained documentation set — a "book" inside an Athenaeum."""
 
     __tablename__ = "grimoires"
 
     id: Mapped[uuid.UUID] = _uuid_pk()
+    athenaeum_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("athenaeums.id", ondelete="CASCADE"), nullable=False, index=True
+    )
     category_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("grimoire_categories.id", ondelete="SET NULL"),
         nullable=True,

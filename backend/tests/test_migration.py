@@ -1,7 +1,7 @@
 """Migration round-trip against live PG18 (runs in CI via postgres:18 service).
 
-Upgrade to head, assert the 8 Q21 tables, downgrade to base, upgrade again
-(idempotency proof for `scriptorium-admin migrate`).
+Upgrade to head, assert the 11 Q21 tables (incl. `athenaeums`, 0020), downgrade
+to base, upgrade again (idempotency proof for `scriptorium-admin migrate`).
 """
 
 from __future__ import annotations
@@ -16,6 +16,7 @@ from tests.conftest import LIVE_DB_URL, needs_db
 EXPECTED_TABLES = {
     "users",
     "memberships",
+    "athenaeums",
     "grimoires",
     "grimoire_categories",
     "nodes",

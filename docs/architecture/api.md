@@ -1,6 +1,6 @@
-# API surface (M3) — auth, categories, grimoires, members
+# API surface — auth, athenaeums, categories, grimoires, members
 
-Last updated: 2026-10-20 / Ref: C2 green (aee1872) + C3 in this commit
+Last updated: 2026-10-21 / Ref: C3.5 in this commit (athenaeum layer, 0020)
 
 ## Conventions
 
@@ -8,7 +8,8 @@ Last updated: 2026-10-20 / Ref: C2 green (aee1872) + C3 in this commit
   `401`. Refresh rides an HttpOnly cookie (0017/0019, see
   `docs/technology/auth.md`).
 - RBAC/IDOR: no membership → uniform `404` (never `403` — existence is not
-  leaked); a member under the required role → `403`.
+  leaked); a member under the required role → `403`. Athenaeum endpoints are
+  owner-scoped: a foreign Athenaeum id is a uniform `404`.
 - Mutations write one `audit_log` row in the same transaction.
 - Request/response JSON over `/api/v1`.
 
@@ -20,25 +21,44 @@ Last updated: 2026-10-20 / Ref: C2 green (aee1872) + C3 in this commit
 | POST `/auth/refresh` | cookie | rotates cookie; reuse → 401 + family burn |
 | POST `/auth/logout` | cookie | revokes family (`reason=logout`), clears cookie, `204` |
 
-## Sidebar categories (`routers/categories.py`, 0018 Q-M3-6/7/8)
+## Athenaeums (`routers/athenaeums.py`, 0020) — the library layer
+
+| Route | Access | Notes |
+|---|---|---|
+| GET `/athenaeums` | owner | own libraries, creation order |
+| POST `/athenaeums` `{slug,title}` | authed | slug allowlist `[a-z0-9-]+` (`422`); dup **per owner** → `409`; creation order stable |
+| GET `/athenaeums/{id}` | owner | foreign/unknown id → `404` |
+| PATCH `/athenaeums/{id}` `{title}` | owner | rename title only; **slug immutable after creation** (stable URLs, mirrors 0018 grimoire slugs); owner-vetoable default |
+| DELETE `/athenaeums/{id}` | owner | **refused `409` while it holds grimoires** (Q-M3-11=A; no audit row on refusal); else cascades its categories, `204` |
+| GET `/athenaeums/{id}/sidebar` | owner | one call for the sidebar (Q-M3-13=A): `{id,slug,title,categories:[{id,name,position,grimoires:[…]}],uncategorized:[…]}` |
+
+Grimoire entries in the sidebar are light rows
+(`{id,slug,title,source_format,theme,category_id}`); categories ordered by
+`position` then `created_at`, grimoires inside a section by `title`.
+
+## Categories — sections inside an Athenaeum (`routers/categories.py`, 0020 Q-M3-9=A)
+
+Re-homed from 0018's `/grimoire-categories` (per-user) to per-Athenaeum
+paths; ownership resolves through the Athenaeum's owner.
 
 | Route | Access |
 |---|---|
-| GET `/grimoire-categories` | own rows, ordered by position |
-| POST `/grimoire-categories` `{name}` | dup → `409`; position auto = max+1 |
-| PATCH `/grimoire-categories/{id}` `{name?, position?}` | position = 1-based index at patch time (insert-displacement → siblings compacted in-tx) |
-| DELETE `/grimoire-categories/{id}` | grimoires drop to `category_id NULL` (Uncategorized) |
+| GET `/athenaeums/{aid}/categories` | own rows, ordered by position |
+| POST `/athenaeums/{aid}/categories` `{name}` | dup in this Athenaeum → `409`; position auto = max+1 |
+| PATCH `/athenaeums/{aid}/categories/{id}` `{name?, position?}` | position = 1-based insert-displacement index → siblings compacted in-tx |
+| DELETE `/athenaeums/{aid}/categories/{id}` | grimoires drop to `category_id NULL` (Uncategorized, same Athenaeum) |
 
-Foreign category ids → `404`.
+Foreign Athenaeum or category id → `404` (a category of *another* Athenaeum
+is equally unreachable).
 
 ## Grimoires (`routers/grimoires.py`)
 
 | Route | Access | Notes |
 |---|---|---|
-| GET `/grimoires` | member rows only | `{id,slug,title,source_format,theme,category_id,created_by,role}` |
-| POST `/grimoires` `{slug,title,source_format?,theme?,category_id?}` | public (authed) | slug allowlist `[a-z0-9-]+` → else `422`; dup slug → `409`; NULL category allowed (Q-M3-8); creator becomes `owner` member atomically |
+| GET `/grimoires` | member rows only | `{id,athenaeum_id,slug,title,source_format,theme,category_id,created_by,role}` |
+| POST `/grimoires` `{athenaeum_id,slug,title,source_format?,theme?,category_id?}` | owner of the athenaeum | missing `athenaeum_id` → `422`; foreign athenaeum → `404`; category must belong to **that same Athenaeum** (`404` otherwise); slug allowlist `[a-z0-9-]+` → else `422`; dup slug → `409`; creator becomes `owner` member atomically |
 | GET `/grimoires/{id}` | any member | `404` outsider |
-| PATCH `/grimoires/{id}` `{title?,theme?,category_id?}` | owner (`403` member) | explicit `category_id: null` clears to Uncategorized; **`source_format` immutable after creation** |
+| PATCH `/grimoires/{id}` `{title?,theme?,category_id?,athenaeum_id?}` | owner (`403` member) | explicit `category_id: null` clears to Uncategorized; `source_format` immutable; **`athenaeum_id` = cross-Athenaeum move** → target must be owned (`404`), `null` target → `422` (no floating grimoires), same-id no-op; audit `grimoire_moved` |
 | DELETE `/grimoires/{id}` | owner (`403` member) | cascades nodes/documents/builds/memberships |
 
 ## Members (`routers/grimoires.py`)
@@ -51,9 +71,11 @@ Foreign category ids → `404`.
 | DELETE `…/members/{user_id}` | owner, or member deleting self | owner self-removal → `409` (delete grimoire or transfer first) |
 
 Owner role assignment/transfer via API is intentionally absent — a future
-decision (transfer flow) will precede any owner-grant endpoint.
+decision (transfer flow) will precede any owner-grant endpoint. Sharing
+stays grimoire-level only (0020 Q-M3-12=A).
 
-## Audit actions (this tranche)
+## Audit actions (through this tranche)
 
-`category_created|patched|deleted`, `grimoire_created|patched|deleted`,
-`member_added|role_changed|removed`.
+`category_created|patched|deleted`, `grimoire_created|patched|deleted|moved`,
+`member_added|role_changed|removed`, `athenaeum_created|patched|deleted`
+(refused deletes write no audit row — nothing happened).
