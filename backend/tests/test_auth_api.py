@@ -5,9 +5,9 @@ starlette.testclient — its import raises a deprecation warning that would
 violate Rule 6 under -W error). Cookie rotation/reuse-burn flows exercise
 the M2 family store end-to-end.
 
-Loop hygiene: each test runs its own asyncio loop; the app's cached
-asyncpg engine is disposed ON that loop (db.dispose_engine) before the
-loop closes — leaves no unclosed sockets behind (Rule 6, C2 CI lesson).
+Loop hygiene: each test runs its own asyncio loop; app-cached asyncpg/redis
+clients are disposed ON that loop via conftest.app_teardown before the loop
+closes — leaves no unclosed sockets behind (Rule 6, C2 CI lesson).
 
 Test-only SECRET value: fine to hardcode (not a production secret).
 """
@@ -31,7 +31,7 @@ from app import db
 from app.auth import hash_password
 from app.main import app
 from app.models import User
-from tests.conftest import LIVE_DB_URL, needs_db
+from tests.conftest import LIVE_DB_URL, app_teardown, needs_db
 
 os.environ.setdefault("SECRET_KEY", "m3-test-only-secret-not-a-real-credential")
 
@@ -93,7 +93,7 @@ def test_login_rejects_wrong_password_and_unknown_email() -> None:
                 },
             )
             assert stranger.status_code == 401
-        await db.dispose_engine()
+        await app_teardown()
 
     _run(run())
 
@@ -121,7 +121,7 @@ def test_login_mint_access_and_rotating_refresh_cookie() -> None:
             assert "access_token" in rotated.json()
             second = _cookie_from(rotated)
             assert second != first  # rotation means a fresh token value
-        await db.dispose_engine()
+        await app_teardown()
 
     _run(run())
 
@@ -153,7 +153,7 @@ def test_refresh_reuse_burns_family_then_chain() -> None:
                 "/api/v1/auth/refresh", headers={"Cookie": f"{_COOKIE}={second}"}
             )
             assert burned.status_code == 401
-        await db.dispose_engine()
+        await app_teardown()
 
     _run(run())
 
@@ -178,7 +178,7 @@ def test_logout_revokes_family_and_clears_cookie() -> None:
                 "/api/v1/auth/refresh", headers={"Cookie": f"{_COOKIE}={cookie}"}
             )
             assert dead.status_code == 401
-        await db.dispose_engine()
+        await app_teardown()
 
     _run(run())
 
@@ -189,6 +189,6 @@ def test_refresh_without_cookie_is_401() -> None:
         async with _client() as client:
             bare = await client.post("/api/v1/auth/refresh")
             assert bare.status_code == 401
-        await db.dispose_engine()  # no-op here — no request opened a connection
+        await app_teardown()  # no-op — no request opened a connection
 
     _run(run())

@@ -51,3 +51,11 @@ def _fresh_app_loops() -> None:
 
     db.reset_engine()
     limiter.reset_client()
+
+
+async def app_teardown() -> None:
+    """Dispose app-cached async clients on the owning loop (tests call before exit)."""
+    from app import db, limiter
+
+    await db.dispose_engine()
+    await limiter.dispose_client()

@@ -26,7 +26,7 @@ from app import db, limiter
 from app.auth import hash_password
 from app.main import app
 from app.models import User
-from tests.conftest import LIVE_DB_URL, needs_db, needs_redis
+from tests.conftest import LIVE_DB_URL, app_teardown, needs_db, needs_redis
 
 os.environ.setdefault("SECRET_KEY", "m3-test-only-secret-not-a-real-credential")
 
@@ -50,6 +50,7 @@ def _flush() -> None:
 
     async def flush() -> None:
         await limiter.get_client().flushdb()
+        await limiter.dispose_client()
 
     asyncio.run(flush())
     limiter.reset_client()
@@ -86,7 +87,7 @@ def test_counters_start_clean_and_keys_separate() -> None:
         assert await limiter.usage(ip_a, "other@example.test") == 3
         # ip_b alone binds at 1 for a fresh email (ip_b: 1, other-mail: 0 → max 1).
         assert await limiter.usage(ip_b, "other@example.test") == 1
-        await limiter.get_client().aclose()
+        await limiter.dispose_client()
 
     _run(run())
 
@@ -114,7 +115,7 @@ def test_five_failures_then_429_with_retry_after() -> None:
             }
             retry = int(trip.headers["Retry-After"])
             assert 0 < retry <= limiter.window_seconds()
-        await db.dispose_engine()
+        await app_teardown()
 
     _run(run())
 
@@ -137,7 +138,7 @@ def test_success_clears_counters_and_reopens_budget() -> None:
             )
             assert ok.status_code == 200
             assert await limiter.usage("127.0.0.1", email) == 0
-        await db.dispose_engine()
+        await app_teardown()
 
     _run(run())
 
@@ -158,7 +159,7 @@ def test_limiter_outage_fails_closed() -> None:
             )
             assert out.status_code == 503
             assert out.json() == {"detail": "Login temporarily unavailable."}
-        await db.dispose_engine()
+        await app_teardown()
 
     try:
         _run(run())

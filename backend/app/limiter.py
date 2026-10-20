@@ -81,6 +81,20 @@ def reset_client() -> None:
     _client = None
 
 
+async def dispose_client() -> None:
+    """Close the cached client ON the current loop, then clear the cache.
+
+    redis-py sends its sockets through per-loop transports; dropping the
+    reference without closing makes GC raise ResourceWarning-style noise
+    during a later test (Rule 6 under -W error), so tests close it in the
+    loop that owns it (mirror of app.db.dispose_engine).
+    """
+    global _client
+    if _client is not None:
+        client, _client = _client, None
+        await client.aclose()
+
+
 async def usage(peer_ip: str, email_addr: str) -> int:
     """Failures used so far under the tighter of the two counters."""
     try:
