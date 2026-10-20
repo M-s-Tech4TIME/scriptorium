@@ -26,7 +26,7 @@ Last updated: 2026-10-20 / Ref: C2 green (aee1872) + C3 in this commit
 |---|---|
 | GET `/grimoire-categories` | own rows, ordered by position |
 | POST `/grimoire-categories` `{name}` | dup → `409`; position auto = max+1 |
-| PATCH `/grimoire-categories/{id}` `{name?, position?}` | explicit-position reorder → siblings compacted 1..n in-tx |
+| PATCH `/grimoire-categories/{id}` `{name?, position?}` | position = 1-based index at patch time (insert-displacement → siblings compacted in-tx) |
 | DELETE `/grimoire-categories/{id}` | grimoires drop to `category_id NULL` (Uncategorized) |
 
 Foreign category ids → `404`.

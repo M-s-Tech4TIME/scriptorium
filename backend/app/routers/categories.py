@@ -131,9 +131,26 @@ async def patch_category(
                 status_code=status.HTTP_409_CONFLICT, detail="Category already exists."
             )
         category.name = body.name
-    if body.position is not None:
-        category.position = body.position
-        await compact_positions(user_id, session)  # explicit-position reorder
+    if body.position is not None and body.position != category.position:
+        # Insert-displacement reorder: position is a 1-based index into the
+        # user's current order (Q-M3-4=A explicit atomic sibling operations).
+        current = await session.scalars(
+            select(GrimoireCategory.id)
+            .where(GrimoireCategory.user_id == user_id)
+            .order_by(GrimoireCategory.position, GrimoireCategory.created_at)
+        )
+        order: list[uuid.UUID] = [row for row in current]
+        if category.id in order:
+            order.remove(category.id)
+        index = max(0, min(body.position - 1, len(order)))
+        order.insert(index, category.id)
+        for new_pos, moved_id in enumerate(order, start=1):
+            await session.execute(
+                update(GrimoireCategory)
+                .where(GrimoireCategory.id == moved_id)
+                .values(position=new_pos)
+            )
+        await session.refresh(category)
     add_audit(
         session,
         actor=user_id,

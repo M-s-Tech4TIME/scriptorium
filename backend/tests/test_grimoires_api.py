@@ -61,11 +61,13 @@ def _client() -> httpx.AsyncClient:
 
 
 def _run(test: Coroutine[Any, Any, None]) -> None:
-    asyncio.run(test)
-    from app import db, limiter
+    try:
+        asyncio.run(test)
+    finally:
+        from app import db, limiter
 
-    db.reset_engine()
-    limiter.reset_client()
+        db.reset_engine()
+        limiter.reset_client()
 
 
 async def _audit_action(action: str) -> int:
@@ -286,7 +288,7 @@ def test_grimoire_patch_owner_only_and_explicit_uncategorize() -> None:
 
             foreign_category = await client.patch(
                 f"/api/v1/grimoires/{gid['id']}",
-                json={"category_id": uuid.uuid4()},
+                json={"category_id": str(uuid.uuid4())},
                 headers=_headers(me),
             )
             assert foreign_category.status_code == 404

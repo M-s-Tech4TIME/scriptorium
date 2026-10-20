@@ -40,9 +40,11 @@ def _client() -> httpx.AsyncClient:
 
 
 def _run(test: Coroutine[Any, Any, None]) -> None:
-    asyncio.run(test)
-    db.reset_engine()
-    limiter.reset_client()
+    try:
+        asyncio.run(test)
+    finally:
+        db.reset_engine()
+        limiter.reset_client()
 
 
 def _flush() -> None:

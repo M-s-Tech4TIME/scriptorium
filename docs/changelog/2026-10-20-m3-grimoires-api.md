@@ -22,3 +22,7 @@
   owner-only patches; member flows; delete cascades + membership-loss 404).
 - Docs/brain synced; no schema change (C1 migration stands); offline suite
   45 passed / 19 skipped.
+- CI fix-up: 422 constant renamed (`HTTP_422_UNPROCESSABLE_CONTENT`);
+  category reorder is insert-displacement (position = 1-based index at
+  patch time, siblings compacted in-tx); test payload UUIDs str()-ed;
+  `_run` disposal in try/finally so mid-test failures still release loops.
