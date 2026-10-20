@@ -5,6 +5,10 @@ starlette.testclient — its import raises a deprecation warning that would
 violate Rule 6 under -W error). Cookie rotation/reuse-burn flows exercise
 the M2 family store end-to-end.
 
+Loop hygiene: each test runs its own asyncio loop; the app's cached
+asyncpg engine is disposed ON that loop (db.dispose_engine) before the
+loop closes — leaves no unclosed sockets behind (Rule 6, C2 CI lesson).
+
 Test-only SECRET value: fine to hardcode (not a production secret).
 """
 
@@ -13,10 +17,17 @@ from __future__ import annotations
 import asyncio
 import os
 import uuid
+from collections.abc import Coroutine
+from typing import Any
 
 import httpx
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 
+from app import db
 from app.auth import hash_password
 from app.main import app
 from app.models import User
@@ -40,6 +51,11 @@ def _client() -> httpx.AsyncClient:
     return httpx.AsyncClient(
         transport=httpx.ASGITransport(app=app), base_url="http://testserver"
     )
+
+
+def _run(test: Coroutine[Any, Any, None]) -> None:
+    asyncio.run(test)
+    db.reset_engine()
 
 
 async def _seed_user() -> str:
@@ -77,8 +93,9 @@ def test_login_rejects_wrong_password_and_unknown_email() -> None:
                 },
             )
             assert stranger.status_code == 401
+        await db.dispose_engine()
 
-    asyncio.run(run())
+    _run(run())
 
 
 @needs_db
@@ -104,8 +121,9 @@ def test_login_mint_access_and_rotating_refresh_cookie() -> None:
             assert "access_token" in rotated.json()
             second = _cookie_from(rotated)
             assert second != first  # rotation means a fresh token value
+        await db.dispose_engine()
 
-    asyncio.run(run())
+    _run(run())
 
 
 @needs_db
@@ -135,8 +153,9 @@ def test_refresh_reuse_burns_family_then_chain() -> None:
                 "/api/v1/auth/refresh", headers={"Cookie": f"{_COOKIE}={second}"}
             )
             assert burned.status_code == 401
+        await db.dispose_engine()
 
-    asyncio.run(run())
+    _run(run())
 
 
 @needs_db
@@ -159,8 +178,9 @@ def test_logout_revokes_family_and_clears_cookie() -> None:
                 "/api/v1/auth/refresh", headers={"Cookie": f"{_COOKIE}={cookie}"}
             )
             assert dead.status_code == 401
+        await db.dispose_engine()
 
-    asyncio.run(run())
+    _run(run())
 
 
 @needs_db
@@ -169,5 +189,6 @@ def test_refresh_without_cookie_is_401() -> None:
         async with _client() as client:
             bare = await client.post("/api/v1/auth/refresh")
             assert bare.status_code == 401
+        await db.dispose_engine()  # no-op here — no request opened a connection
 
-    asyncio.run(run())
+    _run(run())

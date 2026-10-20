@@ -56,6 +56,20 @@ def reset_engine() -> None:
     _engine = None
 
 
+async def dispose_engine() -> None:
+    """Dispose the cached engine on the current loop, then clear the cache.
+
+    Tests each drive the app inside one `asyncio.run` loop; asyncpg pool
+    sockets must be closed by the loop that owns them, or the interpreter
+    later warns ResourceWarning during GC (which -W error escalates to a
+    test failure). Call this before a test's loop closes.
+    """
+    global _engine
+    if _engine is not None:
+        engine, _engine = _engine, None
+        await engine.dispose()
+
+
 async def get_session() -> AsyncIterator[AsyncSession]:
     """FastAPI dependency: per-request session (RBAC checks run inside request handlers)."""
     maker = async_sessionmaker(
