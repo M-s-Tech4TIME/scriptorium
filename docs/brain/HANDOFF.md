@@ -19,6 +19,9 @@ logout, rotating HttpOnly refresh cookie wired to the M2 family store),
 ## Gotchas (carried)
 - Migrate head `0003grimoire`; **do NOT** rename columns on tables that
   never had them (C1's CI lesson: verify SQL against 0001 definitions).
+- conftest now migrates to head ONCE when DATABASE_URL is set — new live
+  test files sort before test_migration.py (C2's CI lesson); never rely
+  on alphabetical ordering to migrate the schema.
 - CI mypy MUST use `--config-file backend/pyproject.toml` (0018 ratified).
 - starlette.testclient import deprecation-warns → use httpx.ASGITransport
   in tests (Rule 6 under -W error).
