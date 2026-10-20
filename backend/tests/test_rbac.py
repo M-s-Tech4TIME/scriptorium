@@ -36,8 +36,10 @@ async def _scenario() -> None:
             stranger = User(
                 email=f"stranger-{tag}@example.test", pw_hash="x", display="Stranger"
             )
+            session.add_all([me, stranger])
+            await session.flush()
             lib = Athenaeum(owner_id=me.id, slug=f"secret-athen-{tag}", title="Secrets")
-            session.add_all([me, stranger, lib])
+            session.add(lib)
             await session.flush()
             grimoire = Grimoire(
                 athenaeum_id=lib.id,
