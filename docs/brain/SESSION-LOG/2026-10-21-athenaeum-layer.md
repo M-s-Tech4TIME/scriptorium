@@ -25,4 +25,11 @@
   `overview.md` canonical-model line, changelog
   `2026-10-21-m3-athenaeum-layer.md`, DECISIONS-INDEX, brain files.
 - Local gates green: ruff, mypy strict 35 files, pytest `45 passed,
-  23 skipped -W error`, validate-docs. CI ×3 to verify after push.
+  23 skipped -W error`, validate-docs. CI ×3 verified green on `b6a453d`
+  (Rule 7), after two test-only fix-ups:
+  - dup-slug probe ran against a foreign athenaeum → 404 before the
+    global slug check (probe as owner instead);
+  - rbac fixture: direct-ORM `Grimoire` missing `athenaeum_id` (NOT NULL
+    since 0004); and `User.id` is `None` until first flush (client-side
+    column default applies at INSERT) — flush users before referencing
+    their ids.

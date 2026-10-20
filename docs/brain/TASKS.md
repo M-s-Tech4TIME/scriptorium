@@ -3,7 +3,7 @@
 Last updated: 2026-10-21 / M3 C3.5 staged with this sync
 
 ## In progress (max 1–2)
-- C3.5 athenaeum layer (0020) — staged, needs commit + CI verify ×3.
+- (none)
 
 ## Todo (M3 next)
 - [ ] C4 tree endpoints: GET `/grimoires/{id}/tree`, node create/move/rename/delete —
@@ -22,7 +22,8 @@ Last updated: 2026-10-21 / M3 C3.5 staged with this sync
 - [x] M3 C2.5: decision 0019 + login rate limiter (a6c17bb, green ×3)
 - [x] M3 C3: categories/grimoires/members endpoints + audit (d62784e)
 - [x] Owner call: 0020 athenaeum layer (Q-M3-9…13=A) approved 2026-10-21
-- [x] M3 C3.5: migration 0004 + athenaeum router + re-homing + move + tests (this commit)
+- [x] M3 C3.5: migration 0004 + athenaeum router + re-homing + move + tests
+      (4b57c82 + CI fixes 30dd8b4/b6a453d — green ×3)
 - [x] Q1–Q23 (2026-10-16); Q-M2-1/2 (2026-10-19); Q-M3-1…8 + Q-002 (2026-10-20);
       Q-M3-9…13 (2026-10-21)
 

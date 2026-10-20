@@ -1,6 +1,6 @@
 # HANDOFF
 
-Last updated: 2026-10-21 / C3.5 athenaeum layer staged with this sync (0020)
+Last updated: 2026-10-21 / C3(4b57c82)+fixes green (b6a453d) — brain sync
 
 ## Was doing
 M3 C3.5 (decision 0020): migration `0004_athenaeums`, `Athenaeum` model,
@@ -8,7 +8,8 @@ M3 C3.5 (decision 0020): migration `0004_athenaeums`, `Athenaeum` model,
 `categories.py` re-homed to athenaeum paths, `grimoires.py` scoping +
 cross-Athenaeum move, `main.py` mount, `test_athenaeums_api.py` (4 live
 cases) + `test_grimoires_api.py` rewrite (5 live cases), test_migration
-EXPECTED_TABLES → 11, docs restructure, brain sync.
+EXPECTED_TABLES → 11, docs restructure, brain sync. **Landed: CI ×3
+green on `b6a453d`.**
 
 ## Next steps (in order)
 1. Commit C3.5 (`feat: athenaeum layer as native library hierarchy (0020)`),

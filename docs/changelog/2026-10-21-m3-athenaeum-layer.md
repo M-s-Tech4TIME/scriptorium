@@ -1,6 +1,7 @@
 # 2026-10-21 — M3 C3.5: Athenaeum layer as the native library hierarchy (0020)
 
-Commit: this commit · Author: alsechemist (with OpenCode) · Milestone M3, tranche C3.5
+Commits: `4b57c82` (feature) + `30dd8b4`, `b6a453d` (CI-lesson fixes) ·
+Author: alsechemist (with OpenCode) · Milestone M3, tranche C3.5 · CI ×3 verified green
 
 ## What changed
 
@@ -48,7 +49,22 @@ categories (which 0020 explicitly supersedes).
   with explicit uncategorize, member flows, delete cascades).
 - Offline gate stays `45 passed, 23 skipped` (live cases `needs_db`).
 
+## CI lessons (post-push fixes, root-caused, no product-code changes)
+
+- `4b57c82` first run: lint-type-test failed on 3 test bugs:
+  - duplicate-slug probe used a *stranger* against my athenaeum —
+    ownership `404` fires before the global slug check → probe as the
+    owner (foreign-athenaeum probe kept as its own `404` case);
+  - `test_rbac` fixture inserted `Grimoire` rows directly without
+    `athenaeum_id` (NOT NULL since 0004) → fixed, then again with PK
+    timing: ORM client-side column defaults (`default=uuid.uuid4`)
+    apply **at first flush** — `User.id` is `None` until flushed, so
+    referencing `me.id` in a same-batch `Athenaeum` insert violated
+    NOT NULL → flush users first (`30dd8b4`, `b6a453d`).
+- The athenaeum router, migration 0004 and all 4 new athenaeum cases
+  passed on the first live run.
+
 ## Gates
 
 ruff check/format · mypy strict (35 files) · `pytest -W error` zero warnings ·
-`validate-docs.sh` — then CI ×3 verified green after push (Rule 7).
+`validate-docs.sh` · CI ×3 verified green on `b6a453d` (Rule 7).

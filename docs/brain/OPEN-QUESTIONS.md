@@ -1,6 +1,6 @@
 # OPEN-QUESTIONS
 
-Last updated: 2026-10-21 / Ref: C3.5 athenaeum layer staged (0020)
+Last updated: 2026-10-21 / Ref: C3.5 green (b6a453d)
 
 | ID | Question | Blocks | Asked |
 |---|---|---|---|
