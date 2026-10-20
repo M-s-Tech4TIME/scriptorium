@@ -35,3 +35,11 @@ def _migrate_if_live() -> None:
 
 
 _migrate_if_live()
+
+
+@pytest.fixture(autouse=True)
+def _fresh_app_engine() -> None:
+    """One event loop per test: drop the app engine so no pool future crosses loops."""
+    from app import db
+
+    db.reset_engine()

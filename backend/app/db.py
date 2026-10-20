@@ -44,6 +44,18 @@ def get_engine() -> AsyncEngine:
     return _engine
 
 
+def reset_engine() -> None:
+    """Drop the cached engine.
+
+    Production keeps one process-wide loop, so the cache lives forever.
+    Tests drive the ASGI app with one event loop per test (asyncio.run);
+    a stale engine's asyncpg pool futures belong to a dead loop
+    ("Future attached to a different loop"), so each test starts fresh.
+    """
+    global _engine
+    _engine = None
+
+
 async def get_session() -> AsyncIterator[AsyncSession]:
     """FastAPI dependency: per-request session (RBAC checks run inside request handlers)."""
     maker = async_sessionmaker(
