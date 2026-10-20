@@ -6,10 +6,10 @@ Last updated: 2026-10-20 / M3 C1 staged with this sync
 - (none — M2 complete with this commit)
 
 ## Todo (M3 next)
-- [ ] C2.5 login rate limiting (0019) — staged, needs commit+CI verify
-- [ ] C3 categories + grimoires + memberships endpoints (+audit)
+- [ ] C3 categories + grimoires + members endpoints — staged, needs CI verify
 - [ ] C4 tree endpoints (atomic sibling reorder)
 - [ ] C5 document endpoints (expected_version→409, history, import→422)
+- [x] C2.5 login rate limiting (0019) — shipped green (a6c17bb)
 - [x] Owner call: Q-002 login rate limiting → B approved, decision 0019
 - [ ] Runner/doc pipeline (M4): gated Sphinx builds; docutils 0.23 gate
       recorded in 0017.
@@ -20,7 +20,8 @@ Last updated: 2026-10-20 / M3 C1 staged with this sync
 - [x] M2: 0017 record (ba153e9), refresh store (d5fb5cc), conversion (be1a220)
 - [x] M3 C1: 0018 record + grimoire rename + categories schema (c26cd7e)
 - [x] M3 C2: auth/session endpoints + live API tests (aee1872)
-- [x] M3 C2.5: decision 0019 + login rate limiter + docs (this commit)
+- [x] M3 C2.5: decision 0019 + login rate limiter (a6c17bb, green ×3)
+- [x] M3 C3: categories/grimoires/members endpoints + audit (this commit)
 - [x] Q1–Q23 (2026-10-16); Q-M2-1/2 (2026-10-19); Q-M3-1…8 + Q-002 (2026-10-20)
 
 ## Blocked

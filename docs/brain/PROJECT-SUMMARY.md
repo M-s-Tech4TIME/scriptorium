@@ -1,6 +1,6 @@
 # PROJECT-SUMMARY (brain map, not a copy)
 
-Last updated: 2026-10-20 / Ref: aee1872 (C2 green) + C2.5 staged
+Last updated: 2026-10-20 / Ref: aee1872 (C2 green) + C3 staged
 
 - **What:** Scriptorium — self-hosted docs platform. Browser WYSIWYG (TipTap) → valid
   Sphinx source (RST default, MyST opt-in) → sandboxed background build → served HTML.
