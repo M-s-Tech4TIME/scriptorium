@@ -1,6 +1,6 @@
 # PROJECT-SUMMARY (brain map, not a copy)
 
-Last updated: 2026-10-20 / Ref: c26cd7e (M3 C1 green) + C2 staged
+Last updated: 2026-10-20 / Ref: aee1872 (C2 green) + C2.5 staged
 
 - **What:** Scriptorium — self-hosted docs platform. Browser WYSIWYG (TipTap) → valid
   Sphinx source (RST default, MyST opt-in) → sandboxed background build → served HTML.
@@ -16,7 +16,11 @@ Last updated: 2026-10-20 / Ref: c26cd7e (M3 C1 green) + C2 staged
   RST export = one mark per run + fail-loud matrix; MyST carries the editor
   set via HTML paths. See `docs/technology/conversion.md` + 0017.
 - **M3 status (as of this sync):** C1 green (grimoire rename + categories,
-  migration head `0003grimoire`); C2 staged (auth/session endpoints);
+  migration head `0003grimoire`); C2 green (auth endpoints); C2.5 staged
+  (login rate limiter, decision 0019 — Redis fixed window, fail-closed);
   C3–C5 next. Terminology: "grimoire" everywhere (0018). Auth surface =
   login/refresh/logout only. Live API tests drive the app via
   `httpx.ASGITransport` (starlette.testclient import warns → Rule 6).
+- **Config keys (auth path):** `SECRET_KEY` (JWT), `SCRIPTORIUM_COOKIE_SECURE`
+  (prod sets Secure), `REDIS_URL` (limiter, fail-closed when missing),
+  `SCRIPTORIUM_RATELIMIT_LOGIN_MAX` / `_WINDOW_S` (0019, optional).

@@ -22,6 +22,7 @@ Last updated: 2026-10-20 / Ref: be1a220 (M2 conversion green)
 | 0016 | Authorship: author=alsechemist + Co-authored-by OpenCode | accepted | 2026-10-16 | owner |
 | 0017 | M2 design (retro 404/squash; refresh family store; starter-kit scope; MyST HTML markers) | accepted | 2026-10-19 | owner |
 | 0018 | M3 design: grimoire rename (full, incl. DB), per-user categories, auth/document/tree API semantics | accepted | 2026-10-20 | owner |
+| 0019 | Login rate limiting (Q-002=B): app-level Redis fixed window, fail-closed, XFF untrusted | accepted | 2026-10-20 | owner |
 
-Full records: `docs/decisions/0001-*.md` … `0018-*.md`. 
+Full records: `docs/decisions/0001-*.md` … `0019-*.md`. 
 Pending: none.

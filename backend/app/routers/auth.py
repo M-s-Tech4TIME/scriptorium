@@ -19,6 +19,7 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app import limiter
 from app.auth import (
     REFRESH_DAYS,
     AuthError,
@@ -32,7 +33,7 @@ from app.auth import (
     verify_password,
 )
 from app.db import get_session
-from app.models import RefreshToken, User
+from app.models import AuditLog, RefreshToken, User
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
@@ -42,6 +43,17 @@ COOKIE_NAME = "scriptorium_refresh"
 class LoginIn(BaseModel):
     email: str
     password: str
+
+
+async def _login_failed(peer_ip: str, email_addr: str) -> None:
+    """Count a failed login; any limiter outage fails closed (0019: 503)."""
+    try:
+        await limiter.count_failure(peer_ip, email_addr)
+    except limiter.LimiterUnavailable as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Login temporarily unavailable.",
+        ) from exc
 
 
 def _cookie_secure() -> bool:
@@ -67,22 +79,49 @@ def _set_refresh_cookie(response: Response, token: str) -> None:
 @router.post("/login")
 async def login(
     body: LoginIn,
+    request: Request,
     response: Response,
     session: AsyncSession = Depends(get_session),
 ) -> dict[str, str]:
     secret = get_secret()
     email = body.email.strip().lower()
+    peer_ip = request.client.host if request.client else "unknown"
+    try:
+        if await limiter.usage(peer_ip, email) >= limiter.max_failures():
+            retry = await limiter.retry_after(peer_ip, email)
+            session.add(AuditLog(action="auth_rate_limited", meta={"ip": peer_ip}))
+            await session.commit()
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="Too many failed attempts. Try again later.",
+                headers={"Retry-After": str(retry)},
+            )
+    except limiter.LimiterUnavailable as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Login temporarily unavailable.",
+        ) from exc
+
     user_id = await session.scalar(select(User.id).where(User.email == email))
     if user_id is None:
         verify_dummy(body.password)  # burn timing, ignore result
+        await _login_failed(peer_ip, email)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials."
         )
     stored = await session.scalar(select(User.pw_hash).where(User.id == user_id))
     if stored is None or not verify_password(stored, body.password):
+        await _login_failed(peer_ip, email)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials."
         )
+    try:
+        await limiter.clear(peer_ip, email)  # success resets the window
+    except limiter.LimiterUnavailable as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Login temporarily unavailable.",
+        ) from exc
     uid = uuid.UUID(str(user_id))
     access, refresh, fam, jti = create_token_pair(uid, secret)
     session.add(

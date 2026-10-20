@@ -1,4 +1,4 @@
-# Technology — argon2-cffi 25.1.0 + PyJWT 2.15.1 (+ httpx 0.28.1 dev)
+# Technology — argon2-cffi 25.1.0 + PyJWT 2.15.1 + redis-py 5.2.1 (+ httpx 0.28.1 dev)
 
 - Versions (locked): argon2-cffi 25.1.0, PyJWT (`pyjwt`) 2.15.1; httpx 0.28.1 (dev/test).
 - Why: Argon2id (OWASP-recommended) for passwords; minimal proven JWT for
@@ -23,9 +23,17 @@
 - `POST /api/v1/auth/logout` — revokes the refresh family (`reason=logout`),
   clears the cookie, `204`; junk/expired cookie still clears (idempotent).
 - Users are seeded by CLI only — no open registration (Q-M3-1=A).
+- Login rate limiting (0019, Q-002=B): Redis fixed window, 5 failures /
+  15 min keyed per-IP (socket peer, XFF untrusted) and per-email;
+  over-limit → `429` + `Retry-After` + audit `auth_rate_limited`;
+  success clears; Redis outage → `503` (fail-closed). See
+  `docs/technology/redis.md`.
 - Tests: `backend/tests/test_auth_api.py` (live PG18 in CI; rotation,
-  reuse-burn, logout revocation, enumeration-shape 401s).
+  reuse-burn, logout revocation, enumeration-shape 401s) and
+  `backend/tests/test_ratelimit_api.py` (live Redis; window trip, key
+  separation, success reset, fail-closed). Both drive the app via
+  `httpx.ASGITransport`.
 
-- Known gap (parked for M4+): no per-IP login rate limiting yet — tracked
-  in `docs/brain/OPEN-QUESTIONS.md` for an owner call before M4.
+- Known gap resolved (0019): per-IP login rate limiting shipped in M3 C2.5;
+  M4 packaging docs add the `After=redis` systemd note + proxy guidance.
 - Verified: 2026-10-16 (PyPI; lock resolved 2026-10-16); endpoints 2026-10-20.

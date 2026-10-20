@@ -18,6 +18,13 @@ needs_db = pytest.mark.skipif(
     reason="DATABASE_URL (postgresql+asyncpg://) not set — needs live PG18",
 )
 
+REDIS_TEST_URL = os.environ.get("REDIS_URL", "")
+
+needs_redis = pytest.mark.skipif(
+    not REDIS_TEST_URL.startswith("redis://"),
+    reason="REDIS_URL (redis://) not set — needs live Redis",
+)
+
 
 def _migrate_if_live() -> None:
     if not LIVE_DB_URL.startswith("postgresql+asyncpg://"):
@@ -38,8 +45,9 @@ _migrate_if_live()
 
 
 @pytest.fixture(autouse=True)
-def _fresh_app_engine() -> None:
-    """One event loop per test: drop the app engine so no pool future crosses loops."""
-    from app import db
+def _fresh_app_loops() -> None:
+    """One event loop per test: decouple cached app↔Redis clients from dead loops."""
+    from app import db, limiter
 
     db.reset_engine()
+    limiter.reset_client()
