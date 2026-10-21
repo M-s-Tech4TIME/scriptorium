@@ -140,8 +140,10 @@ async def get_tree(
         key = str(node.parent_id) if node.parent_id else "root"
         children_of.setdefault(key, []).append(bodies[node.id])
     for node in nodes:
-        key = str(node.parent_id) if node.parent_id else "root"
-        bodies[node.id]["children"] = children_of.get(key, [])
+        # a node's children are the bodies whose parent_id is its OWN id;
+        # keying by parent_id here handed roots a list containing themselves
+        # (circular) and gave leaves their siblings as "children"
+        bodies[node.id]["children"] = children_of.get(str(node.id), [])
     return {"grimoire_id": str(grimoire_id), "nodes": children_of.get("root", [])}
 
 
