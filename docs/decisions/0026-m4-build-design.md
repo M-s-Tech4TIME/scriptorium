@@ -168,6 +168,24 @@ Ruled A/A/A immediately before C2 implementation:
   (html/ + build.log), staging removed. On `failed`: log kept under
   `{SC_BUILD_ROOT}/{build_id}/build.log` (workspace retained; retention
   decisions are the serving phase's, P4).
+- **CI-discovered staging rulings (live rounds, 2026-10-21):**
+  (1) toctree references are **document-relative** in Sphinx — every
+  staged toctree entry therefore uses an absolute `</docname>`
+  reference. (2) toctree entries resolve against the target document's
+  **own section titles**: an explicit `Title <ref>` only restyles the
+  target's top title, which must exist — every referenced page carries
+  its node/book title as the first section (`_title_block`;
+  root `index.rst` is never a target and stays bare). (3) `.md` pages
+  use the **MyST fenced `{toctree}` directive** (the RST directive is
+  not parsed inside MyST); book masters + the site index stay RST.
+  (4) `0006.downgrade` drops library-era build rows before re-tightening
+  the legacy `grimoire_id NOT NULL` — the honest mirror: the legacy
+  model cannot represent athenaeum-keyed builds. (5) bodies that
+  actually reach staged builds are always exporter-clean: the save
+  path itself runs the exporter (line 170, documents.py), so
+  unconvertible TipTap cannot be persisted — a guaranteed-publishable
+  staging contract; the build-time `failed` path is for runtime-level
+  failures (Sphinx -W, all-empty sites, filesystem).
 - **Curated theme base:** queued for C3 but **not decided here**
   (Rule 4) — `alabaster` remains the placeholder; the owner question
   precedes any C4 packaging.

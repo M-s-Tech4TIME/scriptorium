@@ -91,10 +91,10 @@ def test_simple_site_layout_and_index() -> None:
         "letters/one.rst",
     }
     assert "project = 'Athanor'" in files["conf.py"]
-    assert "   Letters <letters/index>" in files["index.rst"]
+    assert "   Letters </letters/index>" in files["index.rst"]
     # the folio page carries its exported body
     assert "hello" in files["letters/one.rst"]
-    assert "   One <letters/one>" in files["letters/index.rst"]
+    assert "   One </letters/one>" in files["letters/index.rst"]
 
 
 def test_empty_book_skipped_with_note() -> None:
@@ -110,7 +110,7 @@ def test_empty_book_skipped_with_note() -> None:
     )
     assert not any(name.startswith("void/") for name in site.files)
     assert "<void/index>" not in site.files["index.rst"]
-    assert "Live <live/index>" in site.files["index.rst"]
+    assert "Live </live/index>" in site.files["index.rst"]
     assert "kept" in site.files["live/doc.rst"]
 
 
@@ -168,11 +168,11 @@ def test_unrestricted_nesting_parent_pages() -> None:
     files = site.files
     # container chapter page = toctree only (no body) with path quals
     assert "tree/spells/ambient.rst" in files
-    assert "   Leaf <tree/spells/ambient/leaf>" in files["tree/spells/ambient.rst"]
+    assert "   Leaf </tree/spells/ambient/leaf>" in files["tree/spells/ambient.rst"]
     # folio-with-children page: body + child toctree in ONE file
     branch_page = files["tree/spells/ambient/branch.rst"]
     assert "branch body" in branch_page
-    assert "   Inner <tree/spells/ambient/branch/inner>" in branch_page
+    assert "   Inner </tree/spells/ambient/branch/inner>" in branch_page
     assert "inner body" in files["tree/spells/ambient/branch/inner.rst"]
     # nothing published for contentless shells
     assert "tree/index.rst" in files
@@ -217,7 +217,7 @@ def test_title_sanitized_in_toctree() -> None:
         id="p", kind="folio", slug="p", title="A<B>C", tiptap=para_doc("x")
     )
     site = plan_site("T", [book("t", (poison,))])
-    assert "   A«B»C <t/p>" in site.files["t/index.rst"]
+    assert "   A«B»C </t/p>" in site.files["t/index.rst"]
     assert "<A<B>C" not in site.files["t/index.rst"]
 
 

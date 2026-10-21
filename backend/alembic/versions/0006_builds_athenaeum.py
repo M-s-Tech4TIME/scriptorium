@@ -74,6 +74,12 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    # Honest mirror (integrity discipline): the legacy model only had
+    # grimoire builds — library-era rows cannot be represented, so the
+    # downgrade drops them before re-tightening the legacy NOT NULL.
+    # (Found by C3 live rounds: athenaeum-keyed test rows previously
+    # failed this ALTER at downgrade time.)
+    op.execute("DELETE FROM builds WHERE athenaeum_id IS NOT NULL")
     op.drop_constraint("ck_builds_site", "builds", type_="check")
     op.alter_column(
         "builds",

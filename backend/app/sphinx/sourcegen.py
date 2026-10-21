@@ -150,10 +150,20 @@ def _page_body(node: SnapshotNode, book: StagedBook) -> str | None:
         ) from exc
 
 
-def _toctree(entries: Sequence[tuple[str, str]]) -> str:
+def _toctree(entries: Sequence[tuple[str, str]], source_format: str = "rst") -> str:
+    if source_format == "myst":
+        # the RST directive is not parsed inside .md pages — MyST uses
+        # a fenced nested directive (CI finding).
+        lines = ["```{toctree}", "   :maxdepth: 2", ""]
+        for title, docname in entries:
+            lines.append(f"{_safe_title(title)} </{docname}>")
+        return "\n".join([*lines, "```", ""])
     lines = [".. toctree::", "   :maxdepth: 2", ""]
     for title, docname in entries:
-        lines.append(f"   {_safe_title(title)} <{docname}>")
+        # Absolute (`/prefix`) docnames: toctree references are
+        # document-relative without the leading slash, so a nested page
+        # entry would resolve against its own directory (CI finding).
+        lines.append(f"   {_safe_title(title)} </{docname}>")
     return "\n".join(lines) + "\n"
 
 
@@ -183,6 +193,22 @@ def _join_page(parts: Sequence[str]) -> str:
     return "\n\n".join(part.rstrip("\n") for part in parts) + "\n"
 
 
+def _title_block(title: str, source_format: str) -> str:
+    """Top section title for a staged page.
+
+    Sphinx resolves toctree entries against the TARGET document's own
+    section titles — an explicit `Title <ref>` only restyles the target's
+    top title, which must exist (CI finding: a page of bare paragraph
+    text has no titles and the entry is dropped, failing `-W`). Every
+    referenced page therefore carries its node/book title as the first
+    section (deterministic, disclosed micro-default). The site root
+    index (master_doc) is never a toctree target and stays bare.
+    """
+    if source_format == "myst":
+        return f"# {title}\n"
+    return f"{title}\n{'=' * len(title)}\n"
+
+
 def _emit_page(
     book: StagedBook,
     node: SnapshotNode,
@@ -197,12 +223,12 @@ def _emit_page(
             child_docname = _emit_page(book, child, parents + (node.slug,), files)
             child_entries.append((child.title, child_docname))
 
-    parts: list[str] = []
+    parts: list[str] = [_title_block(node.title, book.source_format)]
     body = _page_body(node, book)
     if body is not None:
         parts.append(body)
     if child_entries:
-        parts.append(_toctree(child_entries))
+        parts.append(_toctree(child_entries, book.source_format))
     if not parts:  # _publishable guard makes this unreachable
         raise StagingError(f"grimoire '{book.slug}': '{node.slug}' published empty")
 
@@ -226,7 +252,11 @@ def _emit_book(
         )
         return None
     master = f"{book.slug}/index"
-    files[f"{master}.rst"] = _toctree(entries)
+    # book master is a toctree TARGET (the site index references it) →
+    # carries the book title as its top section (see _title_block).
+    files[f"{master}.rst"] = _join_page(
+        [_title_block(book.title, "rst"), _toctree(entries)]
+    )
     return (book.title, master)
 
 

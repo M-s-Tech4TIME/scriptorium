@@ -18,7 +18,13 @@
   output). **Interim theme = `alabaster` placeholder; the curated default
   theme is an owner-question before C4 (0026 mandate 2).** Edge rulings
   E1–E3: empty Athenaeum → 422; empty book → skip + log note; one build
-  per Athenaeum at a time (409, enforced in C3).
+  per Athenaeum at a time (409, enforced in C3). **C3 round-trip
+  refinements:** every staged toctree entry is an absolute `</docname>`;
+  every referenced page carries its node/book title as a generated top
+  section (toctree titles come from the target's own titles); `.md`
+  pages emit the MyST fenced `{toctree}` (masters stay RST); the save
+  path itself exports sources, so staged builds are exporter-clean by
+  construction.
 - **Runner (M4-C3, 0026 P3):** `app/sphinx/runner.py` materializes the
   plan into `/var/lib/scriptorium/builds/{build_id}/` (FHS default;
   `SC_BUILD_ROOT` dev override) and runs `python -m sphinx -W -b html .

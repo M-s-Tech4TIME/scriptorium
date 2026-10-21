@@ -36,6 +36,28 @@ The production half of "numbered builds" (0026 P1/P2/P3):
   serving-phase decision (0026 P4) — unregistered DELETE gives the
   framework 405.
 
+## CI round-trip findings (fixed before green)
+
+The first CI live run rooted out four honest gaps (all fixed in-tranche):
+
+- **Toctree document-relative resolution:** staged entries now use
+  absolute `</docname>` refs (nested pages resolved against their own
+  directory otherwise — `toc.not_readable`).
+- **No-title targets:** Sphinx builds toctree entries from the target's
+  own section titles; a page of bare paragraph text has none
+  (`toc.no_title` drops the entry). Every referenced page now carries
+  its node/book title as a generated top section (deterministic;
+  disclosed above in 0026 §CI-discovered staging rulings).
+- **MyST directives:** `.md` pages emit the fenced `{toctree}` form.
+- **0006 downgrade vs library-era rows:** athenaeum-keyed builds
+  cannot survive the legacy `grimoire_id NOT NULL` — the downgrade now
+  drops them first (honest mirror).
+
+Also re-anchored `test_failed_build_records_log` from a heading-skip
+corpus (unsaveable through the real save path: documents.py runs the
+exporter on save — ConversionError → 500) to the ruled run-time failure
+(athenaeum with grimoires but all books empty → `failed` + crash log).
+
 ## Micro-defaults (disclosed, owner-vetoable)
 
 - `SC_BUILD_PYTHON` falls back to `sys.executable` before packaging;
@@ -55,7 +77,7 @@ The production half of "numbered builds" (0026 P1/P2/P3):
 - `tests/test_build_api.py` (live, 3 cases): E1 422, owner-only trigger
   404, numbered builds 1→2 with artifact inspection on disk, E3 409
   (external queued row), audit rows, member-visible GETs + stranger 404
-  + cross-build 404, failed-build log (heading-skip fail-loud).
+  + cross-build 404, failed run (all-empty books) with crash log.
 - `tests/test_worker_units.py` (offline, 7 cases): celery broker
   wiring + fail-loud, FHS env defaults, env-int fail-loud, dispatch
   whitelist, router registration (OpenAPI map), child-env whitelist

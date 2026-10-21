@@ -292,32 +292,24 @@ def test_failed_build_records_log(tmp_path: Path) -> None:
             os.environ[key] = value
         async with _client() as client:
             aid = await _mk_user_lib(client, me)
-            head_skip = {
-                "type": "doc",
-                "content": [
-                    {
-                        "type": "heading",
-                        "attrs": {"level": 1},
-                        "content": [{"type": "text", "text": "A"}],
-                    },
-                    {
-                        "type": "heading",
-                        "attrs": {"level": 3},
-                        "content": [{"type": "text", "text": "B"}],
-                    },
-                ],
-            }
-            gid, _ = await _mk_folio_with_doc(client, me, aid, "brok", head_skip)
-            del gid
             made = await client.post(
-                f"/api/v1/athenaeums/{aid}/builds", json={}, headers=_headers(me)
+                "/api/v1/grimoires",
+                json={"athenaeum_id": aid, "slug": "void", "title": "Void"},
+                headers=_headers(me),
             )
             assert made.status_code == 201
-            body = made.json()
-            assert body["status"] == "failed"  # fail loud under -W (0017 matrix)
+            # grimoires > 0 → the E1 pre-check passes; a library whose
+            # books are ALL empty is E2 territory → run-time failure
+            # (0026 §C3 mechanics), not a 422.
+            result = await client.post(
+                f"/api/v1/athenaeums/{aid}/builds", json={}, headers=_headers(me)
+            )
+            assert result.status_code == 201
+            body = result.json()
+            assert body["status"] == "failed"  # fail loud: nothing publishable
             assert body["artifact_path"] is None
-            if body["log_path"]:
-                assert Path(str(body["log_path"])).is_file()
+            assert body["log_path"] is not None
+            assert Path(str(body["log_path"])).is_file()  # crash log retained
         await app_teardown()
 
     _run(run())
