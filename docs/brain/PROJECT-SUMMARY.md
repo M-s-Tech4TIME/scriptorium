@@ -21,8 +21,11 @@ Last updated: 2026-10-21 / Ref: M4-C2 landed (3a15b52)
   numbered builds + `app/sphinx/sourcegen.py` deterministic staging +
   sandbox runner/Celery/`builds` endpoints (`c6c407d`+`fadef93`+
   `1e1637e` CI ×3); migration head `0006buildsite`;
-  suite baseline `66 passed, 36 skipped`. **C4 packaging next — theme
-  base owner question first.** Owner ruled the artifact to be a portable static
+  suite baseline `66 passed, 36 skipped`. **0027 recorded: the theme is
+  Scriptorium's own, from scratch (no builtin/third-party inheritance;
+  engine fully inherited incl. vendored engine JS)** — C3.5
+  implementation awaits the owner's design-consult tokens; then C4
+  packaging. Owner ruled the artifact to be a portable static
   website + design mandates (security parity; structure locked,
   skin open). Terminology: "grimoire" everywhere (0018). Auth
   surface = login/refresh/logout only. Live API tests drive the app

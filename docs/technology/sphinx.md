@@ -15,8 +15,22 @@
   `myst`; master docs are always RST toctree pages). Build sources are
   deterministic (`plan_site` → identical bytes for identical input) and
   fail loud (`StagingError` → build failed, never corrected-guess
-  output). **Interim theme = `alabaster` placeholder; the curated default
-  theme is an owner-question before C4 (0026 mandate 2).** Edge rulings
+  output). **The theme is Scriptorium's own, named `scriptorium` —
+  decision 0027:** built from the ground up (no Sphinx builtin /
+  third-party template inheritance, `theme.conf` has no parent;
+  furo/rtd/alabaster-as-final rejected), while the Sphinx **engine** is
+  fully inherited/utilized — builder, environment, toctree/prev-next/
+  genindex, `searchindex.js` client search, Pygments. The engine's
+  client JS (`searchtools.js`, `doctools.js`, `sphinx_highlight.js`,
+  `language_data.js`) is **vendored at build time** from the installed
+  pinned Sphinx into each workspace (never committed, never fetched);
+  the theme's search DOM ids are pinned to what the vendored
+  `searchtools.js` expects and are bumped together with the engine.
+  Implementation template surface: `layout.html`, `page.html`,
+  `search.html`, `genindex.html` + one stylesheet
+  (`backend/app/sphinx/theme/scriptorium/`); brand injection /
+  custom-CSS hooks / dark-mode policy are serving-phase (0026 mandate
+  2). Edge rulings
   E1–E3: empty Athenaeum → 422; empty book → skip + log note; one build
   per Athenaeum at a time (409, enforced in C3). **C3 round-trip
   refinements:** every staged toctree entry is an absolute `</docname>`;

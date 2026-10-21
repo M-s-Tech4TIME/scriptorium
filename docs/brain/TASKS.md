@@ -1,23 +1,36 @@
 # TASKS
 
-Last updated: 2026-10-21 / M4-C3 LANDED (1e1637e, CI ×3)
+Last updated: 2026-10-21 / 0027 recorded (theme ruling) — C3.5 awaits design tokens
 
 ## In progress (max 1–2)
-- Owner question: curated default theme base (0026 mandate 2) — ask
-  before C4 packaging.
+- M4-C3.5: theme implementation (mechanics locked in 0027) — **waiting
+  on the owner's external design-consult tokens**; then theme package +
+  THEME_BASE flip + runner vendoring + offline runner test.
 - M4-C4: packaging (build venv, worker After=redis, config keys) +
   0017 docutils-0.23 probe mechanics + M4-complete report.
 
 ## Todo (M4 next — C4 + phases)
+- [ ] M4-C3.5: `backend/app/sphinx/theme/scriptorium/` (theme.conf no
+      parent; layout/page/search/genindex; scriptorium.css),
+      `THEME_BASE="scriptorium"` + `html_theme_path`, runner theme copy
+      + engine-JS vendoring (build-time only), regressions: offline
+      runner test + sourcegen asserts; search DOM ids locked from
+      vendored `searchtools.js`.
 - [ ] M4-C4 packaging: isolated build venv + `SC_BUILD_PYTHON`,
       unit `scriptorium-worker` `After=redis`, `config.env` build keys
       (`CELERY_BROKER_URL`, `SC_*`); 0017 docutils-0.23 probe
       mechanics; M4-complete report + brain.
 - [ ] Serving phase (resolve Q-SERVE-A…E first) → dedicated phase
+      (brand injection + custom-CSS hooks land here, 0027)
 - [ ] URL-durability phase after serving
 - [ ] Distribution phase (Q-DIST-A…D) + React shell format — concepts
       ratified in 0026, presented before implementation
 
+- [x] Owner ruled the theme 2026-10-21 (decision 0027): Scriptorium's
+      own from-scratch theme, full engine inheritance, engine-JS
+      vendoring + pinned DOM contracts — record tranche committed
+      (OPEN-QUESTIONS Q-C3.5-A resolved; brief delivered for the
+      external design consult)
 - [x] Owner ruled M4 C2/C3 edge cases A/A/A 2026-10-21 (E1 422-empty,
       E2 skip+note, E3 409-serialization) — recorded 0026 §Edge rulings
 - [x] M4-C2: deterministic sourcegen + 14 offline tests (3a15b52, ×3)

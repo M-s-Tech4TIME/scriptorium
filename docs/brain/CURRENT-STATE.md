@@ -1,6 +1,6 @@
 # CURRENT-STATE
 
-Last updated: 2026-10-21 / Ref: M4-C3 LANDED (1e1637e, CI ×3)
+Last updated: 2026-10-21 / Ref: 0027 recorded — M4-C3.5 awaiting design tokens
 
 - **Phase:** **M4-C3 landed.** M4-C1 (`2aed3ef`): decision 0026
   (per-Athenaeum site P1, manual trigger P2, subprocess sandbox P3,
@@ -33,11 +33,20 @@ Last updated: 2026-10-21 / Ref: M4-C3 LANDED (1e1637e, CI ×3)
   +10: 7 offline + 3 live); live cases exercise the real sandbox.
   M3 was C1–C6 all green ×3 (typical refs: C6 `5b5dee1`, close-out
   `5f97463`).
-  **Next: M4-C4** (build venv + packaging config, worker `After=redis`,
-  0017 docutils-0.23 probe mechanics, M4-complete report) — **after the
-  owner answers the curated-theme-base question** (parked; mandate 2)
-  → serving phase (Q-SERVE-A…E) → URL durability → Distribution
-  (Q-DIST-A…D).
+  **Decision 0027 recorded (2026-10-21):** the theme is Scriptorium's
+  **own, from scratch** — no builtin/third-party template inheritance,
+  `theme.conf` no parent — while the Sphinx **engine** is fully
+  inherited/utilized incl. engine-JS vendoring
+  (`searchtools/doctools/sphinx_highlight/language_data`) at build time
+  and DOM contracts pinned to it. Third-party candidates
+  (furo/rtd/alabaster-as-final) presented and rejected. Theme
+  **implementation** (C3.5) awaits the owner's external design-consult
+  tokens; the consult brief (artifact structure + engineering floor +
+  token checklist) was delivered to the owner. **Next: M4-C3.5
+  implementation, then M4-C4** (build venv + packaging config, worker
+  `After=redis`, 0017 docutils-0.23 probe mechanics, M4-complete
+  report)  → serving phase (Q-SERVE-A…E) → URL durability →
+  Distribution (Q-DIST-A…D).
 - **Owner decisions:** 0018 (grimoire rename, per-user categories, auth
   semantics) → **amended by 0020 (2026-10-21):** native hierarchy — categories
   per-Athenaeum (Q-M3-9=A), `grimoires.athenaeum_id` NOT NULL (Q-M3-10=A),
@@ -45,11 +54,15 @@ Last updated: 2026-10-21 / Ref: M4-C3 LANDED (1e1637e, CI ×3)
   grimoire-level (Q-M3-12=A), nested sidebar endpoint (Q-M3-13=A).
   Micro-defaults: per-owner slug uniqueness, migration backfills "Default"
   per user, athenaeum slug immutable (mirrors 0018 grimoire slugs),
-  audit `athenaeum_*` + `grimoire_moved`.
+  audit `athenaeum_*` + `grimoire_moved`. **0027 (2026-10-21):** own
+  from-scratch theme + full engine inheritance
+  (education-before-ruling; plan ratified before implementation).
 - **Done (cumulative):** Q1–Q23 + Q-M2-1/2 + Q-M3-1…8 + Q-002=B(0019) +
-  Q-M3-9…13=A(0020) + Q-M3-16a–e=A(0025) + Q-M4-P1…P4 + E1–E3(0026);
+  Q-M3-9…13=A(0020) + Q-M3-16a–e=A(0025) + Q-M4-P1…P4 + E1–E3(0026) +
+  theme ruling(0027);
   Rules 1–7. M0 locks; M1 green (2539391); M2 A–C green; M3 C1–C6 green
-  ×3; M4 C1 `2aed3ef` + C2 `3a15b52` + C3 `1e1637e` green ×3.
+  ×3; M4 C1 `2aed3ef` + C2 `3a15b52` + C3 `1e1637e` green ×3; 0027
+  record tranche staged.
 - **Last commit:** `1e1637e` (m4-c3 roundtrip fixes, green ×3) atop
   `fadef93` (suite secret fix) + `c6c407d` (m4-c3 feature tranche).
 - **Remote:** `git@github.com:M-s-Tech4TIME/scriptorium.git` (public).

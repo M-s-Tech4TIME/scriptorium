@@ -1,12 +1,13 @@
 # OPEN-QUESTIONS
 
-Last updated: 2026-10-21 / Ref: 0026 staged — serving/distribution questions parked
+Last updated: 2026-10-21 / Ref: 0027 recorded (theme ruling) — serving/distribution questions parked
 
 | ID | Question | Blocks | Asked |
 |---|---|---|---|
 | Q-001 | `.github/` at `scriptorium/.github/` invisible to Actions — CLOSED as moot: re-root (Q-002A) puts workflows at repo root again. No shim needed. | — | closed 2026-10-16 |
 | Q-002 | Login rate limiting: RESOLVED — owner approved Option B 2026-10-20 (in-app Redis fixed window, fail-closed; decision 0019). Implement before M4. | — | closed 2026-10-20 |
 | Q-M3-16a–e | Duplication sub-decisions: RESOLVED by owner 2026-10-21 — caller-supplied slug w/ optional auto-suffix; owner-only roster; head-as-v1 (no history clone); any owned target library; copy-of-copy allowed. Decision 0025. | — | closed 2026-10-21 |
+| Q-C3.5-A | **Curated default theme base — RESOLVED by owner ruling 2026-10-21 (decision 0027):** the theme is Scriptorium's own, built from the ground up (no builtin/third-party inheritance); the Sphinx engine is fully inherited/utilized incl. vendored engine JS. UI specifics (palette/type/layout) pending the owner's external design consult — implementation waits for those tokens; the consult brief was delivered to the owner. C4 packaging is unaffected (theme lands in C3.5 before it). | — | closed 2026-10-21 |
 | Q-SERVE-A | What gets served — latest OK build only, or owner-selected published builds (stable/latest pointers)? | serving phase | 2026-10-21 |
 | Q-SERVE-B | Visibility model — public vs authenticated (private) docs; per-Athenaeum toggle? | serving phase | 2026-10-21 |
 | Q-SERVE-C | Serving mechanics — FastAPI static mount vs nginx alias; reading straight from the artifacts dir? | serving phase | 2026-10-21 |
@@ -27,10 +28,11 @@ in 0026 §Edge rulings): empty Athenaeum → 422 refusal; empty grimoire →
 skipped + log note; one build at a time per Athenaeum, trigger while
 queued/running → 409.
 
-**Curated default theme base — OPEN (owner question, blocked).**
-The C2/C3 conf.py placeholder is `alabaster` (builtin); the curated
-default theme (0026 mandate 2) still needs the owner's base choice
-before C4 packaging presents the theme story. Runner ethics and all
-C3 mechanics are unaffected; parked at 0026 §C3 mechanics.
+**Curated default theme base — RESOLVED (owner 2026-10-21, decision
+0027):** Scriptorium's own from-scratch theme with full engine
+inheritance (incl. vendored engine JS, pinned DOM contracts).
+Implementation (C3.5) awaits the owner's external design-consult
+tokens (palette/type/layout); C4 packaging follows. See 0027.
 
-No other open questions.
+**Serving/distribution questions Q-SERVE-A…E, Q-DIST-A…D remain OPEN —
+parked in their table rows above; none block M4.**
