@@ -65,3 +65,11 @@ ruff check/format · mypy · `pytest -W error` offline ·
 chapter toctrees, one `conf.py` per Athenaeum; pure functions, offline
 unit tests; edge cases presented first per Rule 4) → **C3 runner +
 Celery + endpoints** → **C4 packaging/probes + M4-complete report**.
+
+## Edge rulings (owner, same day)
+
+The three C2/C3 edge cases were presented with options and ruled
+**A/A/A**, recorded in 0026 §Edge rulings: **E1** empty Athenaeum → 422
+refusal (no blank artifact folders); **E2** empty grimoire → skipped
+from the site + build-log note (keeps `-W` warning-free); **E3** one
+build at a time per Athenaeum (trigger while queued/running → 409).

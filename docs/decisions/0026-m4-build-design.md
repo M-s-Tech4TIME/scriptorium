@@ -94,6 +94,16 @@ and adds `ck_builds_site` (exactly one of the two keys must be set) and
 data is untouched; they share one derived legacy number sequence under
 the NULL athenaeum partition). Migrations 0001–0005 are immutable.
 
+## Edge rulings (owner, 2026-10-21)
+
+Ruled A/A/A immediately before C2 implementation:
+
+| Edge | Ruling |
+|---|---|
+| E1 | **Empty Athenaeum** (no grimoires) → build **refused `422`** — "nothing to build"; no blank artifact folders. |
+| E2 | **Empty grimoire** (book with zero folios) inside a build → **skipped from the site** + a note in the build log (keeps the `-W` build warning-free; the owner sees it in the log). |
+| E3 | **One build at a time per Athenaeum** — triggering while a build is queued/running → **`409`**. Matches the manual-trigger philosophy; makes numbering trivially collision-free. |
+
 ## Micro-defaults (owner-vetoable, disclosed)
 
 - Numbering starts at 1 per Athenaeum; legacy grimoire-era rows are
@@ -103,6 +113,13 @@ the NULL athenaeum partition). Migrations 0001–0005 are immutable.
   new-style rows.
 - Curated default-theme base picked in M4-C3 (visible to the owner as a
   preview before it ships).
-- Edge cases in staging (empty Athenaeum → refuse build? empty grimoire →
-  skip or placeholder? per-Athenaeum build serialization?) are **not**
-  decided here — they will be presented with options in M4-C2/C3.
+- Staging materializes **always from canonical TipTap** (per-build export
+  via the M2 exporters; the documents `source_text` cache is not
+  trusted as a build input — no stale-source artifacts).
+- Interim Sphinx theme in C2's generated `conf.py` is a placeholder
+  base (`alabaster`); **curated default theme lands in C3** per the
+  design mandate above.
+- Edge cases in staging are ruled (owner 2026-10-21, A/A/A) — see
+  **Edge rulings** above: empty Athenaeum → `422`; empty grimoire →
+  skipped + log note; one build at a time per Athenaeum (trigger while
+  queued/running → `409`).

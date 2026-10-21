@@ -22,9 +22,9 @@ owner's rulings (placement + concepts ratified 2026-10-21, see decision
 0026 phase-boundary section) — the owner may edit wording before any
 resolution. None of these blocks M4 or later work until their phase.
 
-M4-C2/C3 edge-case presentations queued (not yet asked):
-empty-Athenaeum build refusal, empty-grimoire staging, per-Athenaeum
-build-queue serialization. These are presented with options at their
-tranche, per Rule 4.
+M4-C2/C3 edge cases — RESOLVED by owner 2026-10-21 (**A/A/A**, recorded
+in 0026 §Edge rulings): empty Athenaeum → 422 refusal; empty grimoire →
+skipped + log note; one build at a time per Athenaeum, trigger while
+queued/running → 409.
 
 No other open questions.

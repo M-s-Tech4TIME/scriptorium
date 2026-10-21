@@ -16,7 +16,8 @@ Last updated: 2026-10-21 / Ref: M4-C1 staged (0026)
   `5f97463`). Migrate head `0006buildsite`; offline baseline
   `45 passed, 33 skipped`; 12 live API test cases green in CI.
   **Next: M4-C2 source generation** (TipTap → rst/md staging + conf.py,
-  offline unit tests; edge cases presented first) → C3 runner/Celery/
+  offline unit tests; edge cases RULED E1–E3 A/A/A → recorded in 0026)
+  → C3 runner/Celery/
   endpoints → C4 packaging/probes → serving phase (Q-SERVE-A…E) →
   URL durability → Distribution (Q-DIST-A…D).
 - **Owner decisions:** 0018 (grimoire rename, per-user categories, auth

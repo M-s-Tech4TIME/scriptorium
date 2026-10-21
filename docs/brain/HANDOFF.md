@@ -14,9 +14,11 @@ sequence). Q-SERVE-A…E + Q-DIST-A…D parked in OPEN-QUESTIONS.
 1. **M4-C2 source generation** (`app/sphinx` package): TipTap →
    deterministic per-folio `.rst`/`.md` via the M2 exporters, chapter
    toctree assembly, one `conf.py` per Athenaeum (MyST enabled when any
-   book is myst); pure functions → offline unit tests. **Present edge
-   cases first (Rule 4):** empty Athenaeum, empty grimoire, per-library
-   build serialization.
+   book is myst); pure functions → offline unit tests. Edge cases
+   **RULED** (E1–E3, owner A/A/A 2026-10-21, recorded 0026 §Edge
+   rulings): empty Athenaeum → 422; empty book → skip + note; one
+   build per Athenaeum at a time (409 while queued/running — C3
+   enforces).
 2. **M4-C3 runner + Celery task** (`app/worker`): stage → limited
    subprocess (`sphinx -W`, RLIMIT, no network, minimal env) → artifact
    `/var/lib/scriptorium/artifacts/{athenaeum}/{build_number}/`; status

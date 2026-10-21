@@ -3,7 +3,8 @@
 Last updated: 2026-10-21 / M4-C1 staged (0026)
 
 ## In progress (max 1–2)
-- M4-C2: source generation (present edge cases first, then implement)
+- M4-C2: source generation (edge cases RULED E1–E3 A/A/A, 0026; next:
+  implement sourcegen + offline tests)
 
 ## Todo (M4 next — C2/C3/C4)
 - [ ] M4-C2 sourcegen: TipTap → per-folio rst/md (M2 exporters), chapter
