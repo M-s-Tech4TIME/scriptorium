@@ -30,7 +30,7 @@ from app.main import app
 from app.models import AuditLog, Build, User
 from tests.conftest import LIVE_DB_URL, app_teardown, needs_db
 
-_SECRET = "m4-test-only-secret-not-a-real-credential"
+_SECRET = "m3-test-only-secret-not-a-real-credential"  # matches test_auth_api.py's SECRET_KEY default
 
 _DOC = {
     "type": "doc",
