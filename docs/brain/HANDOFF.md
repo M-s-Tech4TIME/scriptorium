@@ -1,31 +1,26 @@
 # HANDOFF
 
-Last updated: 2026-10-21 / M4-C1 staged (decision 0026 + migration 0006)
+Last updated: 2026-10-21 / M4-C2 LANDED (3a15b52, CI ×3) — brain synced
 
 ## Was doing
-M4-C1: decision 0026 (per-Athenaeum site builds — P1–P4, staging/
-artifact reconciliation, design mandates; all owner-ruled) +
-migration 0006 (build_number per-Athenaeum, athenaeum_id FK,
-grimoire_id relaxed, ck_builds_site, uq_builds_athenaeum_number;
-legacy rows keep the grimoire key and share one derived legacy
-sequence). Q-SERVE-A…E + Q-DIST-A…D parked in OPEN-QUESTIONS.
+M4-C2: deterministic sourcegen (`app/sphinx/sourcegen.py`) — LANDED
+green ×3 on `3a15b52` (record `7d14f3a` first: edge rulings E1–E3
+owner A/A/A). 14 offline tests; suite 59 passed, 33 skipped.
+Micro-defaults disclosed: docname `index-p` mangle, toctree-title
+`«»` sanitize, `alabaster` interim theme (curated theme = C3).
 
 ## Next steps (in order)
-1. **M4-C2 source generation** (`app/sphinx` package): TipTap →
-   deterministic per-folio `.rst`/`.md` via the M2 exporters, chapter
-   toctree assembly, one `conf.py` per Athenaeum (MyST enabled when any
-   book is myst); pure functions → offline unit tests. Edge cases
-   **RULED** (E1–E3, owner A/A/A 2026-10-21, recorded 0026 §Edge
-   rulings): empty Athenaeum → 422; empty book → skip + note; one
-   build per Athenaeum at a time (409 while queued/running — C3
-   enforces).
-2. **M4-C3 runner + Celery task** (`app/worker`): stage → limited
-   subprocess (`sphinx -W`, RLIMIT, no network, minimal env) → artifact
+1. **M4-C3 runner + Celery task** (`app/worker`): load snapshots (same
+   ordering as the nested sidebar), call `plan_site`, materialize into
+   the per-build workspace, run `sphinx -W` inside the limited
+   subprocess (`RLIMIT` CPU/time+memory+processes, no network, minimal
+   env) → artifact
    `/var/lib/scriptorium/artifacts/{athenaeum}/{build_number}/`; status
    queued→running→ok|failed; endpoints `POST /api/v1/athenaeums/{id}/
-   builds` (owner-only), GET list/one (members); Sphinx 9.1.0 into the
-   locked stack + `docs/technology/`; live tests.
-3. **M4-C4** — packaging worker `After=redis` note; the 0017
+   builds` (owner-only; E3: while queued/running → `409`), GET list/one
+   (members); numbering `max(build_number)+1`; Sphinx 9.1.0 into the
+   locked stack + `docs/technology/`; live tests (hardened `_run`).
+2. **M4-C4** — packaging worker `After=redis` note; the 0017
    docutils-0.23 probe mechanics; M4-complete report + brain sync.
 4. Serving phase — resolve Q-SERVE-A…E first, then implement.
 5. URL-durability phase after serving; Distribution-phase concepts

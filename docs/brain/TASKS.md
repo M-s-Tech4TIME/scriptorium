@@ -3,12 +3,12 @@
 Last updated: 2026-10-21 / M4-C1 staged (0026)
 
 ## In progress (max 1–2)
-- M4-C2: source generation (edge cases RULED E1–E3 A/A/A, 0026; next:
-  implement sourcegen + offline tests)
+- M4-C3: runner + Celery + build endpoints (E3 409; owner POST, member GET)
 
-## Todo (M4 next — C2/C3/C4)
-- [ ] M4-C2 sourcegen: TipTap → per-folio rst/md (M2 exporters), chapter
-      toctrees, one conf.py per Athenaeum; offline unit tests
+## Todo (M4 next — C3/C4)
+- [x] M4-C2 sourcegen: TipTap → per-folio rst/md (M2 exporters), chapter
+      toctrees, one conf.py per Athenaeum; offline unit tests — LANDED
+      3a15b52 (59 passed, 33 skipped)
 - [ ] M4-C3 runner + Celery: sandbox subprocess (`-W`), artifact dir,
       status machine, POST/GET build endpoints (owner/member), Sphinx
       9.1.0 into locked stack + technology docs; live tests
@@ -18,6 +18,10 @@ Last updated: 2026-10-21 / M4-C1 staged (0026)
 - [ ] URL-durability phase after serving
 - [ ] Distribution phase (Q-DIST-A…D) + React shell format — concepts
       ratified in 0026, presented before implementation
+
+- [x] Owner ruled M4 C2/C3 edge cases A/A/A 2026-10-21 (E1 422-empty,
+      E2 skip+note, E3 409-serialization) — recorded 0026 §Edge rulings
+- [x] M4-C2: deterministic sourcegen + 14 offline tests (3a15b52, ×3)
 
 ## Done
 - [x] M4-C1: decision 0026 + migration 0006 (build_number per-athenaeum,
