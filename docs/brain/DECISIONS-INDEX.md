@@ -35,4 +35,4 @@ Last updated: 2026-10-21 / Ref: M4-C1 (0026)
 Full records: `docs/decisions/0001-*.md` … `0027-*.md`. 
 Pending: none.
 
-Last updated: 2026-10-21 / Ref: 0027 recorded
+Last updated: 2026-10-21 / Ref: 0027 recorded, green ×3 (`52a2124`)

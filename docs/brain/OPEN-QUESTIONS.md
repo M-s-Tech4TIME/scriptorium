@@ -1,6 +1,6 @@
 # OPEN-QUESTIONS
 
-Last updated: 2026-10-21 / Ref: 0027 recorded (theme ruling) — serving/distribution questions parked
+Last updated: 2026-10-21 / Ref: 0027 recorded, green ×3 (`52a2124`) — serving/distribution questions parked
 
 | ID | Question | Blocks | Asked |
 |---|---|---|---|

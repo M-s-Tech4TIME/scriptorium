@@ -1,6 +1,6 @@
 # CURRENT-STATE
 
-Last updated: 2026-10-21 / Ref: 0027 recorded — M4-C3.5 awaiting design tokens
+Last updated: 2026-10-21 / Ref: 0027 recorded, green ×3 (`52a2124`) — M4-C3.5 awaiting design tokens
 
 - **Phase:** **M4-C3 landed.** M4-C1 (`2aed3ef`): decision 0026
   (per-Athenaeum site P1, manual trigger P2, subprocess sandbox P3,
@@ -63,8 +63,8 @@ Last updated: 2026-10-21 / Ref: 0027 recorded — M4-C3.5 awaiting design tokens
   Rules 1–7. M0 locks; M1 green (2539391); M2 A–C green; M3 C1–C6 green
   ×3; M4 C1 `2aed3ef` + C2 `3a15b52` + C3 `1e1637e` green ×3; 0027
   record tranche staged.
-- **Last commit:** `1e1637e` (m4-c3 roundtrip fixes, green ×3) atop
-  `fadef93` (suite secret fix) + `c6c407d` (m4-c3 feature tranche).
+- **Last commit:** `52a2124` (0027 theme-ruling record, docs-only,
+  green ×3) atop `7e61646` (brain sync) + `1e1637e` (m4-c3 fixes).
 - **Remote:** `git@github.com:M-s-Tech4TIME/scriptorium.git` (public).
   `dev` carries M3 complete + M4 in progress; `main` stays at release
   point (ff-only).

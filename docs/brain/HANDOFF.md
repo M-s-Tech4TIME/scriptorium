@@ -1,6 +1,6 @@
 # HANDOFF
 
-Last updated: 2026-10-21 / Ref: 0027 recorded (theme ruling) — awaiting design tokens
+Last updated: 2026-10-21 / Ref: 0027 recorded, green ×3 (`52a2124`) — awaiting design tokens
 
 ## Was doing
 M4-C3.5 record tranche: **decision 0027** committed — the owner ruled
