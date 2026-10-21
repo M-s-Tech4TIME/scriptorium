@@ -234,6 +234,10 @@ class Document(Base):
     """Editor content for a page-node. TipTap JSON is canonical (decision 0010)."""
 
     __tablename__ = "documents"
+    # fetch server-generated values (INSERT default + onupdate timestamp)
+    # during flush via RETURNING — otherwise the onupdate expiry makes a
+    # post-commit read attempt lazy sync IO (MissingGreenlet in async).
+    __mapper_args__ = {"eager_defaults": True}
 
     id: Mapped[uuid.UUID] = _uuid_pk()
     node_id: Mapped[uuid.UUID] = mapped_column(
