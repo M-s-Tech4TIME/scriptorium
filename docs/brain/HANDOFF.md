@@ -1,26 +1,36 @@
 # HANDOFF
 
-Last updated: 2026-10-21 / M3 COMPLETE — C6 green (f3e7bc1) — brain synced
+Last updated: 2026-10-21 / M4-C1 staged (decision 0026 + migration 0006)
 
 ## Was doing
-M3 C6: decision 0025 (grimoire duplication) — LANDED green ×3 on
-`f3e7bc1` after two live-path fix-ups (missing owner Membership on the
-copy; the copy's own v1 history trace — ruling-c clarified in 0025).
-Q-M3-16a–e were ruled by the owner then implemented same-day.
+M4-C1: decision 0026 (per-Athenaeum site builds — P1–P4, staging/
+artifact reconciliation, design mandates; all owner-ruled) +
+migration 0006 (build_number per-Athenaeum, athenaeum_id FK,
+grimoire_id relaxed, ck_builds_site, uq_builds_athenaeum_number;
+legacy rows keep the grimoire key and share one derived legacy
+sequence). Q-SERVE-A…E + Q-DIST-A…D parked in OPEN-QUESTIONS.
 
 ## Next steps (in order)
-1. **M3 is complete (C1–C6, all green ×3).** Deliver the M3-complete
-   report to the owner.
-2. M4 builds — gated Sphinx builds; docutils 0.23 gate per 0017;
-   packaging `After=redis` systemd note; sources jail keyed by grimoire
-   id (vetoable micro-default from the plan).
-3. Dedicated phase: serving as a website (decisions pending: build
-   granularity, visibility/publishing, serving mechanics, URL scheme).
-4. Dedicated phase after that: URL durability after renames
-   (aliases/redirects/immutable build identity).
+1. **M4-C2 source generation** (`app/sphinx` package): TipTap →
+   deterministic per-folio `.rst`/`.md` via the M2 exporters, chapter
+   toctree assembly, one `conf.py` per Athenaeum (MyST enabled when any
+   book is myst); pure functions → offline unit tests. **Present edge
+   cases first (Rule 4):** empty Athenaeum, empty grimoire, per-library
+   build serialization.
+2. **M4-C3 runner + Celery task** (`app/worker`): stage → limited
+   subprocess (`sphinx -W`, RLIMIT, no network, minimal env) → artifact
+   `/var/lib/scriptorium/artifacts/{athenaeum}/{build_number}/`; status
+   queued→running→ok|failed; endpoints `POST /api/v1/athenaeums/{id}/
+   builds` (owner-only), GET list/one (members); Sphinx 9.1.0 into the
+   locked stack + `docs/technology/`; live tests.
+3. **M4-C4** — packaging worker `After=redis` note; the 0017
+   docutils-0.23 probe mechanics; M4-complete report + brain sync.
+4. Serving phase — resolve Q-SERVE-A…E first, then implement.
+5. URL-durability phase after serving; Distribution-phase concepts
+   (Q-DIST-A…D) presented before their implementation.
 
 ## Gotchas (carried)
-- Migrate head `0005foliochapter`; verify migration SQL against older
+- Migrate head `0006buildsite`; verify migration SQL against older
   definitions before push (C1 lesson). `ck_nodes_kind` is dropped before
   the kind UPDATE runs (values outside the CHECK are otherwise illegal).
   Downgrade re-adds `user_id` as a trailing column — harmless, but
@@ -37,3 +47,8 @@ Q-M3-16a–e were ruled by the owner then implemented same-day.
 - Categories/grimoire category checks are athenaeum-scoped now: a category
   of another (even own) athenaeum → 404.
 - Keep per-step work small; write files one at a time (past derailments).
+- 0006: `ck_builds_site` (exactly one of grimoire_id / athenaeum_id);
+  `Build` has a two-era key pattern — new code writes Athenaeum-keyed
+  rows; `uq_builds_athenaeum_number` needs explicit max(build_number)+1
+  per Athenaeum at trigger time (C3 will need `SELECT … FOR UPDATE`-style
+  care, or serialize per library).

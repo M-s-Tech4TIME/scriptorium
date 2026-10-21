@@ -1,6 +1,6 @@
 # DECISIONS-INDEX
 
-Last updated: 2026-10-20 / Ref: be1a220 (M2 conversion green)
+Last updated: 2026-10-21 / Ref: M4-C1 (0026)
 
 | ID | One-line | Status | Date | Approver |
 |---|---|---|---|---|
@@ -29,8 +29,9 @@ Last updated: 2026-10-20 / Ref: be1a220 (M2 conversion green)
 | 0023 | Tree endpoints (D1=A delete-refusal, D2=A owner-only): chapters/folios, cycle guard, displacement reorder, nesting unrestricted (RTD) | accepted | 2026-10-21 | owner |
 | 0024 | Folio documents: expected_version→409, version+history append, server-derived source cache, import→422, editor/owner saves | accepted | 2026-10-21 | owner |
 | 0025 | Grimoire duplication (Q-M3-16a–e): caller-slug w/ auto-suffix, owner-only roster, head-as-v1, any owned target lib, copy-of-copy allowed | accepted | 2026-10-21 | owner |
+| 0026 | M4 build design (Q-M4-P1…P4): per-Athenaeum sites, manual trigger, subprocess sandbox, keep-all + numbered builds; artifact = portable static site; design mandates (security parity, skin-open) | accepted | 2026-10-21 | owner |
 
-Full records: `docs/decisions/0001-*.md` … `0025-*.md`. 
+Full records: `docs/decisions/0001-*.md` … `0026-*.md`. 
 Pending: none.
 
-Last updated: 2026-10-21 / Ref: C3.5 athenaeum layer
+Last updated: 2026-10-21 / Ref: M4-C1 (0026)

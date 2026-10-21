@@ -284,12 +284,25 @@ class DocumentHistory(Base):
 
 
 class Build(Base):
+    """One numbered production of documentation (0026).
+
+    Two key eras share this table: pre-M4 rows are grimoire-keyed
+    (grimoire_id set, athenaeum_id NULL); 0026 site-build rows are
+    athenaeum-keyed (athenaeum_id set, grimoire_id NULL) — exactly one
+    of the two keys is ever set (ck_builds_site). Numbering is
+    per-Athenaeum, monotonic (uq_builds_athenaeum_number).
+    """
+
     __tablename__ = "builds"
 
     id: Mapped[uuid.UUID] = _uuid_pk()
-    grimoire_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("grimoires.id", ondelete="CASCADE"), nullable=False, index=True
+    grimoire_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("grimoires.id", ondelete="CASCADE"), nullable=True, index=True
     )
+    athenaeum_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("athenaeums.id", ondelete="CASCADE"), nullable=True, index=True
+    )
+    build_number: Mapped[int] = mapped_column(Integer, nullable=False)
     status: Mapped[str] = mapped_column(
         String(16), nullable=False, server_default="queued"
     )
@@ -307,6 +320,13 @@ class Build(Base):
     __table_args__ = (
         CheckConstraint(
             "status IN ('queued', 'running', 'ok', 'failed')", name="ck_builds_status"
+        ),
+        CheckConstraint(
+            "((grimoire_id IS NULL) != (athenaeum_id IS NULL))",
+            name="ck_builds_site",
+        ),
+        UniqueConstraint(
+            "athenaeum_id", "build_number", name="uq_builds_athenaeum_number"
         ),
     )
 

@@ -1,24 +1,26 @@
 # TASKS
 
-Last updated: 2026-10-21 / M3 COMPLETE (all tranches green ×3)
+Last updated: 2026-10-21 / M4-C1 staged (0026)
 
 ## In progress (max 1–2)
-- (none — M3 closed; awaiting M4 start after owner's read of the report)
+- M4-C2: source generation (present edge cases first, then implement)
 
-## Todo (M4 next)
-- [ ] M4 builds: gated Sphinx builds; docutils 0.23 gate per 0017;
-      packaging `After=redis` systemd note; sources jail keyed by
-      grimoire id (vetoable micro-default)
-- [ ] Dedicated phase: serving as a website (granularity/visibility/
-      mechanics/URL-scheme decisions to present first)
-- [ ] Dedicated phase: URL durability after renames (aliases/redirects,
-      immutable build identity)
-- [ ] Runner/doc pipeline (M4): gated Sphinx builds; docutils 0.23 gate
-      recorded in 0017; packaging `After=redis` systemd note.
-- [ ] Later dedicated phases: serving-as-website; URL durability
-      (aliases/redirects + immutable build identity) after renames.
+## Todo (M4 next — C2/C3/C4)
+- [ ] M4-C2 sourcegen: TipTap → per-folio rst/md (M2 exporters), chapter
+      toctrees, one conf.py per Athenaeum; offline unit tests
+- [ ] M4-C3 runner + Celery: sandbox subprocess (`-W`), artifact dir,
+      status machine, POST/GET build endpoints (owner/member), Sphinx
+      9.1.0 into locked stack + technology docs; live tests
+- [ ] M4-C4: packaging `After=redis` note; 0017 docutils-0.23 probe
+      mechanics; M4-complete report + brain
+- [ ] Serving phase (resolve Q-SERVE-A…E first) → dedicated phase
+- [ ] URL-durability phase after serving
+- [ ] Distribution phase (Q-DIST-A…D) + React shell format — concepts
+      ratified in 0026, presented before implementation
 
 ## Done
+- [x] M4-C1: decision 0026 + migration 0006 (build_number per-athenaeum,
+      athenaeum FK, grimoire_key relaxed; legacy rows untouched) — staged
 - [x] M0 locks + technology/*.md (requirements.lock, package-lock.json)
 - [x] M1 migrations + RBAC + IDOR tests (2539391)
 - [x] M2: 0017 record (ba153e9), refresh store (d5fb5cc), conversion (be1a220)

@@ -1,18 +1,24 @@
 # CURRENT-STATE
 
-Last updated: 2026-10-21 / Ref: M3 COMPLETE — C1–C6 all green ×3
+Last updated: 2026-10-21 / Ref: M4-C1 staged (0026)
 
-- **Phase:** **M3 done.** Tranches: C1 0018 design/rename (`c26cd7e`),
-  C2 auth/sessions (`aee1872`), C2.5 login rate limiting 0019
-  (`a6c17bb`), C3 categories/grimoires/members (`d62784e`), C3.5
-  athenaeum layer 0020 (`4b57c82`+fixes), C3.6 renamable slugs 0021
-  (`9fe1280`), C3.7 folio/chapter 0022 (`ab688dc`), C4 tree endpoints
-  0023 (`3fbe4f8`+fix-ups), C5 folio documents 0024 (`5d8d08f`+fix-ups),
-  C6 duplication 0025 (`5b5dee1`+fix-ups). Migrate head
-  `0005foliochapter`; offline baseline `45 passed, 33 skipped`; 12 live
-  API test cases green in CI. **Next: M4 builds** (gated Sphinx; 0017
-  docutils gate; packaging `After=redis` note) → dedicated serving
-  phase → dedicated URL-durability phase.
+- **Phase:** **M4-C1 staged** — decision 0026 (per-Athenaeum site P1,
+  manual trigger P2, subprocess sandbox P3, keep-all versions P4;
+  reconciliation: staging keyed by grimoire id inside each build,
+  artifact keyed by Athenaeum; design mandates: artifact security
+  parity + structure-locked/skin-open) + migration 0006
+  (`builds.build_number` per-Athenaeum counter, `athenaeum_id` FK,
+  `grimoire_id` relaxed nullable, `ck_builds_site`,
+  `uq_builds_athenaeum_number`). Q-SERVE-A…E + Q-DIST-A…D parked.
+  M3 was C1–C6 all green ×3 (C1 `c26cd7e`, C2 `aee1872`, C2.5
+  `a6c17bb`, C3 `d62784e`, C3.5 `4b57c82`, C3.6 `9fe1280`, C3.7
+  `ab688dc`, C4 `3fbe4f8`, C5 `5d8d08f`, C6 `5b5dee1`; close-out
+  `5f97463`). Migrate head `0006buildsite`; offline baseline
+  `45 passed, 33 skipped`; 12 live API test cases green in CI.
+  **Next: M4-C2 source generation** (TipTap → rst/md staging + conf.py,
+  offline unit tests; edge cases presented first) → C3 runner/Celery/
+  endpoints → C4 packaging/probes → serving phase (Q-SERVE-A…E) →
+  URL durability → Distribution (Q-DIST-A…D).
 - **Owner decisions:** 0018 (grimoire rename, per-user categories, auth
   semantics) → **amended by 0020 (2026-10-21):** native hierarchy — categories
   per-Athenaeum (Q-M3-9=A), `grimoires.athenaeum_id` NOT NULL (Q-M3-10=A),
@@ -32,4 +38,4 @@ Last updated: 2026-10-21 / Ref: M3 COMPLETE — C1–C6 all green ×3
   markup does not nest — 0017 fail-loud matrix in
   `docs/technology/conversion.md`; RST writer rejects mark-run edge spaces,
   mark combinations, and heading level skips; MyST keeps them via HTML
-  paths. Live-DB tests need PG schema at migration head `0004athenaeum`.
+  paths. Live-DB tests migrate to the current head (`0006buildsite`).

@@ -16,6 +16,8 @@ project-scriptorium/
 ```
 
 Naming: `scriptorium-web/worker` units, `scriptorium` user, `/opt/scriptorium`,
-`/etc/scriptorium/config.env` (0600), `/var/lib/scriptorium/{sources,builds,uploads}`,
-tables per Q21 (`users memberships projects nodes documents document_history builds audit_log`).
-API prefix `/api/v1/*`. Any rename = Rule 4 decision.
+`/etc/scriptorium/config.env` (0600), `/var/lib/scriptorium/{sources,builds,uploads}`
+(0026 adds `artifacts/` — `/var/lib/scriptorium/artifacts/{athenaeum}/{build_number}/`),
+tables (0012-era list; renames since: `projects`→`grimoires` 0003, plus
+athenaeums/grimoire_categories/refresh_tokens — current model in
+data-model.md). API prefix `/api/v1/*`. Any rename = Rule 4 decision.

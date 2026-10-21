@@ -1,6 +1,6 @@
 # Data model — native library hierarchy, generic ordered tree (0021 / 0020 / 0018 / Q21)
 
-Last updated: 2026-10-21 / Ref: C3.6 slug-rename policy (0021)
+Last updated: 2026-10-21 / Ref: M4 build identity (0026)
 
 The canonical, ground-up structure is the Athenaeum hierarchy (decision
 0020): every user owns one or more **Athenaeums** (libraries — one complete
@@ -23,18 +23,25 @@ users ──owns──> athenaeums ──contains──> grimoire_categories (se
 - `nodes(id UUID PK, grimoire_id FK, parent_id FK NULL=root, kind chapter|folio, title, slug, position INT, UNIQUE(grimoire_id,parent_id,slug))` — drives TOC + `toctree`; reorder = atomic sibling-position ops (Q-M3-4=A). `kind` is **`chapter|folio`** since 0022 (was 0010's `category|page`; migration 0005).
 - `documents(id UUID PK, node_id FK UNIQUE, tiptap_json JSONB, source_text TEXT (server-derived cache of the canonical JSON, Q-M3-3=A), source_format, version INT, updated_by FK, updated_at)` — JSON canonical.
 - `document_history(id UUID PK, document_id FK, version INT, tiptap_json JSONB, source_text TEXT, author FK, at)` — append-only; `PUT` with `expected_version` mismatches → 409 (Q-M3-2=A).
-- `builds(id UUID PK, grimoire_id FK, status queued|running|ok|failed, triggered_by FK, started, finished, log_path, artifact_path)`
+- `builds(id UUID PK, grimoire_id FK NULL *(pre-0026 rows)*, athenaeum_id FK NULL, build_number, status queued|running|ok|failed, triggered_by FK, started, finished, log_path, artifact_path)` — **one site per Athenaeum (0026):** a build compiles the entire library; `build_number` is a per-Athenaeum monotonic counter (`uq_builds_athenaeum_number`); exactly one key is ever set (`ck_builds_site`). Pre-M4 rows stay grimoire-keyed. Artifacts live at `/var/lib/scriptorium/artifacts/{athenaeum_id}/{build_number}/` (portable static site).
 - `audit_log(id BIGSERIAL PK, actor FK, action, grimoire_id FK NULL, at, meta JSONB)` — Athenaeum mutations stage rows with `grimoire_id NULL` (`athenaeum_created|patched|deleted`, `grimoire_moved`).
 - `refresh_tokens(id UUID PK, user_id FK CASCADE, family UUID, jti UUID UNIQUE, parent_jti UUID NULL, expires_at, created_at, revoked_at NULL, revoked_reason NULL CHECK rotated|reuse|logout|expired)` — family-based refresh reuse detection (0017). Never stores token material.
 
 Migrations are append-only history: 0001 initial, 0002 refresh tokens,
 0003 grimoire rename + per-user categories, 0004 athenaeum layer
 (backfills one **"Default"** Athenaeum per user and re-points all existing
-categories/grimoires into it), 0005 folio/chapter `kind` vocabulary (0022).
-Old migrations are never edited.
+categories/grimoires into it), 0005 folio/chapter `kind` vocabulary (0022), 0006 build key era +
+per-Athenaeum build numbers (0026). Old migrations are never edited.
 
-Last updated: 2026-10-20 / Ref: be1a220 → C1 (grimoire rename + categories)
+Last updated: 2026-10-21 / Ref: 0026 (M4 build model)
 
-Slugs allowlisted `[a-z0-9-]+`; all content paths jailed to `/var/lib/scriptorium/sources/<grimoire>/`.
+Slugs allowlisted `[a-z0-9-]+`. Sources are no longer held in a persistent
+per-grimoire jail — 0026 supersedes `/var/lib/scriptorium/sources/<grimoire>/`:
+each build materializes an ephemeral staging tree **keyed by grimoire id**
+inside its workspace and compiles it into the site artifact at
+`/var/lib/scriptorium/artifacts/{athenaeum_id}/{build_number}/` — a
+portable, self-contained static website (HTML in M4; `ok` ⇔ warning-free
+under Sphinx `-W`, design mandate in 0026).
 Rejected alternative: literal `categories/branches/sub_branches` tables (rigid).
 Rejected alternative (0020): per-user categories kept, athenaeum mapped over them only in the API (a library abstraction would be unverifiable — scoping must be native).
+Rejected (0026): container/nspawn isolation (P3 = limited-subprocess sandbox); per-grimoire sites/artifacts (P1 = one Athenaeum = one site).
