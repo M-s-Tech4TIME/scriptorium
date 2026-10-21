@@ -125,19 +125,21 @@ async def get_tree(
     session: AsyncSession = Depends(get_session),
 ) -> dict[str, object]:
     await require_membership(grimoire_id, user_id, session)
-    rows = await session.scalars(
-        select(Node)
-        .where(Node.grimoire_id == grimoire_id)
-        .order_by(Node.position, Node.id)
-    )
+    nodes = (
+        await session.scalars(
+            select(Node)
+            .where(Node.grimoire_id == grimoire_id)
+            .order_by(Node.position, Node.id)
+        )
+    ).all()  # materialize once — ScalarResult is single-pass
     bodies: dict[uuid.UUID, dict[str, object]] = {
-        node.id: _node_body(node) for node in rows
+        node.id: _node_body(node) for node in nodes
     }
     children_of: dict[str, list[dict[str, object]]] = {}
-    for node in rows:
+    for node in nodes:
         key = str(node.parent_id) if node.parent_id else "root"
         children_of.setdefault(key, []).append(bodies[node.id])
-    for node in rows:
+    for node in nodes:
         key = str(node.parent_id) if node.parent_id else "root"
         bodies[node.id]["children"] = children_of.get(key, [])
     return {"grimoire_id": str(grimoire_id), "nodes": children_of.get("root", [])}
