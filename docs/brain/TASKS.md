@@ -1,21 +1,25 @@
 # TASKS
 
-Last updated: 2026-10-21 / 0027 recorded (theme ruling) — C3.5 awaits design tokens
+Last updated: 2026-10-22 / 0028 recorded (design baseline) — C3.5 code next
 
 ## In progress (max 1–2)
-- M4-C3.5: theme implementation (mechanics locked in 0027) — **waiting
-  on the owner's external design-consult tokens**; then theme package +
-  THEME_BASE flip + runner vendoring + offline runner test.
+- M4-C3.5: theme code tranche (0027 + 0028 fully specify it) — theme
+  package + tokens/--sd-adm-*/sprite/copy-script/Pygments style +
+  THEME_BASE flip + html_theme_path + runner copy + engine-JS vendoring
+  + offline runner test + AA pair test.
 - M4-C4: packaging (build venv, worker After=redis, config keys) +
   0017 docutils-0.23 probe mechanics + M4-complete report.
 
 ## Todo (M4 next — C4 + phases)
-- [ ] M4-C3.5: `backend/app/sphinx/theme/scriptorium/` (theme.conf no
-      parent; layout/page/search/genindex; scriptorium.css),
+- [ ] M4-C3.5 code: `backend/app/sphinx/theme/scriptorium/` (theme.conf
+      no parent; layout/page/search/genindex; scriptorium.css + inline
+      Tabler sprite + scriptorium.js; Pygments style),
       `THEME_BASE="scriptorium"` + `html_theme_path`, runner theme copy
-      + engine-JS vendoring (build-time only), regressions: offline
-      runner test + sourcegen asserts; search DOM ids locked from
-      vendored `searchtools.js`.
+      + vendoring of the 3 engine JS (searchtools/doctools/
+      sphinx_highlight; `language_data.js` is builder-emitted), search
+      contract per 0028, offline runner regression + sourcegen conf
+      asserts + AA contrast test; local browser preview offered before
+      push.
 - [ ] M4-C4 packaging: isolated build venv + `SC_BUILD_PYTHON`,
       unit `scriptorium-worker` `After=redis`, `config.env` build keys
       (`CELERY_BROKER_URL`, `SC_*`); 0017 docutils-0.23 probe
@@ -31,6 +35,13 @@ Last updated: 2026-10-21 / 0027 recorded (theme ruling) — C3.5 awaits design t
       vendoring + pinned DOM contracts — record tranche committed
       (OPEN-QUESTIONS Q-C3.5-A resolved; brief delivered for the
       external design consult)
+- [x] Design consult received 2026-10-21/22; owner approved the full
+      design-baseline sheet 2026-10-22 (decision 0028): Tabler inline
+      sprite, custom Pygments style, first-party copy script (0027 JS
+      clause amended), zero extensions v1, fixed scheme, no logo v1;
+      exceptions ruled: 11-anchor per-type callout palette (blue/violet,
+      body ink uniform) + all-caps bold verdigris category labels —
+      record tranche committed
 - [x] Owner ruled M4 C2/C3 edge cases A/A/A 2026-10-21 (E1 422-empty,
       E2 skip+note, E3 409-serialization) — recorded 0026 §Edge rulings
 - [x] M4-C2: deterministic sourcegen + 14 offline tests (3a15b52, ×3)

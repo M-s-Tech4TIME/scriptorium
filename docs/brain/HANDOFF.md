@@ -1,35 +1,43 @@
 # HANDOFF
 
-Last updated: 2026-10-21 / Ref: 0027 recorded, green ×3 (`52a2124`) — awaiting design tokens
+Last updated: 2026-10-22 / Ref: 0028 recorded — C3.5 code tranche next
 
 ## Was doing
-M4-C3.5 record tranche: **decision 0027** committed — the owner ruled
-the theme is Scriptorium's **own, from scratch** (no builtin/third-party
-template inheritance; engine fully inherited incl. vendored engine JS
-`searchtools/doctools/sphinx_highlight/language_data`, pinned DOM
-contracts). OPEN-QUESTIONS theme park flipped to RESOLVED (Q-C3.5-A);
-sphinx.md theme section replaced the alabaster placeholder text;
-changelog `2026-10-21-m4-own-theme-record.md`.
-
-## Blocked / waiting on owner input (not an open question — input, not decision)
-Theme **implementation** (templates + CSS) waits for the owner's
-external design-consult tokens (palette/type/layout per the brief
-delivered to them; binding floor: no webfonts/CDN, WCAG AA, tokens as
-CSS custom properties, system stacks). The code-side mechanics are
-already committed in 0027 — implementation on token arrival.
+M4-C3.5 record chain: **decision 0028 committed** — the owner approved
+the full design-baseline sheet (Tabler inline-sprite icons, custom
+Pygments style, **first-party copy script amending 0027's JS clause**,
+zero extensions v1, fixed scheme, no logo v1, icon breadth) plus two
+ruled exceptions: an 11-anchor per-type callout palette
+(`--sd-adm-<type>-{rule,bg,ink}`, blue/violet/teal/rust added, uniform
+`--sd-page-ink` body ink) and all-caps bold verdigris category labels
+(D15 owner-revision). Engine-asset mechanics verified against Sphinx
+9.1.0 (3 vendored JS + builder-emitted `language_data.js` /
+`documentation_options.js`); search DOM contract read off the vendored
+`searchtools.js` and pinned. Consult gaps (missing reference HTMLs,
+CDN icon loader, declared-inaccurate preview) inventoried and resolved
+by the owner.
 
 ## Next steps (in order)
-1. **M4-C3.5 implementation** (mechanics locked in 0027): theme
-   package `backend/app/sphinx/theme/scriptorium/` (`theme.conf` no
-   parent, `layout/page/search/genindex.html`, `static/scriptorium.css`);
-   `sourcegen.py` `THEME_BASE = "scriptorium"` + `html_theme_path =
-   ["theme"]`; `runner.py` `_materialize` copies the theme dir into the
-   workspace + vendors the four engine JS files from the installed
-   pinned Sphinx; search DOM ids locked by reading vendored
-   `searchtools.js`; offline-but-real runner test (build ok, our CSS in
-   artifact, search markup ids, `searchindex.js`) + sourcegen test
-   updates; docs (sphinx.md theme section refresh) + changelog + brain;
-   gates + push + CI ×3.
+1. **M4-C3.5 code tranche** (0027 + 0028 are the full spec — no design
+   decisions remain): theme package
+   `backend/app/sphinx/theme/scriptorium/` (`theme.conf` no parent,
+   `layout/page/search/genindex.html`, `static/scriptorium.css` from
+   the consult tokens + `--sd-adm-*` 33 tokens, inline Tabler sprite in
+   layout, first-party `static/scriptorium.js`, Pygments style module
+   wired via conf `pygments_style`); `sourcegen.py`
+   `THEME_BASE = "scriptorium"` + `html_theme_path = ["theme"]`;
+   `runner.py` `_materialize` copies the theme dir into the workspace +
+   vendors `searchtools/doctools/sphinx_highlight.js` from the pinned
+   Sphinx (`language_data.js` is builder-emitted); templates honor the
+   pinned search contract (`#search-results`, `#search-progress`,
+   `input[name="q"]`, `role="main"`, `data-content_root`, script
+   wiring, `Search.init()` self-runs); offline-but-real runner test
+   (build ok, our CSS in artifact, search markup ids, `searchindex.js`,
+   vendored engine JS present, `scriptorium.js` + CSS referenced) +
+   sourcegen test updates (conf asserts) + AA contrast verification
+   test; docs (sphinx.md theme section refresh) + changelog + brain;
+   gates + push + CI ×3. Offer the owner a local browser preview of a
+   built artifact before push.
 2. **M4-C4** — packaging (`packaging/` creates the isolated build venv,
    `SC_BUILD_PYTHON` pointed there; worker unit `After=redis`;
    `config.env` gains `CELERY_BROKER_URL` + `SC_*` build keys), the
@@ -37,7 +45,8 @@ already committed in 0027 — implementation on token arrival.
 3. **Junk-sweep before every gate:** re-read written files; grep the
    standing junk markers before committing.
 4. Serving phase — resolve Q-SERVE-A…E first, then implement (theme
-   brand-injection hooks + custom-CSS wiring land there, 0027).
+   brand-injection hooks + custom-CSS wiring land there, 0027;
+   `[data-theme]` second scheme is its own later ruling, 0028).
 5. URL-durability phase after serving; Distribution-phase concepts
    (Q-DIST-A…D) presented before their implementation (incl. the React
    shell format).

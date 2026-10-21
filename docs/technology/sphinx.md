@@ -30,7 +30,17 @@
   `search.html`, `genindex.html` + one stylesheet
   (`backend/app/sphinx/theme/scriptorium/`); brand injection /
   custom-CSS hooks / dark-mode policy are serving-phase (0026 mandate
-  2). Edge rulings
+  2). **Design baseline (M4-C3.5, decision 0028):** tokens come from the
+  owner's approved external consult (dark-forest chrome + cream paper,
+  serif body stack, 740px column, 268px sidebar, 56px topbar, every
+  value a `--sd-*` custom property); icons are an inline Tabler SVG
+  sprite (16 icons, MIT pinned + attribution; zero CDN); callouts use
+  11 per-type anchors via `--sd-adm-<type>-{rule,bg,ink}` (uniform
+  `--sd-page-ink` body); syntax colors come from a custom Pygments
+  `Style` subclass wired via `pygments_style`; the only first-party JS
+  is the disclosed copy support script (`scriptorium.js`, 0027 JS
+  clause amended); zero asset-injecting extensions in v1; WCAG AA pairs
+  are test-pinned (Rule 2). Edge rulings
   E1–E3: empty Athenaeum → 422; empty book → skip + log note; one build
   per Athenaeum at a time (409, enforced in C3). **C3 round-trip
   refinements:** every staged toctree entry is an absolute `</docname>`;
@@ -51,4 +61,7 @@
   Artifact on `ok`: `{SC_ARTIFACT_ROOT}/{athenaeum}/{build_number}/`
   (html/ + build.log); `SC_BUILD_PYTHON` defaults to `sys.executable`
   pre-packaging (isolated build venv required in production, C4).
-- Verified: 2026-10-16 (sphinx-doc.org/PyPI; lock resolved 2026-10-16).
+- Verified: 2026-10-16 (sphinx-doc.org/PyPI; lock resolved 2026-10-16);
+  theme design baseline verified against Sphinx 9.1.0 in-repo probe
+  (2026-10-22 — asset physiology: 3 vendored scripts vs build-emitted
+  `language_data.js`/`documentation_options.js` / asset auto-lists).

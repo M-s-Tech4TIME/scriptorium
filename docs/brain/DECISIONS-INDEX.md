@@ -31,8 +31,9 @@ Last updated: 2026-10-21 / Ref: M4-C1 (0026)
 | 0025 | Grimoire duplication (Q-M3-16a–e): caller-slug w/ auto-suffix, owner-only roster, head-as-v1, any owned target lib, copy-of-copy allowed | accepted | 2026-10-21 | owner |
 | 0026 | M4 build design (Q-M4-P1…P4): per-Athenaeum sites, manual trigger, subprocess sandbox, keep-all + numbered builds; artifact = portable static site; design mandates (security parity, skin-open) | accepted | 2026-10-21 | owner |
 | 0027 | M4-C3.5 theme: Scriptorium's own, from scratch (no builtin/third-party inheritance); full engine inheritance incl. vendored engine JS + pinned DOM contracts; brand hooks serving-phase | accepted | 2026-10-21 | owner |
+| 0028 | M4-C3.5 design baseline: consult tokens accepted (fixed dark-chrome/cream scheme), Tabler inline-SVG sprite (16 icons), 11-anchor per-type callout palette (`--sd-adm-*`), custom Pygments style, first-party copy script (0027 JS clause amended), zero extensions v1, all-caps bold verdigris category labels (D15 revised) | accepted | 2026-10-22 | owner |
 
-Full records: `docs/decisions/0001-*.md` … `0027-*.md`. 
+Full records: `docs/decisions/0001-*.md` … `0028-*.md`. 
 Pending: none.
 
-Last updated: 2026-10-21 / Ref: 0027 recorded, green ×3 (`52a2124`)
+Last updated: 2026-10-22 / Ref: 0028 recorded
