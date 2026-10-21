@@ -404,8 +404,8 @@ def test_node_patch_reorder_reparent_cycle_and_slug() -> None:
             )
             assert foreign.status_code == 404
 
-            assert await _audit_action("node_moved") >= 3
-            assert await _audit_action("node_patched") >= 1
+            assert await _audit_action("node_moved") >= 2  # re-parents only
+            assert await _audit_action("node_patched") >= 1  # rename + reorder
         await app_teardown()
 
     _run(run())
