@@ -373,6 +373,8 @@ async def duplicate_grimoire(
         category_id=grimoire.category_id if same_library else None,
     )
     session.add(copy)
+    # ruling b: fresh roster — the duplicator is the copy's sole owner
+    session.add(Membership(user_id=user_id, grimoire_id=copy_id, role="owner"))
 
     source_nodes = list(
         (

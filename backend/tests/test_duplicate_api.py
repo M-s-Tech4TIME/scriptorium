@@ -229,7 +229,7 @@ def test_duplicate_deep_copy_fidelity() -> None:
             assert made.status_code == 201
             twin = made.json()
             assert twin["slug"] == "twin-book"
-            assert twin["title"] == "Original book"  # explicit slug, title kept
+            assert twin["title"] == "Original book (copy)"  # 0025 default suffix
             assert twin["athenaeum_id"] == aid
             assert twin["source_format"] == "rst"
             assert twin["theme"] == "dark-parchment"
