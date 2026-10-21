@@ -5,6 +5,10 @@
   chosen name for Library; one Athenaeum per product/company). All of
   Q-M3-9…13 = option A; micro-defaults approved with the set; adoption
   date recorded honestly in 0020 (0018's per-user categories superseded).
+- Vocabulary sharpened by the owner the same day (see later bullets):
+  Library (Athenaeum) → Section (grimoire-category) → Book (grimoire)
+  → Chapter (in-book tree folder, renamed from `kind category`) →
+  Folio (page file, renamed from `kind page`).
 - C3.5 work, in owner plan order: decision record → migration
   `0004_athenaeums` (athenaeums table + `UNIQUE(owner_id, slug)`;
   per-user "Default" backfill; categories re-scoped `user_id` →
@@ -33,3 +37,5 @@
     since 0004); and `User.id` is `None` until first flush (client-side
     column default applies at INSERT) — flush users before referencing
     their ids.
+- Further owner rulings flowed through 0021 (renamable slugs) and 0022
+  (folio/chapter) — see the C3.6/C3.7 changelog entries and DECISIONS-INDEX.

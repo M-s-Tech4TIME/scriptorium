@@ -363,3 +363,74 @@ def test_grimoire_scoping_and_move_rejections() -> None:
         await app_teardown()
 
     _run(run())
+
+
+@needs_db
+def test_slug_rename_policy_athenaeums() -> None:
+    users = asyncio.run(_seed_users(2))
+    me, stranger = users
+
+    async def run() -> None:
+        async with _client() as client:
+            alpha = await client.post(
+                "/api/v1/athenaeums",
+                json={"slug": "alpha", "title": "Alpha"},
+                headers=_headers(me),
+            )
+            aid = alpha.json()["id"]
+            await client.post(
+                "/api/v1/athenaeums",
+                json={"slug": "beta", "title": "Beta"},
+                headers=_headers(me),
+            )
+
+            renamed = await client.patch(
+                f"/api/v1/athenaeums/{aid}",
+                json={"slug": "gamma"},
+                headers=_headers(me),
+            )
+            assert renamed.status_code == 200
+            assert renamed.json()["slug"] == "gamma"
+            assert await _audit_count("athenaeum_patched") >= 1
+
+            floated = await client.patch(
+                f"/api/v1/athenaeums/{aid}",
+                json={"slug": None},
+                headers=_headers(me),
+            )
+            assert floated.status_code == 422  # slugs never float
+
+            # the slug freed stays free only if nothing claimed it: beta
+            # renaming to the abandoned "alpha" succeeds (old slug released)
+            listing = await client.get("/api/v1/athenaeums", headers=_headers(me))
+            beta_id = next(a["id"] for a in listing.json() if a["slug"] == "beta")
+            claim = await client.patch(
+                f"/api/v1/athenaeums/{beta_id}",
+                json={"slug": "alpha"},
+                headers=_headers(me),
+            )
+            assert claim.status_code == 200
+
+            dup = await client.patch(
+                f"/api/v1/athenaeums/{beta_id}",
+                json={"slug": "gamma"},
+                headers=_headers(me),
+            )
+            assert dup.status_code == 409
+
+            invalid = await client.patch(
+                f"/api/v1/athenaeums/{beta_id}",
+                json={"slug": "Not Valid!"},
+                headers=_headers(me),
+            )
+            assert invalid.status_code == 422
+
+            foreign = await client.patch(
+                f"/api/v1/athenaeums/{aid}",
+                json={"slug": "theirs"},
+                headers=_headers(stranger),
+            )
+            assert foreign.status_code == 404
+        await app_teardown()
+
+    _run(run())

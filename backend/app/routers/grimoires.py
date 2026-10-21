@@ -46,6 +46,7 @@ class GrimoireIn(BaseModel):
 
 class GrimoirePatch(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=200)
+    slug: str | None = Field(default=None, min_length=1, max_length=120)
     theme: str | None = Field(default=None, min_length=1, max_length=80)
     athenaeum_id: uuid.UUID | None = None  # cross-Athenaeum move (owner of target)
     category_id: uuid.UUID | None = None  # `None` present in body clears it
@@ -221,6 +222,24 @@ async def patch_grimoire(
             await _own_athenaeum(target, user_id, session)
             grimoire.athenaeum_id = target
             moved = True
+    if "slug" in provided:
+        if body.slug is None:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="slug is required — grimoires cannot float.",
+            )
+        _check_slug(body.slug)
+        if body.slug != grimoire.slug:
+            dup = await session.scalar(
+                select(Grimoire.id).where(
+                    Grimoire.slug == body.slug, Grimoire.id != grimoire_id
+                )
+            )
+            if dup is not None:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT, detail="Slug already exists."
+                )
+            grimoire.slug = body.slug
     if "category_id" in provided:
         scope = grimoire.athenaeum_id
         await _verify_category(scope, body.category_id, session)

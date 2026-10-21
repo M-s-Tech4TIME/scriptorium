@@ -3,7 +3,7 @@
 Ownership: every endpoint is owner-scoped; a foreign Athenaeum id is a
 uniform 404 (IDOR rule). Sharing stays grimoire-level (Q-M3-12=A).
 Delete refuses 409 while the Athenaeum still holds grimoires (Q-M3-11=A).
-Slug is immutable after creation (URLs are stable by design).
+Slug is renamable (0021): per-owner uniqueness still applies.
 """
 
 from __future__ import annotations
@@ -32,7 +32,8 @@ class AthenaeumIn(BaseModel):
 
 
 class AthenaeumPatch(BaseModel):
-    title: str = Field(min_length=1, max_length=200)
+    title: str | None = Field(default=None, min_length=1, max_length=200)
+    slug: str | None = Field(default=None, min_length=1, max_length=120)
 
 
 def _check_slug(slug: str) -> str:
@@ -139,12 +140,43 @@ async def patch_athenaeum(
     session: AsyncSession = Depends(get_session),
 ) -> dict[str, object]:
     row = await _own_athenaeum(athenaeum_id, user_id, session)
-    row.title = body.title
+    provided = body.model_fields_set
+    changes: dict[str, str] = {}
+    if "title" in provided:
+        if body.title is None:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="title is required — athenaeums cannot be unnamed.",
+            )
+        if body.title != row.title:
+            row.title = body.title
+            changes["title"] = body.title
+    if "slug" in provided:
+        if body.slug is None:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="slug is required — athenaeums cannot float.",
+            )
+        _check_slug(body.slug)
+        if body.slug != row.slug:
+            taken = await session.scalar(
+                select(Athenaeum.id).where(
+                    Athenaeum.owner_id == user_id,
+                    Athenaeum.slug == body.slug,
+                    Athenaeum.id != row.id,
+                )
+            )
+            if taken is not None:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT, detail="Slug already exists."
+                )
+            row.slug = body.slug
+            changes["slug"] = body.slug
     add_audit(
         session,
         actor=user_id,
         action="athenaeum_patched",
-        meta={"athenaeum_id": str(row.id), "title": body.title},
+        meta={"athenaeum_id": str(row.id), "changes": changes},
     )
     await session.commit()
     return _body(row)

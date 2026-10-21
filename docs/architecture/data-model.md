@@ -1,6 +1,6 @@
-# Data model — native library hierarchy, generic ordered tree (0020 / 0018 / Q21)
+# Data model — native library hierarchy, generic ordered tree (0021 / 0020 / 0018 / Q21)
 
-Last updated: 2026-10-21 / Ref: C3.5 in this commit (athenaeum layer)
+Last updated: 2026-10-21 / Ref: C3.6 slug-rename policy (0021)
 
 The canonical, ground-up structure is the Athenaeum hierarchy (decision
 0020): every user owns one or more **Athenaeums** (libraries — one complete
@@ -16,9 +16,9 @@ users ──owns──> athenaeums ──contains──> grimoire_categories (se
 ```
 
 - `users(id UUID PK, email UNIQUE, pw_hash_argon2id, display, created_at)`
-- `athenaeums(id UUID PK, owner_id FK users CASCADE, slug, title, created_at, UNIQUE(owner_id, slug))` — the library layer (0020). Slug uniqueness is **per owner**: every user may own slug `default`. Slug is immutable after creation (stable URLs). Delete is owner-driven and **refused `409` while the Athenaeum still holds grimoires** (Q-M3-11=A) — the `ON DELETE CASCADE` is belt-and-braces, not reachable via API.
+- `athenaeums(id UUID PK, owner_id FK users CASCADE, slug, title, created_at, UNIQUE(owner_id, slug))` — the library layer (0020). Slug uniqueness is **per owner**: every user may own slug `default`. Slug is **renamable** (0021). Delete is owner-driven and **refused `409` while the Athenaeum still holds grimoires** (Q-M3-11=A) — the `ON DELETE CASCADE` is belt-and-braces, not reachable via API.
 - `grimoire_categories(id UUID PK, athenaeum_id FK athenaeums CASCADE, name, position INT, created_at, UNIQUE(athenaeum_id, name))` — sections **inside an Athenaeum** (0020 Q-M3-9=A; `user_id` dropped, migration 0004). Deleting a section leaves its grimoires Uncategorized.
-- `grimoires(id UUID PK, athenaeum_id FK athenaeums NOT NULL CASCADE, category_id FK NULL→grimoire_categories ON DELETE SET NULL, slug UNIQUE, title, source_format rst|myst DEFAULT rst, theme, created_by FK, created_at)` — every grimoire lives in an Athenaeum (0020 Q-M3-10=A); rename from `projects` (0018 Q-M3-5=A, migration 0003). Cross-Athenaeum moves happen via grimoire PATCH to an Athenaeum the caller owns (audit `grimoire_moved`).
+- `grimoires(id UUID PK, athenaeum_id FK athenaeums NOT NULL CASCADE, category_id FK NULL→grimoire_categories ON DELETE SET NULL, slug UNIQUE, title, source_format rst|myst DEFAULT rst, theme, created_by FK, created_at)` — every grimoire lives in an Athenaeum (0020 Q-M3-10=A); rename from `projects` (0018 Q-M3-5=A, migration 0003). Slug is **renamable** (0021, amending 0018); cross-Athenaeum moves happen via grimoire PATCH to an Athenaeum the caller owns (audit `grimoire_moved`).
 - `memberships(user_id FK, grimoire_id FK, role owner|editor|viewer, PK(user_id,grimoire_id))` — sharing stays **grimoire-level only** (0020 Q-M3-12=A); no Athenaeum-level sharing yet (future decision first).
 - `nodes(id UUID PK, grimoire_id FK, parent_id FK NULL=root, kind category|page, title, slug, position INT, UNIQUE(grimoire_id,parent_id,slug))` — drives TOC + `toctree`; reorder = atomic sibling-position ops (Q-M3-4=A).
 - `documents(id UUID PK, node_id FK UNIQUE, tiptap_json JSONB, source_text TEXT (server-derived cache of the canonical JSON, Q-M3-3=A), source_format, version INT, updated_by FK, updated_at)` — JSON canonical.

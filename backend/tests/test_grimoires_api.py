@@ -480,3 +480,56 @@ def test_grimoire_delete_owner_only_and_cascades() -> None:
         await app_teardown()
 
     _run(run())
+
+
+@needs_db
+def test_slug_rename_policy_grimoires() -> None:
+    users = asyncio.run(_seed_users(2))
+    me, stranger = users
+
+    async def run() -> None:
+        async with _client() as client:
+            aid = await _mk_lib(client, me, "rename")
+            one = await _mk_grimoire(client, me, aid, "doc-one", "Doc one")
+            two = await _mk_grimoire(client, me, aid, "doc-two", "Doc two")
+
+            renamed = await client.patch(
+                f"/api/v1/grimoires/{one['id']}",
+                json={"slug": "doc-renamed"},
+                headers=_headers(me),
+            )
+            assert renamed.status_code == 200
+            assert renamed.json()["slug"] == "doc-renamed"
+
+            dup = await client.patch(
+                f"/api/v1/grimoires/{one['id']}",
+                json={"slug": "doc-two"},
+                headers=_headers(me),
+            )
+            assert dup.status_code == 409  # slug uniqueness is global
+
+            floated = await client.patch(
+                f"/api/v1/grimoires/{one['id']}",
+                json={"slug": None},
+                headers=_headers(me),
+            )
+            assert floated.status_code == 422
+
+            invalid = await client.patch(
+                f"/api/v1/grimoires/{one['id']}",
+                json={"slug": "Bad Slug!"},
+                headers=_headers(me),
+            )
+            assert invalid.status_code == 422
+
+            foreign = await client.patch(
+                f"/api/v1/grimoires/{two['id']}",
+                json={"slug": "theirs"},
+                headers=_headers(stranger),
+            )
+            assert foreign.status_code == 404
+
+            assert await _audit_action("grimoire_patched") >= 1
+        await app_teardown()
+
+    _run(run())

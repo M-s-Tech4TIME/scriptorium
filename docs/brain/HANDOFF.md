@@ -1,26 +1,23 @@
 # HANDOFF
 
-Last updated: 2026-10-21 / C3(4b57c82)+fixes green (b6a453d) — brain sync
+Last updated: 2026-10-21 / C3.6 slug-rename staged (0021) — brain sync
 
 ## Was doing
-M3 C3.5 (decision 0020): migration `0004_athenaeums`, `Athenaeum` model,
-`routers/athenaeums.py` (CRUD + delete-refusal + nested sidebar),
-`categories.py` re-homed to athenaeum paths, `grimoires.py` scoping +
-cross-Athenaeum move, `main.py` mount, `test_athenaeums_api.py` (4 live
-cases) + `test_grimoires_api.py` rewrite (5 live cases), test_migration
-EXPECTED_TABLES → 11, docs restructure, brain sync. **Landed: CI ×3
-green on `b6a453d`.**
+M3 C3.6: decision 0021 (slugs renamable at every layer; amends 0018) —
+`AthenaeumPatch`/`GrimoirePatch` gain `{slug?}` (allowlist/`null` → 422,
+scoped collision → 409, metas record changes), two new live tests, docs.
 
 ## Next steps (in order)
-1. Commit C3.5 (`feat: athenaeum layer as native library hierarchy (0020)`),
-   push, verify CI green ×3 (Rule 7).
-2. C4 tree endpoints: GET `/grimoires/{id}/tree`, node create/move/
-   rename/delete — atomic sibling reorder (Q-M3-4=A), slug integrity
-   `[a-z0-9-]+`, per-sibling-set partial-unique slugs, category/page kinds.
-3. C5 document endpoints: GET/PUT `/nodes/{node_id}/document` with
-   `expected_version`→409, version+history append, import-from-source→422.
-4. Then: M3 complete report; M4 next (gated Sphinx builds; docutils 0.23
-   gate per 0017; packaging `After=redis` systemd note).
+1. Commit C3.6, push, verify CI green ×3 (Rule 7).
+2. C3.7 folio/chapter rename: decision 0022, migration `0005`
+   (kind `page→folio` + `category→chapter`, CHECK reuse `ck_nodes_kind`),
+   models wording, glossary, docs — push, CI ×3.
+3. C4 tree endpoints (decision 0023: D1=A delete-refusal incl. document
+   check, D2=A owner-only, cycle guard, displacement reorder) —
+   `test_tree_api.py`.
+4. C5 document endpoints (`expected_version`→409, history append,
+   import→422, D2 role mapping).
+5. C6 grimoire duplication (deep copy; Q-M3-16) → M3 report → M4.
 
 ## Gotchas (carried)
 - Migrate head `0004athenaeum`; verify migration SQL against 0001/0003

@@ -1,15 +1,13 @@
 # CURRENT-STATE
 
-Last updated: 2026-10-21 / Ref: C3.5 green (`4b57c82` + `30dd8b4`/`b6a453d`)
+Last updated: 2026-10-21 / Ref: C3.5 green (`4b57c82`/`30dd8b4`/`b6a453d`) + C3.6 staged (0021)
 
-- **Phase:** M3 underway. C1–C3.5 green (`c26cd7e` / `aee1872` / `a6c17bb` /
-  `d62784e` / `4b57c82`, CI ×3 each; C3.5 fix-ups `30dd8b4`+`b6a453d`).
-  Decision 0020 athenaeum layer LANDED: migration 0004 (head
-  `0004athenaeum`), `Athenaeum` model, athenaeums router (CRUD +
-  delete-refusal 409 + nested sidebar), categories re-homed to
-  `/api/v1/athenaeums/{id}/…`, grimoire create scoped + cross-Athenaeum
-  move, tests (4 new + 5 rewritten live cases), docs/brain. Remaining:
-  C4 (tree) → C5 (documents) → M3 done.
+- **Phase:** M3 underway. C1–C3.5 green (CI ×3 each); C3.5 fixed-ups landed.
+  **C3.6 staged:** decision 0021 — slugs renamable at every layer
+  (athenaeum per-owner 409, grimoire global 409; allowlist/null → 422),
+  two new live tests, docs. Next: C3.7 folio/chapter rename (0005),
+  C4 tree (0023: delete-refusal D1=A, owner-only D2=A), C5 documents,
+  C6 duplication (0023→Q-M3-16 numbering exact at that tranche).
 - **Owner decisions:** 0018 (grimoire rename, per-user categories, auth
   semantics) → **amended by 0020 (2026-10-21):** native hierarchy — categories
   per-Athenaeum (Q-M3-9=A), `grimoires.athenaeum_id` NOT NULL (Q-M3-10=A),

@@ -28,7 +28,7 @@ Last updated: 2026-10-21 / Ref: C3.5 in this commit (athenaeum layer, 0020)
 | GET `/athenaeums` | owner | own libraries, creation order |
 | POST `/athenaeums` `{slug,title}` | authed | slug allowlist `[a-z0-9-]+` (`422`); dup **per owner** → `409`; creation order stable |
 | GET `/athenaeums/{id}` | owner | foreign/unknown id → `404` |
-| PATCH `/athenaeums/{id}` `{title}` | owner | rename title only; **slug immutable after creation** (stable URLs, mirrors 0018 grimoire slugs); owner-vetoable default |
+| PATCH `/athenaeums/{id}` `{title?, slug?}` | owner | **slug renamable (0021)**: per-owner uniqueness → `409`; `[a-z0-9-]+` (else `422`) or explicit `null` → `422`; audit meta records what changed |
 | DELETE `/athenaeums/{id}` | owner | **refused `409` while it holds grimoires** (Q-M3-11=A; no audit row on refusal); else cascades its categories, `204` |
 | GET `/athenaeums/{id}/sidebar` | owner | one call for the sidebar (Q-M3-13=A): `{id,slug,title,categories:[{id,name,position,grimoires:[…]}],uncategorized:[…]}` |
 
@@ -58,7 +58,7 @@ is equally unreachable).
 | GET `/grimoires` | member rows only | `{id,athenaeum_id,slug,title,source_format,theme,category_id,created_by,role}` |
 | POST `/grimoires` `{athenaeum_id,slug,title,source_format?,theme?,category_id?}` | owner of the athenaeum | missing `athenaeum_id` → `422`; foreign athenaeum → `404`; category must belong to **that same Athenaeum** (`404` otherwise); slug allowlist `[a-z0-9-]+` → else `422`; dup slug → `409`; creator becomes `owner` member atomically |
 | GET `/grimoires/{id}` | any member | `404` outsider |
-| PATCH `/grimoires/{id}` `{title?,theme?,category_id?,athenaeum_id?}` | owner (`403` member) | explicit `category_id: null` clears to Uncategorized; `source_format` immutable; **`athenaeum_id` = cross-Athenaeum move** → target must be owned (`404`), `null` target → `422` (no floating grimoires), same-id no-op; audit `grimoire_moved` |
+| PATCH `/grimoires/{id}` `{title?, slug?, theme?, category_id?, athenaeum_id?}` | owner (`403` member) | explicit `category_id: null` clears to Uncategorized; `source_format` immutable; **`slug` renamable (0021)** — global uniqueness → `409`, `[a-z0-9-]+`/`null` → `422`; **`athenaeum_id` = cross-Athenaeum move** → target must be owned (`404`), `null` target → `422` (no floating grimoires), same-id no-op; audit `grimoire_moved` on move else `grimoire_patched` |
 | DELETE `/grimoires/{id}` | owner (`403` member) | cascades nodes/documents/builds/memberships |
 
 ## Members (`routers/grimoires.py`)
