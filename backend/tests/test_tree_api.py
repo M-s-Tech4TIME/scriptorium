@@ -42,8 +42,17 @@ def _client() -> httpx.AsyncClient:
 
 
 def _run(test: Coroutine[Any, Any, None]) -> None:
+    async def wrapped() -> None:
+        try:
+            await test
+        finally:
+            # the awaited disposal MUST run even when an assert fails,
+            # else pooled asyncpg sockets leak and a later test eats the
+            # ResourceWarning under -W error (Rule 6, 2026-10-21 lesson)
+            await app_teardown()
+
     try:
-        asyncio.run(test)
+        asyncio.run(wrapped())
     finally:
         from app import db, limiter
 
@@ -219,7 +228,6 @@ def test_tree_read_shape_and_access() -> None:
             assert viewer_bad.status_code == 403
 
             assert await _audit_action("node_created") >= 3
-        await app_teardown()
 
     _run(run())
 
@@ -301,7 +309,6 @@ def test_node_create_validation() -> None:
             )
             assert foreign.status_code == 404  # parent of another grimoire
             assert await _audit_action("node_created") >= 4
-        await app_teardown()
 
     _run(run())
 
@@ -406,7 +413,6 @@ def test_node_patch_reorder_reparent_cycle_and_slug() -> None:
 
             assert await _audit_action("node_moved") >= 2  # re-parents only
             assert await _audit_action("node_patched") >= 1  # rename + reorder
-        await app_teardown()
 
     _run(run())
 
@@ -487,6 +493,5 @@ def test_node_delete_refusal_then_success() -> None:
             assert "loose-folio" not in _tree_slugs(list(tree["nodes"]))
 
             assert await _audit_action("node_deleted") >= 1
-        await app_teardown()
 
     _run(run())

@@ -53,8 +53,17 @@ def _client() -> httpx.AsyncClient:
 
 
 def _run(test: Coroutine[Any, Any, None]) -> None:
+    async def wrapped() -> None:
+        try:
+            await test
+        finally:
+            # the awaited disposal MUST run even when an assert fails,
+            # else pooled asyncpg sockets leak and a later test eats the
+            # ResourceWarning under -W error (Rule 6, 2026-10-21 lesson)
+            await app_teardown()
+
     try:
-        asyncio.run(test)
+        asyncio.run(wrapped())
     finally:
         from app import db, limiter
 
@@ -212,7 +221,6 @@ def test_document_lifecycle_and_concurrency() -> None:
             assert viewer_put.status_code == 403  # viewers never save (0024)
 
             assert await _audit_action("document_saved") >= 2
-        await app_teardown()
 
     _run(run())
 
@@ -252,12 +260,13 @@ def test_document_import_from_source_and_errors() -> None:
             boom = await client.put(
                 base,
                 json={
-                    "source_text": "Watch::\n\n    x = 1\n",
+                    "source_text": "D\n==\n\n:x-unknown:`y`\n",
                     "expected_version": 1,
                 },
                 headers=_headers(me),
             )
-            assert boom.status_code == 422  # ConversionError surfaces (Q-M3-3=A)
+            assert boom.status_code == 422  # unknown rst role → docutils errors
+            assert "docutils" in boom.json()["detail"].lower()
 
             both = await client.put(
                 base,
@@ -316,6 +325,5 @@ def test_document_import_from_source_and_errors() -> None:
             assert cross_get.status_code == 404  # node not in this grimoire
 
             assert await _audit_action("document_saved") >= 2
-        await app_teardown()
 
     _run(run())
