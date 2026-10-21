@@ -36,7 +36,10 @@ brand-new grimoire owned by the caller.
   uniqueness re-satisfied inside the new grimoire by construction).
 - **Documents:** one `documents` row per source folio document — head
   `tiptap_json` + cached `source_text`, `version = 1`, `updated_by` =
-  caller; `document_history` stays empty (ruling c).
+  caller. **History ruling clarified on implementation:** the source's
+  v1..vN provenance is never cloned; the copy's own v1 save leaves
+  exactly one new history row (authored by the duplicator at copy time),
+  preserving the C5 invariant that every version leaves a trace.
 - All in one transaction; source is untouched and remains editable.
 
 ## Micro-defaults (owner-vetoable, disclosed)

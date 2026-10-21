@@ -30,6 +30,7 @@ from app.db import get_session
 from app.models import (
     Athenaeum,
     Document,
+    DocumentHistory,
     Grimoire,
     GrimoireCategory,
     Membership,
@@ -418,14 +419,27 @@ async def duplicate_grimoire(
         ).all()
     )
     for source_doc in source_docs:
+        doc_id = uuid.uuid4()
         session.add(
             Document(
+                id=doc_id,
                 node_id=id_map[source_doc.node_id],
                 tiptap_json=source_doc.tiptap_json,
                 source_text=source_doc.source_text,
                 source_format=source_doc.source_format,
-                version=1,  # ruling c: head content as v1, no history clone
+                version=1,  # ruling c: head content as v1
                 updated_by=user_id,
+            )
+        )
+        # the copy's own v1 save leaves its trace (same invariant as
+        # put_document); the SOURCE's v1..vN provenance is never cloned
+        session.add(
+            DocumentHistory(
+                document_id=doc_id,
+                version=1,
+                tiptap_json=source_doc.tiptap_json,
+                source_text=source_doc.source_text,
+                author=user_id,
             )
         )
 
