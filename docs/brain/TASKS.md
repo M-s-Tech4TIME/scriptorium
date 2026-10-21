@@ -1,12 +1,12 @@
 # TASKS
 
-Last updated: 2026-10-21 / M3 C5 staged with this sync
+Last updated: 2026-10-21 / M3 C5 green; C6 parked on Q-M3-16
 
 ## In progress (max 1–2)
-- C5 folio documents (0024) — staged, needs commit + CI verify ×3.
+- (none — C6 blocked on owner rulings Q-M3-16a–e, see OPEN-QUESTIONS)
 
 ## Todo (M3 next)
-- [ ] C6 grimoire duplication (deep copy; Q-M3-16)
+- [ ] C6 grimoire duplication (after Q-M3-16a–e ruling; decision 0025)
 - [ ] M3-complete report after C6 green
 - [ ] Runner/doc pipeline (M4): gated Sphinx builds; docutils 0.23 gate
       recorded in 0017; packaging `After=redis` systemd note.

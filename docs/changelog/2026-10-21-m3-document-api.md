@@ -42,3 +42,18 @@ addressing → 404). Offline `45 passed, 31 skipped`.
 ## Next
 
 C6 — grimoire duplication (deep copy; Q-M3-16) → M3-complete report → M4.
+
+## CI lessons (post-push fix-ups `5f6640e`/`034db20`)
+
+- `onupdate=func.now()` expires the timestamp after flush; a post-commit
+  body read then attempted lazy sync IO → `MissingGreenlet` in the async
+  app session. Fix: `Document.__mapper_args__ = {"eager_defaults": True}`
+  so PG RETURNING populates server-generated values during flush.
+- A live-test assert inside the body skipped `app_teardown`, leaking the
+  pooled asyncpg sockets; the GC-cleaned warning then failed a LATER
+  test under `-W error` (Rule 6). Fix: `_run` now awaits the disposal in
+  a `finally` on the owning loop even on failure (applied to the C4/C5
+  test files; C3-era files keep the old shape — queued cleanup).
+- This tranche's first "invalid source" sample (`Watch::` literal block)
+  is valid rst per `test_roundtrip`; the test now uses the proven
+  ConversionError sample (unknown role → docutils errors).

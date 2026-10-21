@@ -1,13 +1,13 @@
 # CURRENT-STATE
 
-Last updated: 2026-10-21 / Ref: C4 green (`e9b59e3`) + C5 staged (0024)
+Last updated: 2026-10-21 / Ref: C5 green (`034db20`) — C6 parked (Rule 4)
 
-- **Phase:** M3 underway. C1–C4 green (CI ×3 each; C4 needed two live-path
-  fix-ups: single-pass ScalarResult + tree-children keying). **C5 staged:**
-  folio documents — GET/PUT with `expected_version`→409, version+history
-  append, server-derived source cache (grimoire `source_format` authority),
-  import-from-source→422, editor/owner save rule, trust-boundary caps.
-  Next: C6 duplication → M3 report → M4 builds.
+- **Phase:** M3 nearly done — C1–C5 all green ×3 (C4 and C5 each needed
+  live-path fix-ups; lessons recorded in their changelogs). Remaining:
+  **C6 grimoire duplication — BLOCKED on Q-M3-16a–e** (five sub-decisions
+  parked in OPEN-QUESTIONS; owner rules, then decision 0025 + router +
+  tests), then the M3-complete report. Migrate head `0005foliochapter`;
+  offline baseline `45 passed, 31 skipped`.
 - **Owner decisions:** 0018 (grimoire rename, per-user categories, auth
   semantics) → **amended by 0020 (2026-10-21):** native hierarchy — categories
   per-Athenaeum (Q-M3-9=A), `grimoires.athenaeum_id` NOT NULL (Q-M3-10=A),

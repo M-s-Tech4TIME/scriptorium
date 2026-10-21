@@ -37,5 +37,7 @@
     since 0004); and `User.id` is `None` until first flush (client-side
     column default applies at INSERT) — flush users before referencing
     their ids.
-- Further owner rulings flowed through 0021 (renamable slugs) and 0022
-  (folio/chapter) — see the C3.6/C3.7 changelog entries and DECISIONS-INDEX.
+- Further owner rulings flowed through 0021 (renamable slugs), 0022
+  (folio/chapter) and 0023/0024 (tree, documents) — see the C3.6–C5
+  changelog entries and DECISIONS-INDEX. C6 duplication is parked on
+  Q-M3-16a–e (OPEN-QUESTIONS, Rule 4).
