@@ -1,21 +1,23 @@
 # HANDOFF
 
-Last updated: 2026-10-21 / M3 complete pending C6 CI — C6 staged (0025)
+Last updated: 2026-10-21 / M3 COMPLETE — C6 green (f3e7bc1) — brain synced
 
 ## Was doing
-M3 C6: decision 0025 (grimoire duplication) — owner ruled Q-M3-16a–e;
-`POST /grimoires/{id}/duplicate` deep-copies grimoire + tree + head
-documents (v1, no history clone), fresh owner-only roster, caller-slug
-or auto-suffix, any owned target library, copy-of-copy allowed;
-`test_duplicate_api.py` (2 live cases); docs + brain.
+M3 C6: decision 0025 (grimoire duplication) — LANDED green ×3 on
+`f3e7bc1` after two live-path fix-ups (missing owner Membership on the
+copy; the copy's own v1 history trace — ruling-c clarified in 0025).
+Q-M3-16a–e were ruled by the owner then implemented same-day.
 
 ## Next steps (in order)
-1. Commit C6, push, verify CI green ×3 (Rule 7).
-2. **M3-complete report to the owner** (all tranches green, micro-default
-   recap).
-3. M4 builds (gated Sphinx builds; docutils 0.23 gate per 0017;
-   packaging `After=redis` systemd note) → dedicated serving phase →
-   dedicated URL-durability phase.
+1. **M3 is complete (C1–C6, all green ×3).** Deliver the M3-complete
+   report to the owner.
+2. M4 builds — gated Sphinx builds; docutils 0.23 gate per 0017;
+   packaging `After=redis` systemd note; sources jail keyed by grimoire
+   id (vetoable micro-default from the plan).
+3. Dedicated phase: serving as a website (decisions pending: build
+   granularity, visibility/publishing, serving mechanics, URL scheme).
+4. Dedicated phase after that: URL durability after renames
+   (aliases/redirects/immutable build identity).
 
 ## Gotchas (carried)
 - Migrate head `0005foliochapter`; verify migration SQL against older

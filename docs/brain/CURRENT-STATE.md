@@ -1,14 +1,18 @@
 # CURRENT-STATE
 
-Last updated: 2026-10-21 / Ref: C6 staged (0025) — all M3 tranches authored
+Last updated: 2026-10-21 / Ref: M3 COMPLETE — C1–C6 all green ×3
 
-- **Phase:** M3 nearly done — C1–C5 green ×3; **C6 (duplication) staged**:
-  `POST /grimoires/{id}/duplicate` deep copy per the owner's Q-M3-16a–e
-  rulings, `test_duplicate_api.py` (2 live cases). Next: C6 CI ×3 →
-  M3-complete report → M4 builds (0017 docutils gate; packaging
-  `After=redis` note) → dedicated serving phase → dedicated
-  URL-durability phase. Migrate head `0005foliochapter`; offline
-  baseline `45 passed, 33 skipped`.
+- **Phase:** **M3 done.** Tranches: C1 0018 design/rename (`c26cd7e`),
+  C2 auth/sessions (`aee1872`), C2.5 login rate limiting 0019
+  (`a6c17bb`), C3 categories/grimoires/members (`d62784e`), C3.5
+  athenaeum layer 0020 (`4b57c82`+fixes), C3.6 renamable slugs 0021
+  (`9fe1280`), C3.7 folio/chapter 0022 (`ab688dc`), C4 tree endpoints
+  0023 (`3fbe4f8`+fix-ups), C5 folio documents 0024 (`5d8d08f`+fix-ups),
+  C6 duplication 0025 (`5b5dee1`+fix-ups). Migrate head
+  `0005foliochapter`; offline baseline `45 passed, 33 skipped`; 12 live
+  API test cases green in CI. **Next: M4 builds** (gated Sphinx; 0017
+  docutils gate; packaging `After=redis` note) → dedicated serving
+  phase → dedicated URL-durability phase.
 - **Owner decisions:** 0018 (grimoire rename, per-user categories, auth
   semantics) → **amended by 0020 (2026-10-21):** native hierarchy — categories
   per-Athenaeum (Q-M3-9=A), `grimoires.athenaeum_id` NOT NULL (Q-M3-10=A),

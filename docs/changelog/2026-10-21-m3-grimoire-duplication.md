@@ -40,8 +40,24 @@ rule set (auto-suffix derivation ×2, explicit collision 409, regex 422,
 cross-library + category reset, foreign target/source 404, editor 403,
 copy-of-copy 201, audit). Offline `45 passed, 33 skipped`.
 
+## CI lessons (post-push fix-ups `2c4a6d4`/`f3e7bc1`)
+
+- The copy endpoint created no `Membership` row: every copy was an
+  unreachable orphan even to its own duplicator (uniform 404) — caught
+  in CI by the copy-of-copy case. Fix: mirror `create_grimoire`, the
+  duplicator becomes the sole owner (ruling b).
+- The copy's own v1 save must leave a history trace (the C5 invariant
+  "every version leaves a trace"); the source's v1..vN provenance stays
+  uncloned. Fix: one new `document_history` row per copied document.
+
+## Gates
+
+ruff check/format · mypy strict (41 files) · `pytest -W error` zero
+warnings · `validate-docs.sh` · CI ×3 verified green on `f3e7bc1`
+(Rule 7).
+
 ## Next
 
-M3 complete — M4 builds (gated Sphinx builds; docutils 0.23 gate per
-0017; packaging `After=redis` note) → dedicated serving phase →
-dedicated URL-durability phase.
+**M3 complete (C1–C6, every tranche green ×3).** Next: M4 builds
+(gated Sphinx per 0017; packaging `After=redis` note) → dedicated
+serving phase → dedicated URL-durability phase.
