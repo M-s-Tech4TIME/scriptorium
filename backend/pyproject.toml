@@ -43,3 +43,11 @@ warn_unused_ignores = true
 module = "docutils.*"
 ignore_missing_imports = true
 follow_imports = "skip"
+
+[[tool.mypy.overrides]]
+# celery likewise ships no py.typed marker; the worker surface in use is
+# pinned and narrow (Celery app/broker wiring, task registration — M4,
+# decision 0026) and is exercised by the M4 tests.
+module = "celery.*"
+ignore_missing_imports = true
+follow_imports = "skip"

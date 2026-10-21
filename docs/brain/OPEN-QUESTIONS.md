@@ -27,4 +27,10 @@ in 0026 §Edge rulings): empty Athenaeum → 422 refusal; empty grimoire →
 skipped + log note; one build at a time per Athenaeum, trigger while
 queued/running → 409.
 
+**Curated default theme base — OPEN (owner question, blocked).**
+The C2/C3 conf.py placeholder is `alabaster` (builtin); the curated
+default theme (0026 mandate 2) still needs the owner's base choice
+before C4 packaging presents the theme story. Runner ethics and all
+C3 mechanics are unaffected; parked at 0026 §C3 mechanics.
+
 No other open questions.

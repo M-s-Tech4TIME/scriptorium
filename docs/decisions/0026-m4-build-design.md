@@ -123,3 +123,51 @@ Ruled A/A/A immediately before C2 implementation:
   **Edge rulings** above: empty Athenaeum → `422`; empty grimoire →
   skipped + log note; one build at a time per Athenaeum (trigger while
   queued/running → `409`).
+
+## C3 mechanics (2026-10-21 — implementation-recorded mechanism micro-defaults, disclosed)
+
+- **Trigger:** `POST /api/v1/athenaeums/{id}/builds` — Athenaeum-owner
+  only; `GET` list/one is owner-or-member (membership on any grimoire
+  inside). Foreign Athenaeum → uniform `404` (IDOR rule in force).
+- **E1 mechanics:** the trigger pre-check counts grimoires — zero →
+  `422` ("nothing to build"). A library whose books are ALL empty still
+  passes the pre-check and fails at **run time** (`status=failed`,
+  log note) — per-book emptiness is E2 territory, not E1.
+- **E3 + numbering serialization:** the active-build check and the
+  `max(build_number)+1` insert run in one transaction guarded by
+  `pg_advisory_xact_lock` (single-int8 form, keyed on the first half of
+  the Athenaeum id) — concurrent triggers cannot race past the lock.
+- **Dispatch:** `SC_BUILD_DISPATCH` — `celery` (prod default; task
+  `app.worker.tasks.run_athenaeum_build` on queue `scriptorium`; broker
+  from `CELERY_BROKER_URL` env or `/etc/scriptorium/config.env`,
+  fail-loud when missing) or `inline` (dev/CI only: the request thread
+  runs the same `app.sphinx.execute` executor and the row is refreshed
+  so the 201 carries the final status).
+- **Executor:** a fresh async engine per run, awaited-disposed in
+  `finally` (the cached app engine never crosses event loops — M3
+  lesson). Status machine `queued → running → ok|failed` writes
+  `started/finished/log_path/artifact_path`; staging/plan failures mark
+  `failed` and drop a crash log under the build workspace.
+- **Audit:** action `build_triggered` (grimoire_id NULL — Athenaum-
+  scope action keyed in meta).
+- **Sandbox mechanics (P3):** the child environment is a whitelist —
+  `PATH`, `LC_ALL=C.UTF-8`, `PYTHONHASHSEED=0`, `HOME` inside the build
+  workspace; inherited keys (proxies, secrets) are structurally absent.
+  RLIMITs: `SC_SPHINX_CPU_SECONDS=600`, `SC_SPHINX_MEMORY_BYTES=1.5 GiB`,
+  `SC_SPHINX_MAX_FILE_BYTES=512 MiB`, core=0; wall timeout
+  `SC_SPHINX_TIMEOUT_S=900`. Command: `python -m sphinx -W -b html . _build/html`.
+  Honest limitation (from the P3 ruling: no containers): OS-level
+  egress isolation is by *construction* of the pinned stack — nothing
+  in it dials out and no proxy/credential env exists — not a kernel
+  namespace.
+- **Paths:** FHS defaults; dev/CI overrides `SC_ARTIFACT_ROOT`,
+  `SC_BUILD_ROOT`, `SC_BUILD_PYTHON`. Disclosed micro-default:
+  `SC_BUILD_PYTHON` falls back to `sys.executable` pre-packaging —
+  production must point it at the isolated build venv (packaging, C4).
+  On `ok`: artifact `{SC_ARTIFACT_ROOT}/{athenaeum}/{build_number}/`
+  (html/ + build.log), staging removed. On `failed`: log kept under
+  `{SC_BUILD_ROOT}/{build_id}/build.log` (workspace retained; retention
+  decisions are the serving phase's, P4).
+- **Curated theme base:** queued for C3 but **not decided here**
+  (Rule 4) — `alabaster` remains the placeholder; the owner question
+  precedes any C4 packaging.

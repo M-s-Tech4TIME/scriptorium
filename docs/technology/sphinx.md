@@ -16,7 +16,19 @@
   deterministic (`plan_site` → identical bytes for identical input) and
   fail loud (`StagingError` → build failed, never corrected-guess
   output). **Interim theme = `alabaster` placeholder; the curated default
-  theme lands in C3 (0026 mandate 2).** Edge rulings E1–E3: empty
-  Athenaeum → 422; empty book → skip + log note; one build per Athenaeum
-  at a time (C3).
+  theme is an owner-question before C4 (0026 mandate 2).** Edge rulings
+  E1–E3: empty Athenaeum → 422; empty book → skip + log note; one build
+  per Athenaeum at a time (409, enforced in C3).
+- **Runner (M4-C3, 0026 P3):** `app/sphinx/runner.py` materializes the
+  plan into `/var/lib/scriptorium/builds/{build_id}/` (FHS default;
+  `SC_BUILD_ROOT` dev override) and runs `python -m sphinx -W -b html .
+  _build/html` — `-W` is the `ok` gate. Child env is a strict whitelist
+  (`PATH`, `LC_ALL`, `PYTHONHASHSEED=0`, `HOME` inside the workspace;
+  `app.sphinx.runner.child_env`); RLIMITs CPU 600 s / AS 1.5 GiB / FSIZE
+  512 MiB / core 0 (`SC_SPHINX_*` overrides); wall timeout 900 s.
+  Honest limitation (P3 ruled out containers): egress isolation comes
+  by construction of the pinned stack, not a kernel namespace.
+  Artifact on `ok`: `{SC_ARTIFACT_ROOT}/{athenaeum}/{build_number}/`
+  (html/ + build.log); `SC_BUILD_PYTHON` defaults to `sys.executable`
+  pre-packaging (isolated build venv required in production, C4).
 - Verified: 2026-10-16 (sphinx-doc.org/PyPI; lock resolved 2026-10-16).
