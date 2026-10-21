@@ -24,8 +24,10 @@ Last updated: 2026-10-20 / Ref: be1a220 (M2 conversion green)
 | 0018 | M3 design: grimoire rename (full, incl. DB), per-user categories, auth/document/tree API semantics | accepted | 2026-10-20 | owner |
 | 0019 | Login rate limiting (Q-002=B): app-level Redis fixed window, fail-closed, XFF untrusted | accepted | 2026-10-20 | owner |
 | 0020 | Athenaeum layer = native hierarchy (Q-M3-9…13=A): athenaeums→categories→grimoires, delete-refusal, grimoire-level sharing, nested sidebar | accepted | 2026-10-21 | owner |
+| 0021 | Slugs renamable at every layer (D0=B, amends 0018); uniform 409/422 rules; URL durability deferred to its own phase | accepted | 2026-10-21 | owner |
+| 0022 | Folio + chapter vocabulary (Q-M3-14=A; amends 0010 kinds); single-membership confirmed; duplication ≠ membership | accepted | 2026-10-21 | owner |
 
-Full records: `docs/decisions/0001-*.md` … `0020-*.md`. 
+Full records: `docs/decisions/0001-*.md` … `0022-*.md`. 
 Pending: none.
 
 Last updated: 2026-10-21 / Ref: C3.5 athenaeum layer

@@ -1,13 +1,14 @@
 # CURRENT-STATE
 
-Last updated: 2026-10-21 / Ref: C3.5 green (`4b57c82`/`30dd8b4`/`b6a453d`) + C3.6 staged (0021)
+Last updated: 2026-10-21 / Ref: C3.6 green (`9fe1280`) + C3.7 staged (0022)
 
-- **Phase:** M3 underway. C1–C3.5 green (CI ×3 each); C3.5 fixed-ups landed.
-  **C3.6 staged:** decision 0021 — slugs renamable at every layer
-  (athenaeum per-owner 409, grimoire global 409; allowlist/null → 422),
-  two new live tests, docs. Next: C3.7 folio/chapter rename (0005),
-  C4 tree (0023: delete-refusal D1=A, owner-only D2=A), C5 documents,
-  C6 duplication (0023→Q-M3-16 numbering exact at that tranche).
+- **Phase:** M3 underway. C1–C3.6 green (CI ×3 each). **C3.7 staged:**
+  decision 0022 — `nodes.kind` now `chapter|folio` (migration 0005
+  rewrites values under a dropped-then-recreated CHECK), models/GLOSSARY/
+  data-model/changelog; C4 will be authored with the new vocabulary.
+  Also recorded: single section membership stands; grimoire duplication
+  is its own tranche after C5 (Q-M3-16). Migrate head now
+  `0005foliochapter`.
 - **Owner decisions:** 0018 (grimoire rename, per-user categories, auth
   semantics) → **amended by 0020 (2026-10-21):** native hierarchy — categories
   per-Athenaeum (Q-M3-9=A), `grimoires.athenaeum_id` NOT NULL (Q-M3-10=A),

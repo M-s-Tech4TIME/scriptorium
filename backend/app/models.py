@@ -191,7 +191,7 @@ class Membership(Base):
 
 
 class Node(Base):
-    """One ordered-tree row (kind category|page) driving TOC + toctree (0010).
+    """One ordered-tree row (kind chapter|folio, 0022) driving TOC + toctree.
 
     Root rows have parent_id NULL. Slug uniqueness is enforced per sibling set via
     partial indexes (plain UNIQUE would let NULL parent_ids collide in PG).
@@ -211,7 +211,7 @@ class Node(Base):
     slug: Mapped[str] = mapped_column(String(160), nullable=False)
     position: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
     __table_args__ = (
-        CheckConstraint("kind IN ('category', 'page')", name="ck_nodes_kind"),
+        CheckConstraint("kind IN ('chapter', 'folio')", name="ck_nodes_kind"),
         Index(
             "uq_nodes_root_slug",
             "grimoire_id",
