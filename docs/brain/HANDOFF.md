@@ -1,21 +1,18 @@
 # HANDOFF
 
-Last updated: 2026-10-21 / C3.7 folio/chapter staged (0022) — brain sync
+Last updated: 2026-10-21 / C4 tree endpoints staged (0023) — brain sync
 
 ## Was doing
-M3 C3.7: decision 0022 (folio + chapter vocabulary; single-membership
-confirmation) — migration `0005` rewrites `nodes.kind` (CHECK dropped →
-data → CHECK recreated, `page→folio`, `category→chapter`), models
-docstrings, GLOSSARY, data-model, changelog.
+M3 C4: decision 0023 (D1=A delete-refusal incl. document check, D2=A
+owner-only) — `routers/nodes.py` (GET `/tree`, POST/PATCH/DELETE nodes,
+cycle guard, displacement reorder, sibling-set slugs per 0021),
+`test_tree_api.py` (4 live cases), api.md tree section, changelog.
 
 ## Next steps (in order)
-1. Commit C3.7, push, verify CI green ×3 (Rule 7).
-2. C4 tree endpoints (decision 0023: D1=A delete-refusal incl. document
-   check, D2=A owner-only, cycle guard, displacement reorder) —
-   `test_tree_api.py`.
-3. C5 document endpoints (`expected_version`→409, history append,
-   import→422, D2 role mapping).
-4. C6 grimoire duplication (deep copy; Q-M3-16) → M3 report → M4.
+1. Commit C4, push, verify CI green ×3 (Rule 7).
+2. C5 document endpoints (`expected_version`→409, history append, import→422,
+   D2 role mapping), `test_document_api.py`.
+3. C6 grimoire duplication (deep copy; Q-M3-16) → M3 report → M4.
 
 ## Gotchas (carried)
 - Migrate head `0005foliochapter`; verify migration SQL against older

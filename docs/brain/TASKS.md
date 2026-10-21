@@ -3,12 +3,9 @@
 Last updated: 2026-10-21 / M3 C3.5 staged with this sync
 
 ## In progress (max 1–2)
-- C3.7 folio/chapter vocabulary (0022) — staged, needs commit + CI verify ×3.
+- C4 tree endpoints (0023) — staged, needs commit + CI verify ×3.
 
 ## Todo (M3 next)
-- [ ] C4 tree endpoints (0023: D1=A, D2=A) — GET `/grimoires/{id}/tree`,
-      node create/rename/move/reorder/delete, atomic sibling reorder,
-      per-sibling-set slugs (`chapter|folio` kinds, post-0005)
 - [ ] C5 document endpoints (expected_version→409, history append, import→422)
 - [ ] C6 grimoire duplication (deep copy; 0024/Q-M3-16)
 - [ ] M3-complete report after C6 green

@@ -1,14 +1,12 @@
 # CURRENT-STATE
 
-Last updated: 2026-10-21 / Ref: C3.6 green (`9fe1280`) + C3.7 staged (0022)
+Last updated: 2026-10-21 / Ref: C3.6+C3.7 green (`9fe1280`/`ab688dc`) + C4 staged (0023)
 
-- **Phase:** M3 underway. C1–C3.6 green (CI ×3 each). **C3.7 staged:**
-  decision 0022 — `nodes.kind` now `chapter|folio` (migration 0005
-  rewrites values under a dropped-then-recreated CHECK), models/GLOSSARY/
-  data-model/changelog; C4 will be authored with the new vocabulary.
-  Also recorded: single section membership stands; grimoire duplication
-  is its own tranche after C5 (Q-M3-16). Migrate head now
-  `0005foliochapter`.
+- **Phase:** M3 underway. C1–C3.7 green (CI ×3 each; migrate head
+  `0005foliochapter`). **C4 staged:** tree endpoints — chapters/folios,
+  delete-refusal, owner-only mutations, cycle guard, displacement
+  reorder, renamable node slugs; `test_tree_api.py` (4 live cases).
+  Next: C5 documents → C6 duplication → M3 report → M4 builds.
 - **Owner decisions:** 0018 (grimoire rename, per-user categories, auth
   semantics) → **amended by 0020 (2026-10-21):** native hierarchy — categories
   per-Athenaeum (Q-M3-9=A), `grimoires.athenaeum_id` NOT NULL (Q-M3-10=A),

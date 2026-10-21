@@ -61,6 +61,23 @@ is equally unreachable).
 | PATCH `/grimoires/{id}` `{title?, slug?, theme?, category_id?, athenaeum_id?}` | owner (`403` member) | explicit `category_id: null` clears to Uncategorized; `source_format` immutable; **`slug` renamable (0021)** — global uniqueness → `409`, `[a-z0-9-]+`/`null` → `422`; **`athenaeum_id` = cross-Athenaeum move** → target must be owned (`404`), `null` target → `422` (no floating grimoires), same-id no-op; audit `grimoire_moved` on move else `grimoire_patched` |
 | DELETE `/grimoires/{id}` | owner (`403` member) | cascades nodes/documents/builds/memberships |
 
+## Tree — Chapters & Folios inside a Grimoire (`routers/nodes.py`, 0023)
+
+The book's ordered tree drives the TOC/`toctree` (Sphinx/RTD flexibility,
+unbounded depth). Vocabulary per 0022: chapters = in-book folders
+(`kind 'chapter'`), folios = page files (`kind 'folio'`).
+
+| Route | Access | Notes |
+|---|---|---|
+| GET `/grimoires/{gid}/tree` | any member | `{grimoire_id, nodes:[{id,parent_id,kind,title,slug,position,children}]}` — siblings ordered 1..n by `position` |
+| POST `/grimoires/{gid}/nodes` `{parent_id?, kind, title, slug}` | owner | `parent_id` omitted/`null` → root set; slug `[a-z0-9-]+` → `422`; sibling-set collision → `409`; position auto = max+1 |
+| PATCH `/grimoires/{gid}/nodes/{id}` `{title?, slug?, parent_id?, position?}` | owner | slugs renamable (0021: sibling-set uniqueness → `409`, `[a-z0-9-]+`/`null` → `422`); re-parent by `parent_id` presence — same Grimoire only (`404`), `null` = return to root set; **cycle guard `409`** (never under self/descendant); `position` = 1-based insert-displacement (Q-M3-4=A, one transaction), position `null` → `422` |
+| DELETE `/grimoires/{gid}/nodes/{id}` | owner | **refused `409` while the node holds sub-nodes or a folio document (D1=A)** — nothing cascades by choice; emptied → `204`, no audit row on refusal |
+
+Kinds do not restrict nesting (any node may parent another — Sphinx allows
+documents as toctree parents; 0023 micro-default). Foreign
+Grimoire/node ids → uniform `404` (IDOR).
+
 ## Members (`routers/grimoires.py`)
 
 | Route | Access | Notes |
@@ -77,5 +94,6 @@ stays grimoire-level only (0020 Q-M3-12=A).
 ## Audit actions (through this tranche)
 
 `category_created|patched|deleted`, `grimoire_created|patched|deleted|moved`,
-`member_added|role_changed|removed`, `athenaeum_created|patched|deleted`
+`member_added|role_changed|removed`, `athenaeum_created|patched|deleted`,
+`node_created|patched|moved|deleted`
 (refused deletes write no audit row — nothing happened).

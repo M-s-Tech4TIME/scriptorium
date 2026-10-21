@@ -26,8 +26,9 @@ Last updated: 2026-10-20 / Ref: be1a220 (M2 conversion green)
 | 0020 | Athenaeum layer = native hierarchy (Q-M3-9…13=A): athenaeums→categories→grimoires, delete-refusal, grimoire-level sharing, nested sidebar | accepted | 2026-10-21 | owner |
 | 0021 | Slugs renamable at every layer (D0=B, amends 0018); uniform 409/422 rules; URL durability deferred to its own phase | accepted | 2026-10-21 | owner |
 | 0022 | Folio + chapter vocabulary (Q-M3-14=A; amends 0010 kinds); single-membership confirmed; duplication ≠ membership | accepted | 2026-10-21 | owner |
+| 0023 | Tree endpoints (D1=A delete-refusal, D2=A owner-only): chapters/folios, cycle guard, displacement reorder, nesting unrestricted (RTD) | accepted | 2026-10-21 | owner |
 
-Full records: `docs/decisions/0001-*.md` … `0022-*.md`. 
+Full records: `docs/decisions/0001-*.md` … `0023-*.md`. 
 Pending: none.
 
 Last updated: 2026-10-21 / Ref: C3.5 athenaeum layer

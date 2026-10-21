@@ -8,6 +8,7 @@ from app.routers import athenaeums as athenaeums_router
 from app.routers import auth as auth_router
 from app.routers import categories as categories_router
 from app.routers import grimoires as grimoires_router
+from app.routers import nodes as nodes_router
 
 APP_VERSION = "0.0.0"
 
@@ -18,6 +19,7 @@ def create_app() -> FastAPI:
     app.include_router(athenaeums_router.router)
     app.include_router(categories_router.router)
     app.include_router(grimoires_router.router)
+    app.include_router(nodes_router.router)
 
     @app.get("/api/v1/health")
     def health() -> dict[str, str]:
