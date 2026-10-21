@@ -59,6 +59,7 @@ is equally unreachable).
 | POST `/grimoires` `{athenaeum_id,slug,title,source_format?,theme?,category_id?}` | owner of the athenaeum | missing `athenaeum_id` → `422`; foreign athenaeum → `404`; category must belong to **that same Athenaeum** (`404` otherwise); slug allowlist `[a-z0-9-]+` → else `422`; dup slug → `409`; creator becomes `owner` member atomically |
 | GET `/grimoires/{id}` | any member | `404` outsider |
 | PATCH `/grimoires/{id}` `{title?, slug?, theme?, category_id?, athenaeum_id?}` | owner (`403` member) | explicit `category_id: null` clears to Uncategorized; `source_format` immutable; **`slug` renamable (0021)** — global uniqueness → `409`, `[a-z0-9-]+`/`null` → `422`; **`athenaeum_id` = cross-Athenaeum move** → target must be owned (`404`), `null` target → `422` (no floating grimoires), same-id no-op; audit `grimoire_moved` on move else `grimoire_patched` |
+| POST `/grimoires/{id}/duplicate` `{athenaeum_id?, slug?, title?}` | owner (`403` member) | **deep copy (0025)**: tree + head documents as v1 (no history clone), fresh owner-only roster, same `source_format`/`theme`; slug caller-supplied (`409` collision, `422` regex) or auto-derived `…-copy`, `…-copy-2`…; target library any the caller owns (default source's; foreign → `404`); copy-of-copy allowed; audit `grimoire_duplicated` |
 | DELETE `/grimoires/{id}` | owner (`403` member) | cascades nodes/documents/builds/memberships |
 
 ## Tree — Chapters & Folios inside a Grimoire (`routers/nodes.py`, 0023)
@@ -110,5 +111,5 @@ stays grimoire-level only (0020 Q-M3-12=A).
 
 `category_created|patched|deleted`, `grimoire_created|patched|deleted|moved`,
 `member_added|role_changed|removed`, `athenaeum_created|patched|deleted`,
-`node_created|patched|moved|deleted`, `document_saved`
+`node_created|patched|moved|deleted`, `document_saved`, `grimoire_duplicated`
 (refused deletes/saves write no audit row — nothing happened).

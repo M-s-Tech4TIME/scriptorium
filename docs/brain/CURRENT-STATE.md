@@ -1,13 +1,14 @@
 # CURRENT-STATE
 
-Last updated: 2026-10-21 / Ref: C5 green (`034db20`) — C6 parked (Rule 4)
+Last updated: 2026-10-21 / Ref: C6 staged (0025) — all M3 tranches authored
 
-- **Phase:** M3 nearly done — C1–C5 all green ×3 (C4 and C5 each needed
-  live-path fix-ups; lessons recorded in their changelogs). Remaining:
-  **C6 grimoire duplication — BLOCKED on Q-M3-16a–e** (five sub-decisions
-  parked in OPEN-QUESTIONS; owner rules, then decision 0025 + router +
-  tests), then the M3-complete report. Migrate head `0005foliochapter`;
-  offline baseline `45 passed, 31 skipped`.
+- **Phase:** M3 nearly done — C1–C5 green ×3; **C6 (duplication) staged**:
+  `POST /grimoires/{id}/duplicate` deep copy per the owner's Q-M3-16a–e
+  rulings, `test_duplicate_api.py` (2 live cases). Next: C6 CI ×3 →
+  M3-complete report → M4 builds (0017 docutils gate; packaging
+  `After=redis` note) → dedicated serving phase → dedicated
+  URL-durability phase. Migrate head `0005foliochapter`; offline
+  baseline `45 passed, 33 skipped`.
 - **Owner decisions:** 0018 (grimoire rename, per-user categories, auth
   semantics) → **amended by 0020 (2026-10-21):** native hierarchy — categories
   per-Athenaeum (Q-M3-9=A), `grimoires.athenaeum_id` NOT NULL (Q-M3-10=A),

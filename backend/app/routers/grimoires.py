@@ -27,7 +27,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.audit import add_audit
 from app.auth import get_current_user_id, require_membership
 from app.db import get_session
-from app.models import Athenaeum, Grimoire, GrimoireCategory, Membership, Node, User
+from app.models import (
+    Athenaeum,
+    Document,
+    Grimoire,
+    GrimoireCategory,
+    Membership,
+    Node,
+    User,
+)
 
 router = APIRouter(prefix="/api/v1/grimoires", tags=["grimoires"])
 
@@ -281,6 +289,160 @@ async def delete_grimoire(
     )
     await session.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+class DuplicateIn(BaseModel):
+    athenaeum_id: uuid.UUID | None = None  # default: the source's library
+    slug: str | None = Field(default=None, min_length=1, max_length=120)
+    title: str | None = Field(default=None, min_length=1, max_length=200)
+
+
+async def _free_auto_slug(base: str, session: AsyncSession) -> str:
+    """0025 ruling a: `base-copy`, then `-copy-2`, …; first free wins."""
+    candidates = [f"{base}-copy"] + [f"{base}-copy-{n}" for n in range(2, 101)]
+    for candidate in candidates:
+        taken = await session.scalar(
+            select(Grimoire.id).where(Grimoire.slug == candidate)
+        )
+        if taken is None:
+            return candidate
+    raise HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail="No free copy slug could be derived.",
+    )
+
+
+def _parent_first(nodes: list[Node]) -> list[Node]:
+    """Order nodes so parents precede children (roots, then BFS by level)."""
+    by_parent: dict[uuid.UUID | None, list[Node]] = {}
+    for node in nodes:
+        by_parent.setdefault(node.parent_id, []).append(node)
+    result: list[Node] = []
+    frontier: list[uuid.UUID | None] = [None]
+    while frontier:
+        level = frontier
+        frontier = []
+        for parent_id in level:
+            for node in by_parent.get(parent_id, []):
+                result.append(node)
+                frontier.append(node.id)
+    if len(result) != len(nodes):  # unreachables mean a cycle API rules forbid
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Source tree is inconsistent; duplication refused.",
+        )
+    return result
+
+
+@router.post("/{grimoire_id}/duplicate", status_code=status.HTTP_201_CREATED)
+async def duplicate_grimoire(
+    grimoire_id: uuid.UUID,
+    body: DuplicateIn,
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, object]:
+    """Deep copy (0025): grimoire + tree + head documents; fresh roster, v1."""
+    grimoire, _ = await _role_grimoire(grimoire_id, user_id, session, need_owner=True)
+
+    target_athenaeum = body.athenaeum_id or grimoire.athenaeum_id
+    if body.athenaeum_id is not None and body.athenaeum_id != grimoire.athenaeum_id:
+        await _own_athenaeum(body.athenaeum_id, user_id, session)  # foreign → 404
+
+    if body.slug is not None:
+        _check_slug(body.slug)
+        new_slug = body.slug
+    else:
+        new_slug = await _free_auto_slug(grimoire.slug, session)
+    taken = await session.scalar(select(Grimoire.id).where(Grimoire.slug == new_slug))
+    if taken is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail="Slug already exists."
+        )
+    new_title = body.title if body.title is not None else f"{grimoire.title} (copy)"
+
+    same_library = target_athenaeum == grimoire.athenaeum_id
+    copy_id = uuid.uuid4()  # explicit ids: client-side defaults land at flush
+    copy = Grimoire(
+        id=copy_id,
+        athenaeum_id=target_athenaeum,
+        slug=new_slug,
+        title=new_title,
+        source_format=grimoire.source_format,
+        theme=grimoire.theme,
+        created_by=user_id,
+        category_id=grimoire.category_id if same_library else None,
+    )
+    session.add(copy)
+
+    source_nodes = list(
+        (
+            await session.scalars(
+                select(Node)
+                .where(Node.grimoire_id == grimoire_id)
+                .order_by(Node.position, Node.id)
+            )
+        ).all()
+    )
+    ordered = _parent_first(source_nodes)
+    id_map: dict[uuid.UUID, uuid.UUID] = {}
+    for source_node in ordered:
+        node_id = uuid.uuid4()
+        session.add(
+            Node(
+                id=node_id,
+                grimoire_id=copy_id,
+                parent_id=(
+                    id_map[source_node.parent_id]
+                    if source_node.parent_id is not None
+                    else None
+                ),
+                kind=source_node.kind,
+                title=source_node.title,
+                slug=source_node.slug,
+                position=source_node.position,
+            )
+        )
+        id_map[source_node.id] = node_id
+
+    source_docs = list(
+        (
+            await session.scalars(
+                select(Document).where(
+                    Document.node_id.in_(
+                        select(Node.id).where(Node.grimoire_id == grimoire_id)
+                    )
+                )
+            )
+        ).all()
+    )
+    for source_doc in source_docs:
+        session.add(
+            Document(
+                node_id=id_map[source_doc.node_id],
+                tiptap_json=source_doc.tiptap_json,
+                source_text=source_doc.source_text,
+                source_format=source_doc.source_format,
+                version=1,  # ruling c: head content as v1, no history clone
+                updated_by=user_id,
+            )
+        )
+
+    add_audit(
+        session,
+        actor=user_id,
+        action="grimoire_duplicated",
+        grimoire_id=copy_id,
+        meta={
+            "source_id": str(grimoire_id),
+            "slug": new_slug,
+            "nodes": len(ordered),
+            "documents": len(source_docs),
+        },
+    )
+    await session.commit()
+    copy_row = await session.get(Grimoire, copy_id)
+    assert copy_row is not None
+    return _grimoire_body(copy_row, "owner")
 
 
 @router.get("/{grimoire_id}/members")

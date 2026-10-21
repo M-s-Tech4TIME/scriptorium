@@ -1,12 +1,11 @@
 # TASKS
 
-Last updated: 2026-10-21 / M3 C5 green; C6 parked on Q-M3-16
+Last updated: 2026-10-21 / M3 C6 staged with this sync
 
 ## In progress (max 1–2)
-- (none — C6 blocked on owner rulings Q-M3-16a–e, see OPEN-QUESTIONS)
+- C6 grimoire duplication (0025) — staged, needs commit + CI verify ×3.
 
 ## Todo (M3 next)
-- [ ] C6 grimoire duplication (after Q-M3-16a–e ruling; decision 0025)
 - [ ] M3-complete report after C6 green
 - [ ] Runner/doc pipeline (M4): gated Sphinx builds; docutils 0.23 gate
       recorded in 0017; packaging `After=redis` systemd note.
@@ -25,6 +24,11 @@ Last updated: 2026-10-21 / M3 C5 green; C6 parked on Q-M3-16
 - [x] M3 C3.5: migration 0004 + athenaeum router + re-homing + move + tests
       (4b57c82 + CI fixes 30dd8b4/b6a453d — green ×3)
 - [x] M3 C3.6: renamable slugs everywhere (0021; 9fe1280 green ×3)
+- [x] M3 C3.7: folio/chapter vocabulary + migration 0005 (0022; ab688dc green ×3)
+- [x] M3 C4: tree endpoints, D1/D2 rulings (0023; 3fbe4f8 + fix-ups, green ×3)
+- [x] M3 C5: folio documents, concurrency/import/history (0024; green ×3)
+- [x] Owner ruled Q-M3-16a–e 2026-10-21 (duplication design)
+- [x] M3 C6: grimoire duplication (0025) — staged with this sync
 - [x] Owner rulings 2026-10-21: D0=B renamable slugs (0021), grimoire-slug
       0018-amendment, single section membership confirmed, chapters (0022),
       duplication phase (Q-M3-16 later), D1=A/D2=A tree semantics

@@ -1,23 +1,21 @@
 # HANDOFF
 
-Last updated: 2026-10-21 / C5 green (034db20) — C6 parked on Q-M3-16 sub-decisions
+Last updated: 2026-10-21 / M3 complete pending C6 CI — C6 staged (0025)
 
 ## Was doing
-M3 C5: decision 0024 (folio documents) — LANDED green ×3 on `034db20`
-(two live-path fix-ups recorded in the C5 changelog: eager_defaults for
-the onupdate timestamp; `_run` now guarantees the awaited disposal even
-on failing asserts). API surface: GET/PUT `/document` +
-`/document/history` with expected_version→409, version+history append,
-server-derived source cache, import→422, editor/owner saves.
+M3 C6: decision 0025 (grimoire duplication) — owner ruled Q-M3-16a–e;
+`POST /grimoires/{id}/duplicate` deep-copies grimoire + tree + head
+documents (v1, no history clone), fresh owner-only roster, caller-slug
+or auto-suffix, any owned target library, copy-of-copy allowed;
+`test_duplicate_api.py` (2 live cases); docs + brain.
 
 ## Next steps (in order)
-1. **C6 is blocked on Q-M3-16a–e** (PARKED in OPEN-QUESTIONS per Rule 4):
-   duplication slug source, member scope, history depth, cross-library
-   copies, copy-of-copy. Present to owner; implement after ruling
-   (decision 0025) → M3-complete report.
-2. M4 next (gated Sphinx builds; docutils 0.23 gate per 0017; packaging
-   `After=redis` systemd note); then dedicated serving + URL-durability
-   phases.
+1. Commit C6, push, verify CI green ×3 (Rule 7).
+2. **M3-complete report to the owner** (all tranches green, micro-default
+   recap).
+3. M4 builds (gated Sphinx builds; docutils 0.23 gate per 0017;
+   packaging `After=redis` systemd note) → dedicated serving phase →
+   dedicated URL-durability phase.
 
 ## Gotchas (carried)
 - Migrate head `0005foliochapter`; verify migration SQL against older
