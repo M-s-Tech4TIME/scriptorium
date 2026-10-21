@@ -1,12 +1,13 @@
 # CURRENT-STATE
 
-Last updated: 2026-10-21 / Ref: C3.6+C3.7 green (`9fe1280`/`ab688dc`) + C4 staged (0023)
+Last updated: 2026-10-21 / Ref: C4 green (`e9b59e3`) + C5 staged (0024)
 
-- **Phase:** M3 underway. C1–C3.7 green (CI ×3 each; migrate head
-  `0005foliochapter`). **C4 staged:** tree endpoints — chapters/folios,
-  delete-refusal, owner-only mutations, cycle guard, displacement
-  reorder, renamable node slugs; `test_tree_api.py` (4 live cases).
-  Next: C5 documents → C6 duplication → M3 report → M4 builds.
+- **Phase:** M3 underway. C1–C4 green (CI ×3 each; C4 needed two live-path
+  fix-ups: single-pass ScalarResult + tree-children keying). **C5 staged:**
+  folio documents — GET/PUT with `expected_version`→409, version+history
+  append, server-derived source cache (grimoire `source_format` authority),
+  import-from-source→422, editor/owner save rule, trust-boundary caps.
+  Next: C6 duplication → M3 report → M4 builds.
 - **Owner decisions:** 0018 (grimoire rename, per-user categories, auth
   semantics) → **amended by 0020 (2026-10-21):** native hierarchy — categories
   per-Athenaeum (Q-M3-9=A), `grimoires.athenaeum_id` NOT NULL (Q-M3-10=A),

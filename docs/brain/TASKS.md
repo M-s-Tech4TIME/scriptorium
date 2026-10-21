@@ -1,13 +1,12 @@
 # TASKS
 
-Last updated: 2026-10-21 / M3 C3.5 staged with this sync
+Last updated: 2026-10-21 / M3 C5 staged with this sync
 
 ## In progress (max 1–2)
-- C4 tree endpoints (0023) — staged, needs commit + CI verify ×3.
+- C5 folio documents (0024) — staged, needs commit + CI verify ×3.
 
 ## Todo (M3 next)
-- [ ] C5 document endpoints (expected_version→409, history append, import→422)
-- [ ] C6 grimoire duplication (deep copy; 0024/Q-M3-16)
+- [ ] C6 grimoire duplication (deep copy; Q-M3-16)
 - [ ] M3-complete report after C6 green
 - [ ] Runner/doc pipeline (M4): gated Sphinx builds; docutils 0.23 gate
       recorded in 0017; packaging `After=redis` systemd note.

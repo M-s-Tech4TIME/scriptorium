@@ -78,6 +78,21 @@ Kinds do not restrict nesting (any node may parent another — Sphinx allows
 documents as toctree parents; 0023 micro-default). Foreign
 Grimoire/node ids → uniform `404` (IDOR).
 
+## Folio documents (`routers/documents.py`, 0024)
+
+Content of a folio (or any tree node): TipTap JSON canonical, source
+server-derived (Q-M3-3=A). Optimistic concurrency per Q-M3-2=A.
+
+| Route | Access | Notes |
+|---|---|---|
+| GET `/grimoires/{gid}/nodes/{nid}/document` | any member | `404` until the first save |
+| PUT `…/document` `{tiptap_json \| source_text, expected_version}` | editor/owner (`403` viewer) | exactly one content field; `expected_version` required (`0` = create assertion); mismatch → `409` with expected/current, nothing written; import mode runs the M2 importer, `ConversionError` → `422`; every save: version+1, history append, source re-derived from canonical TipTap via the grimoire's `source_format`; audit `document_saved` |
+| GET `…/document/history` | any member | metadata list `{version, author, at}` — blobs omitted (0024); restore is a later phase |
+
+Size caps at the trust boundary (Rule 2): `source_text` ≤ 1,000,000
+chars, serialized `tiptap_json` ≤ 2,000,000 chars → `422`. Cross-grimoire
+node addressing → uniform `404` (IDOR).
+
 ## Members (`routers/grimoires.py`)
 
 | Route | Access | Notes |
@@ -95,5 +110,5 @@ stays grimoire-level only (0020 Q-M3-12=A).
 
 `category_created|patched|deleted`, `grimoire_created|patched|deleted|moved`,
 `member_added|role_changed|removed`, `athenaeum_created|patched|deleted`,
-`node_created|patched|moved|deleted`
-(refused deletes write no audit row — nothing happened).
+`node_created|patched|moved|deleted`, `document_saved`
+(refused deletes/saves write no audit row — nothing happened).
