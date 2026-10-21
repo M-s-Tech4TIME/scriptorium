@@ -1,19 +1,18 @@
 # TASKS
 
-Last updated: 2026-10-21 / M4-C1 staged (0026)
+Last updated: 2026-10-21 / M4-C3 LANDED (1e1637e, CI ×3)
 
 ## In progress (max 1–2)
-- M4-C3: runner + Celery + build endpoints (E3 409; owner POST, member GET)
+- Owner question: curated default theme base (0026 mandate 2) — ask
+  before C4 packaging.
+- M4-C4: packaging (build venv, worker After=redis, config keys) +
+  0017 docutils-0.23 probe mechanics + M4-complete report.
 
-## Todo (M4 next — C3/C4)
-- [x] M4-C2 sourcegen: TipTap → per-folio rst/md (M2 exporters), chapter
-      toctrees, one conf.py per Athenaeum; offline unit tests — LANDED
-      3a15b52 (59 passed, 33 skipped)
-- [ ] M4-C3 runner + Celery: sandbox subprocess (`-W`), artifact dir,
-      status machine, POST/GET build endpoints (owner/member), Sphinx
-      9.1.0 into locked stack + technology docs; live tests
-- [ ] M4-C4: packaging `After=redis` note; 0017 docutils-0.23 probe
-      mechanics; M4-complete report + brain
+## Todo (M4 next — C4 + phases)
+- [ ] M4-C4 packaging: isolated build venv + `SC_BUILD_PYTHON`,
+      unit `scriptorium-worker` `After=redis`, `config.env` build keys
+      (`CELERY_BROKER_URL`, `SC_*`); 0017 docutils-0.23 probe
+      mechanics; M4-complete report + brain.
 - [ ] Serving phase (resolve Q-SERVE-A…E first) → dedicated phase
 - [ ] URL-durability phase after serving
 - [ ] Distribution phase (Q-DIST-A…D) + React shell format — concepts
@@ -22,6 +21,9 @@ Last updated: 2026-10-21 / M4-C1 staged (0026)
 - [x] Owner ruled M4 C2/C3 edge cases A/A/A 2026-10-21 (E1 422-empty,
       E2 skip+note, E3 409-serialization) — recorded 0026 §Edge rulings
 - [x] M4-C2: deterministic sourcegen + 14 offline tests (3a15b52, ×3)
+- [x] M4-C3: runner + Celery + build endpoints (c6c407d → fadef93 →
+      1e1637e, ×3): E1/E3 live, numbering, artifact bytes, visibility,
+      failed-run crash log, migration roundtrip vs library-era rows
 
 ## Done
 - [x] M4-C1: decision 0026 + migration 0006 (build_number per-athenaeum,

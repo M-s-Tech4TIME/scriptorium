@@ -17,11 +17,12 @@ Last updated: 2026-10-21 / Ref: M4-C2 landed (3a15b52)
   RST export = one mark per run + fail-loud matrix; MyST carries the editor
   set via HTML paths. See `docs/technology/conversion.md` + 0017.
 - **M4 status (as of this sync):** M3 C1–C6 complete, green ×3
-  (0021–0025 landed). **M4-C1 + C2 LANDED:** 0026 per-Athenaeum
-  numbered builds + `app/sphinx/sourcegen.py` deterministic staging
-  (`7d14f3a`/`3a15b52`, CI ×3); migration head `0006buildsite`;
-  suite baseline `59 passed, 33 skipped`. **C3 runner/Celery/endpoints
-  next, then C4 packaging.** Owner ruled the artifact to be a portable static
+  (0021–0025 landed). **M4-C1 + C2 + C3 LANDED:** 0026 per-Athenaeum
+  numbered builds + `app/sphinx/sourcegen.py` deterministic staging +
+  sandbox runner/Celery/`builds` endpoints (`c6c407d`+`fadef93`+
+  `1e1637e` CI ×3); migration head `0006buildsite`;
+  suite baseline `66 passed, 36 skipped`. **C4 packaging next — theme
+  base owner question first.** Owner ruled the artifact to be a portable static
   website + design mandates (security parity; structure locked,
   skin open). Terminology: "grimoire" everywhere (0018). Auth
   surface = login/refresh/logout only. Live API tests drive the app

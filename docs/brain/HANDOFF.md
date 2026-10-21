@@ -1,27 +1,29 @@
 # HANDOFF
 
-Last updated: 2026-10-21 / M4-C2 LANDED (3a15b52, CI ×3) — brain synced
+Last updated: 2026-10-21 / Ref: M4-C3 LANDED (1e1637e, CI ×3) — brain synced
 
 ## Was doing
-M4-C2: deterministic sourcegen (`app/sphinx/sourcegen.py`) — LANDED
-green ×3 on `3a15b52` (record `7d14f3a` first: edge rulings E1–E3
-owner A/A/A). 14 offline tests; suite 59 passed, 33 skipped.
-Micro-defaults disclosed: docname `index-p` mangle, toctree-title
-`«»` sanitize, `alabaster` interim theme (curated theme = C3).
+M4-C3: runner + Celery + build endpoints — LANDED green ×3 on
+`1e1637e` (record `c6c407d`, then `fadef93` pickling-secret fix +
+`1e1637e` staging round-trip fixes). CI live suites prove: E1 422,
+owner-only trigger, numbering 1→2, artifact on disk, E3 409,
+member-visible GETs, failed run + crash log, and the migration
+roundtrip against library-era rows. Micro-defaults disclosed in 0026
+§C3 mechanics / §CI-discovered staging rulings.
+
+## Blocked / open owner question
+**Curated default theme base** (0026 mandate 2) — parked in
+OPEN-QUESTIONS; MUST be presented with options before C4 packaging
+presents the theme story. `alabaster` remains the placeholder.
 
 ## Next steps (in order)
-1. **M4-C3 runner + Celery task** (`app/worker`): load snapshots (same
-   ordering as the nested sidebar), call `plan_site`, materialize into
-   the per-build workspace, run `sphinx -W` inside the limited
-   subprocess (`RLIMIT` CPU/time+memory+processes, no network, minimal
-   env) → artifact
-   `/var/lib/scriptorium/artifacts/{athenaeum}/{build_number}/`; status
-   queued→running→ok|failed; endpoints `POST /api/v1/athenaeums/{id}/
-   builds` (owner-only; E3: while queued/running → `409`), GET list/one
-   (members); numbering `max(build_number)+1`; Sphinx 9.1.0 into the
-   locked stack + `docs/technology/`; live tests (hardened `_run`).
-2. **M4-C4** — packaging worker `After=redis` note; the 0017
-   docutils-0.23 probe mechanics; M4-complete report + brain sync.
+1. **Owner question (Rule 4, present next):** curated default theme
+   base (0026 mandate 2) — options + trade-offs before C4 packaging
+   presents the theme story.
+2. **M4-C4** — packaging (`packaging/` creates the isolated build venv,
+   `SC_BUILD_PYTHON` pointed there; worker unit `After=redis`;
+   `config.env` gains `CELERY_BROKER_URL` + `SC_*` build keys), the
+   0017 docutils-0.23 probe mechanics, M4-complete report + brain sync.
 4. Serving phase — resolve Q-SERVE-A…E first, then implement.
 5. URL-durability phase after serving; Distribution-phase concepts
    (Q-DIST-A…D) presented before their implementation.

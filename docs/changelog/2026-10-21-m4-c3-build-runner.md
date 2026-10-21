@@ -1,6 +1,8 @@
 # 2026-10-21 — M4 C3: sandboxed runner + Celery + build endpoints
 
-Tranche C3 of decision 0026 · CI ×3 verified in the follow-up sync.
+Tranche C3 of decision 0026 · **CI ×3 verified green on `1e1637e`**
+(with two fix rounds mid-flight: `fadef93` suite-secret literal;
+`1e1637e` staging round-trip).
 
 ## What changed
 
