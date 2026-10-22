@@ -35,7 +35,9 @@ async def load_site_snapshot(
         .where(GrimoireCategory.athenaeum_id == athenaeum_id)
         .order_by(GrimoireCategory.position, GrimoireCategory.created_at)
     )
-    bucket_order: list[uuid.UUID | None] = [c.id for c in categories]
+    bucket_meta = [(c.id, c.name) for c in categories]
+    bucket_order: list[uuid.UUID | None] = [cid for cid, _ in bucket_meta]
+    category_name = dict(bucket_meta)
 
     grimoires = await session.scalars(
         select(Grimoire)
@@ -88,6 +90,11 @@ async def load_site_snapshot(
                 title=grimoire.title,
                 source_format=grimoire.source_format,
                 nodes=snapshot_nodes(node_rows),
+                category_label=(
+                    category_name[grimoire.category_id]
+                    if grimoire.category_id is not None
+                    else None
+                ),
             )
         )
     return athenaeum, books

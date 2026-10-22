@@ -1,0 +1,43 @@
+{#-
+  Scriptorium theme — search page (0027/0028).
+
+  Pinned contract with the vendored `searchtools.js` (Sphinx 9.1.0):
+  - the form submits `q` (GET, action="") and any `input[name="q"]`
+    gets the current query prefilled by `Search.init()` (self-runs);
+  - optional `#search-progress` node is filled while preparing;
+  - required `#search-results` node collects the rendered results
+    (`h2` / `p.search-summary` / `ul.search > li.kind-*`);
+  - the page must load `searchtools.js` + `language_data.js`
+    (from `_static`) and the build-emitted `searchindex.js`
+    (project-relative, deferred) — the engine's asset auto-list does
+    not add these; our template does.
+  Document pages draw result summaries via fetch from `[role="main"]`.
+-#}
+{% extends "layout.html" %}
+{% block html_title %}Search — {{ project|e }}{% endblock %}
+{% block page_scripts %}
+  <script src="{{ pathto('_static/searchtools.js', 1) }}"></script>
+  <script src="{{ pathto('_static/language_data.js', 1) }}"></script>
+{% endblock %}
+{% block content %}
+<section class="sd-searchpage">
+  <h1 id="search-documentation">Search</h1>
+  <noscript>
+    <div class="admonition warning" role="alert">
+      <p class="admonition-title">JavaScript required</p>
+      <p>Please activate JavaScript to enable the search functionality.</p>
+    </div>
+  </noscript>
+  <p class="sd-search-hint">Searching for multiple words only shows matches that contain all words.</p>
+  <form class="sd-searchpage-form" action="" method="get">
+    <svg class="sd-icon" aria-hidden="true"><use href="#sd-i-search"></use></svg>
+    <input type="text" name="q" aria-labelledby="search-documentation" value=""
+           autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+    <input type="submit" value="search" />
+    <span id="search-progress"></span>
+  </form>
+  <div id="search-results"></div>
+  {#- The build-emitted full-text index (project-relative), deferred. -#}
+  <script src="{{ pathto('searchindex.js', 1) }}" defer="defer"></script>
+</section>
+{% endblock %}

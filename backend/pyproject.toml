@@ -21,7 +21,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest==8.3.4", "ruff==0.8.4", "mypy==1.14.1", "pip-audit==2.9.0", "httpx==0.28.1"]
+dev = ["pytest==8.3.4", "ruff==0.8.4", "mypy==1.14.1", "pip-audit==2.9.0", "httpx==0.28.1", "types-Pygments==2.21.0.20260819"]
 
 [project.scripts]
 scriptorium-admin = "app.cli:main"

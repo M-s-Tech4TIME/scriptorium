@@ -1,0 +1,143 @@
+{#-
+  Scriptorium theme — base layout (decision 0027/0028).
+  Own, from-scratch template: no builtin-theme inheritance.
+
+  Design source of truth: the owner's consult tokens (dark-forest
+  chrome + cream paper page), every value a --sd-* custom property.
+  Icons: inline Tabler SVG sprite (v3.36.0, MIT — attribution below);
+  the artifact makes no network request, ever.
+
+  This file is a theme, not a product: it renders whatever the engine
+  hands it. Sidebar tree data comes from `sidebar_categories`
+  (html_context, materialized by sourcegen, only pages the build
+  actually publishes) and every link resolves through the engine's
+  own `pathto()`. "Open" state is CSS-only (`details open` on the
+  current page's ancestry branch).
+-#}
+{% macro sd_node(node, depth) %}
+  {%- set here = pagename == node.docname -%}
+  {%- set on_path = pagename.startswith(node.branch) -%}
+  {%- if node.children %}
+  <details class="sd-node sd-node-cont sd-depth-{{ depth }}{% if here %} sd-here{% endif %}"
+           {% if on_path or here %}open{% endif %}>
+    <summary>
+      <svg class="sd-icon sd-chevron" aria-hidden="true"><use href="#sd-i-chevron-right"></use></svg>
+      <svg class="sd-icon sd-marker" aria-hidden="true"><use href="#sd-i-{{ node.icon }}"></use></svg>
+      <a href="{{ pathto(node.docname, 1) }}">{{ node.title|e }}</a>
+    </summary>
+    {%- for child in node.children %}{{ sd_node(child, depth + 1) }}{% endfor -%}
+  </details>
+  {%- else %}
+  <div class="sd-node sd-node-leaf sd-depth-{{ depth }}{% if here %} sd-here sd-current{% endif %}">
+    <svg class="sd-icon sd-marker" aria-hidden="true"><use href="#sd-i-{{ node.icon }}"></use></svg>
+    <a href="{{ pathto(node.docname, 1) }}" {% if here %}aria-current="page"{% endif %}>{{ node.title|e }}</a>
+  </div>
+  {%- endif %}
+{% endmacro %}
+
+<!DOCTYPE html>
+<html lang="{{ language }}" data-content_root="{{ content_root }}">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block html_title %}{{ title|striptags|e }} — {{ project|e }}{% endblock %}</title>
+
+  {#- engine asset list (pygments.css + generated styles) first, ours
+      last (later in document order wins the plain cascade). -#}
+  {%- for css in css_files %}
+  {{ css_tag(css) }}
+  {%- endfor %}
+  <link rel="stylesheet" href="{{ pathto('_static/scriptorium.css', 1) }}" type="text/css" />
+
+  {#- engine auto-scripts: documentation_options.js, doctools.js,
+      sphinx_highlight.js (priority-200 asset list). -#}
+  {%- for js in script_files %}
+  {{ js_tag(js) }}
+  {%- endfor %}
+  {%- block page_scripts %}{% endblock %}
+</head>
+<body>
+
+{#- ================================================================ -#}
+{#- Icon sprite — Tabler Icons v3.36.0 (outline subset), MIT license:-#}
+{#- https://github.com/tabler/tabler-icons — Copyright (c) 2020-2026 -#}
+{#- Paweł Kuna. Stroke normalized to 1.75 / round caps per the      -#}
+{#- design consult (0028 ①A). Inline <symbol> + <use>: zero network.-#}
+{#- ================================================================ -#}
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <symbol id="sd-i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19a9 9 0 0 1 9 0a9 9 0 0 1 9 0" /><path d="M3 6a9 9 0 0 1 9 0a9 9 0 0 1 9 0" /><path d="M3 6l0 13" /><path d="M12 6l0 13" /><path d="M21 6l0 13" /></symbol>
+  <symbol id="sd-i-file-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /><path d="M9 9l1 0" /><path d="M9 13l6 0" /><path d="M9 17l6 0" /></symbol>
+  <symbol id="sd-i-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6l-6 6" /></symbol>
+  <symbol id="sd-i-chevron-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6l6 -6" /></symbol>
+  <symbol id="sd-i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" /><path d="M21 21l-6 -6" /></symbol>
+  <symbol id="sd-i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7m0 2.667a2.667 2.667 0 0 1 2.667 -2.667h8.666a2.667 2.667 0 0 1 2.667 2.667v8.666a2.667 2.667 0 0 1 -2.667 2.667h-8.666a2.667 2.667 0 0 1 -2.667 -2.667z" /><path d="M4.012 16.737a2.005 2.005 0 0 1 -1.012 -1.737v-10c0 -1.1 .9 -2 2 -2h10c.75 0 1.158 .385 1.5 1" /></symbol>
+  <symbol id="sd-i-alert-triangle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4" /><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z" /><path d="M12 16h.01" /></symbol>
+  <symbol id="sd-i-alert-octagon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12.802 2.165l5.575 2.389c.48 .206 .863 .589 1.07 1.07l2.388 5.574c.22 .512 .22 1.092 0 1.604l-2.389 5.575c-.206 .48 -.589 .863 -1.07 1.07l-5.574 2.388c-.512 .22 -1.092 .22 -1.604 0l-5.575 -2.389a2.036 2.036 0 0 1 -1.07 -1.07l-2.388 -5.574a2.036 2.036 0 0 1 0 -1.604l2.389 -5.575c.206 -.48 .589 -.863 1.07 -1.07l5.574 -2.388a2.036 2.036 0 0 1 1.604 0z" /><path d="M12 8v4" /><path d="M12 16h.01" /></symbol>
+  <symbol id="sd-i-bulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h1m8 -9v1m8 8h1m-15.4 -6.4l.7 .7m12.1 -.7l-.7 .7" /><path d="M9 16a5 5 0 1 1 6 0a3.5 3.5 0 0 0 -1 3a2 2 0 0 1 -4 0a3.5 3.5 0 0 0 -1 -3" /><path d="M9.7 17l4.6 0" /></symbol>
+  <symbol id="sd-i-info-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M12 9h.01" /><path d="M11 12h1v4h1" /></symbol>
+  <symbol id="sd-i-bookmarks" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 10v11l-5 -3l-5 3v-11a3 3 0 0 1 3 -3h4a3 3 0 0 1 3 3z" /><path d="M11 3h5a3 3 0 0 1 3 3v11" /></symbol>
+  <symbol id="sd-i-flag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5a5 5 0 0 1 7 0a5 5 0 0 0 7 0v9a5 5 0 0 1 -7 0a5 5 0 0 0 -7 0v-9z" /><path d="M5 21v-7" /></symbol>
+  <symbol id="sd-i-message-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20l1.3 -3.9c-2.324 -3.437 -1.426 -7.872 2.1 -10.374c3.526 -2.501 8.59 -2.296 11.845 .48c3.255 2.777 3.695 7.266 1.029 10.501c-2.666 3.235 -7.615 4.215 -11.574 2.293l-4.7 1" /></symbol>
+  <symbol id="sd-i-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l14 0" /><path d="M5 12l6 6" /><path d="M5 12l6 -6" /></symbol>
+  <symbol id="sd-i-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l14 0" /><path d="M13 18l6 -6" /><path d="M13 6l6 6" /></symbol>
+  <symbol id="sd-i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" /></symbol>
+</svg>
+
+{#- Drawer toggle: CSS-only (consult D9). The label lives in the top bar.
+    Keep the checkbox visually hidden (not `hidden`) so keyboard focus
+    and label activation still work. -#}
+<input type="checkbox" id="sd-drawer" class="sd-drawer-toggle sd-sr" />
+<a class="sd-skip" href="#sd-content">Skip to content</a>
+
+<div class="sd-shell">
+
+  <aside class="sd-sidebar" aria-label="Library contents">
+    <form class="sd-search" action="{{ pathto('search') }}" method="get" role="search">
+      <svg class="sd-icon sd-search-glyph" aria-hidden="true"><use href="#sd-i-search"></use></svg>
+      <input type="search" name="q" placeholder="Search the library"
+             aria-label="Search the library"
+             autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+    </form>
+
+    <nav class="sd-tree">
+      {%- for cat in sidebar_categories %}
+        {%- if cat.label %}
+          <div class="sd-cat-label">{{ cat.label|e }}</div>
+        {%- endif %}
+        {%- for book in cat.books %}{{ sd_node(book, 0) }}{% endfor %}
+      {%- endfor %}
+    </nav>
+  </aside>
+
+  <div class="sd-frame">
+    <header class="sd-topbar">
+      <label for="sd-drawer" class="sd-drawer-label">Contents</label>
+      <nav class="sd-trail" aria-label="Breadcrumb">
+        <a class="sd-trail-root" href="{{ pathto('index') }}">{{ project|e }}</a>
+        {%- for parent in parents %}
+          <span class="sd-trail-sep" aria-hidden="true">/</span>
+          <a href="{{ parent.link|e }}" class="sd-trail-parent">{{ parent.title|striptags|e }}</a>
+        {%- endfor %}
+      </nav>
+    </header>
+
+    <main class="sd-main" id="sd-content">
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="sd-foot">
+      {%- if hasdoc('genindex') -%}
+        <a href="{{ pathto('genindex') }}">Index</a>
+      {%- endif -%}
+      {%- if hasdoc('search') -%}
+        <a href="{{ pathto('search') }}">Search</a>
+      {%- endif -%}
+      <span class="sd-foot-note">Compiled by Scriptorium</span>
+    </footer>
+  </div>
+</div>
+
+{#- First-party support script (0028 ③B): code-copy buttons only. -#}
+<script src="{{ pathto('_static/scriptorium.js', 1) }}"></script>
+</body>
+</html>

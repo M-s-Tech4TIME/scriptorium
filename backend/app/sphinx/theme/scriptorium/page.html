@@ -1,0 +1,28 @@
+{#-
+  Scriptorium theme — document page (0027/0028).
+  The engine-generated `body` carries the staged title (first h1),
+  sections, and any code blocks. `role="main"` on the article is the
+  pinned search contract (vendored searchtools.js extracts summaries
+  from `[role="main"]`).
+-#}
+{% extends "layout.html" %}
+{% block content %}
+<article role="main" class="sd-article">
+  {{ body }}
+</article>
+
+<nav class="sd-pager" aria-label="Adjacent pages">
+  {%- if prev %}
+    <a class="sd-pager-prev" href="{{ prev.link|e }}" rel="prev">
+      <svg class="sd-icon" aria-hidden="true"><use href="#sd-i-arrow-left"></use></svg>
+      <span>{{ prev.title|striptags|e }}</span>
+    </a>
+  {%- endif %}
+  {%- if next %}
+    <a class="sd-pager-next" href="{{ next.link|e }}" rel="next">
+      <span>{{ next.title|striptags|e }}</span>
+      <svg class="sd-icon" aria-hidden="true"><use href="#sd-i-arrow-right"></use></svg>
+    </a>
+  {%- endif %}
+</nav>
+{% endblock %}

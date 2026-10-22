@@ -1,0 +1,55 @@
+{#-
+  Scriptorium theme — global index page (0027/0028, engine data only).
+
+  `genindexentries` comes from the engine (`IndexEntries.create_index`,
+  builder context; `html_split_index` stays False in our conf so only
+  this template is needed). Plain HTML — the engine's genindex needs no
+  JS. Each entry: `(entryname, (links, subitems, _))` where `links` is
+  a list of `(ismain, href)` — the first entry name itself is the first
+  link; each additional reference renders as `[N]`.
+-#}
+{% macro sd_index_entries(firstname, links) %}
+  {%- if links -%}
+    <a href="{{ links[0][1]|e }}"{% if links[0][0] %} class="sd-main-ref"{% endif %}>{{ firstname|e }}</a>
+    {%- for ismain, link in links[1:] -%}
+      {%- if not loop.first %}, {% endif %}<a href="{{ link|e }}"{% if ismain %} class="sd-main-ref"{% endif %}>[{{ loop.index }}]</a>
+    {%- endfor %}
+  {%- else %}
+    {{ firstname|e }}
+  {%- endif %}
+{% endmacro %}
+{% extends "layout.html" %}
+{% block html_title %}Index — {{ project|e }}{% endblock %}
+{% block content %}
+<section class="sd-genindex" id="sd-index">
+  <h1>Index</h1>
+
+  {%- if genindexentries %}
+  <div class="sd-jumpbox">
+    {%- for key, _ in genindexentries -%}
+      {%- if not loop.first -%}<span class="sd-jumpbox-sep" aria-hidden="true">·</span>{%- endif -%}
+      <a href="#{{ key|e }}"><strong>{{ key|e }}</strong></a>
+    {%- endfor %}
+  </div>
+  {%- endif %}
+
+  {%- for key, entries in genindexentries %}
+  <div class="sd-index-group">
+    <h2 id="{{ key|e }}">{{ key|e }}</h2>
+    <ul>
+      {%- for entryname, (links, subitems, _) in entries %}
+      <li>{{ sd_index_entries(entryname, links) }}
+        {%- if subitems %}
+        <ul>
+          {%- for subname, sublinks in subitems %}
+          <li>{{ sd_index_entries(subname, sublinks) }}</li>
+          {%- endfor %}
+        </ul>
+        {%- endif %}
+      </li>
+      {%- endfor %}
+    </ul>
+  </div>
+  {%- endfor %}
+</section>
+{% endblock %}

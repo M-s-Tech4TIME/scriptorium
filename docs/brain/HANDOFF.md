@@ -1,43 +1,36 @@
 # HANDOFF
 
-Last updated: 2026-10-22 / Ref: 0028 recorded — C3.5 code tranche next
+Last updated: 2026-10-22 / Ref: C3.5 code written + docs synced — commit/preview/push next
 
 ## Was doing
-M4-C3.5 record chain: **decision 0028 committed** — the owner approved
-the full design-baseline sheet (Tabler inline-sprite icons, custom
-Pygments style, **first-party copy script amending 0027's JS clause**,
-zero extensions v1, fixed scheme, no logo v1, icon breadth) plus two
-ruled exceptions: an 11-anchor per-type callout palette
-(`--sd-adm-<type>-{rule,bg,ink}`, blue/violet/teal/rust added, uniform
-`--sd-page-ink` body ink) and all-caps bold verdigris category labels
-(D15 owner-revision). Engine-asset mechanics verified against Sphinx
-9.1.0 (3 vendored JS + builder-emitted `language_data.js` /
-`documentation_options.js`); search DOM contract read off the vendored
-`searchtools.js` and pinned. Consult gaps (missing reference HTMLs,
-CDN icon loader, declared-inaccurate preview) inventoried and resolved
-by the owner.
+M4-C3.5 **code tranche complete, docs synced** (this staging): the
+Scriptorium theme package shipped (`backend/app/sphinx/theme/
+scriptorium/`: `theme.conf` `inherit = none`, four templates,
+`scriptorium.css`, `scriptorium.js`, `style.py`), `sourcegen` wired
+(`THEME_BASE`, `html_theme_path`, `pygments_style`, sidebar rows →
+`html_context{'sidebar_categories'}`), loader fetches category labels,
+runner `_materialize` stages theme + style module + engine assets and
+fails loud, NOTICE + 0028 amendment + sphinx.md + changelog +
+CURRENT-STATE. Two build-mechanics discoveries fixed en route (see
+Gotchas): Sphinx 9.1 requires explicit `theme.inherit = none`, and with
+a parentless theme the two `.jinja` static templates
+(`documentation_options.js.jinja`/`language_data.js.jinja`) must be
+vendored or the artifact 404s their rendered scripts (silent under
+`-W`). Gates green locally: `75 passed, 36 skipped` (`-W error`, zero
+warnings), `ruff check`/`format` clean, `mypy --strict` clean;
+`types-Pygments==2.21.0.20260819` added dev-only (typing stubs for
+mypy strict — reported to owner for visibility, same league as
+existing dev pins). Junk sweep clean.
 
 ## Next steps (in order)
-1. **M4-C3.5 code tranche** (0027 + 0028 are the full spec — no design
-   decisions remain): theme package
-   `backend/app/sphinx/theme/scriptorium/` (`theme.conf` no parent,
-   `layout/page/search/genindex.html`, `static/scriptorium.css` from
-   the consult tokens + `--sd-adm-*` 33 tokens, inline Tabler sprite in
-   layout, first-party `static/scriptorium.js`, Pygments style module
-   wired via conf `pygments_style`); `sourcegen.py`
-   `THEME_BASE = "scriptorium"` + `html_theme_path = ["theme"]`;
-   `runner.py` `_materialize` copies the theme dir into the workspace +
-   vendors `searchtools/doctools/sphinx_highlight.js` from the pinned
-   Sphinx (`language_data.js` is builder-emitted); templates honor the
-   pinned search contract (`#search-results`, `#search-progress`,
-   `input[name="q"]`, `role="main"`, `data-content_root`, script
-   wiring, `Search.init()` self-runs); offline-but-real runner test
-   (build ok, our CSS in artifact, search markup ids, `searchindex.js`,
-   vendored engine JS present, `scriptorium.js` + CSS referenced) +
-   sourcegen test updates (conf asserts) + AA contrast verification
-   test; docs (sphinx.md theme section refresh) + changelog + brain;
-   gates + push + CI ×3. Offer the owner a local browser preview of a
-   built artifact before push.
+1. **C3.5 commit + preview + push:** owner offered a local browser
+   preview of a built artifact (a probe build is materializable via
+   `runner._materialize` + `sphinx -W -b html` with the dev venv as
+   build python); commit
+   (`feat(m4-c3.5): …` Conventional style, author
+   `alsechemist <239932722+alsechemist@users.noreply.github.com>` +
+   `Co-authored-by: OpenCode <opencode@local>`), push `dev`, verify CI
+   green ×3 (`gh run list --branch dev`), fix-on-red if needed.
 2. **M4-C4** — packaging (`packaging/` creates the isolated build venv,
    `SC_BUILD_PYTHON` pointed there; worker unit `After=redis`;
    `config.env` gains `CELERY_BROKER_URL` + `SC_*` build keys), the
@@ -52,6 +45,20 @@ by the owner.
    shell format).
 
 ## Gotchas (carried)
+- **Sphinx 9.1 theme:** `theme.conf` MUST carry `inherit = none`
+  explicitly (absence → `ThemeError`); with a parentless theme the
+  builder only reaches YOUR staged theme statics — engine basic-theme
+  statics are unreachable, so `.jinja` static templates must be
+  vendored to be rendered (silent 404s otherwise, `-W` can't see
+  runtime asset misses). `html_context` must be a DICT
+  (list → config-validation warning → error under `-W`).
+  `searchindex.js` lands at output ROOT (not `_static`) — reference it
+  project-relative (`pathto('searchindex.js', 1)`).
+- **Test interpreter = build python** in the offline-but-real runner
+  test (same venv): vendored-byte assertions compare against the same
+  engine distribution the build used; in production `SC_BUILD_PYTHON`
+  points at the isolated build venv and vendoring follows it
+  (`_sphinx_static_dir` subprocess probe).
 - Migrate head `0006buildsite`; verify migration SQL against older
   definitions before push (C1 lesson). `ck_nodes_kind` is dropped before
   the kind UPDATE runs (values outside the CHECK are otherwise illegal).

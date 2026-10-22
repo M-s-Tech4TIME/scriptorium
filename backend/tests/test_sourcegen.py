@@ -8,7 +8,9 @@ docname rules (`index` → `index-p` leaf mangle), unrestricted nesting
 
 from __future__ import annotations
 
-from typing import Any
+import ast
+from dataclasses import replace
+from typing import Any, cast
 
 import pytest
 
@@ -140,8 +142,12 @@ def test_rst_only_conf_has_no_myst() -> None:
     conf = site.files["conf.py"]
     assert "myst_parser" not in conf
     assert '".md"' not in conf
-    assert "html_theme = " in conf  # interim placeholder present (C3 swaps curated)
-    assert "html_theme = 'alabaster'" in conf
+    assert "html_theme = 'scriptorium'" in conf  # own theme, no parent (0027)
+    assert 'html_theme_path = ["theme"]' in conf
+    assert "pygments_style = 'scriptorium_style.ScriptoriumStyle'" in conf
+    assert "html_static_path = []" in conf
+    # the sidebar tree is always materialized once pages exist
+    assert "html_context = {'sidebar_categories': [{" in conf
 
 
 def test_unrestricted_nesting_parent_pages() -> None:
@@ -185,6 +191,14 @@ def test_leaf_index_slug_mangles() -> None:
     assert "hit" in site.files["b/index-p.rst"]
 
 
+def _sidebar_context(conf: str) -> list[dict[str, Any]]:
+    """Parse the materialized html_context literal (deterministic repr)."""
+    line = next(ln for ln in conf.splitlines() if ln.startswith("html_context = "))
+    context = ast.literal_eval(line.removeprefix("html_context = "))
+    assert isinstance(context, dict)
+    return cast("list[dict[str, Any]]", context["sidebar_categories"])
+
+
 def test_contentless_shell_not_published() -> None:
     site = plan_site(
         "Shell",
@@ -200,6 +214,92 @@ def test_contentless_shell_not_published() -> None:
     )
     assert "s/empty-shelf.rst" not in site.files
     assert "s/kept.rst" in site.files
+
+
+def test_sidebar_tree_in_conf_context() -> None:
+    """0028: html_context carries the publishable-only sidebar tree."""
+    site = plan_site(
+        "Nest",
+        [
+            book(
+                "tree",
+                (
+                    chapter("spells", (folio("leaf", para_doc("leaf")),)),
+                    folio("solo", para_doc("solo")),
+                ),
+            )
+        ],
+    )
+    sidebar = _sidebar_context(site.files["conf.py"])
+    assert sidebar == [
+        {
+            "label": None,  # unlabeled bucket exists but stays unlabeled
+            "books": [
+                {
+                    "title": "Tree",
+                    "docname": "tree/index",
+                    "branch": "tree/",
+                    "icon": "book",
+                    "children": [
+                        {
+                            "title": "Spells",  # container page exists (toctree)
+                            "docname": "tree/spells",
+                            "branch": "tree/spells/",
+                            "icon": "file-text",
+                            "children": [
+                                {
+                                    "title": "Leaf",
+                                    "docname": "tree/spells/leaf",
+                                    "branch": "tree/spells/leaf/",
+                                    "icon": "file-text",
+                                    "children": [],
+                                }
+                            ],
+                        },
+                        {
+                            "title": "Solo",
+                            "docname": "tree/solo",
+                            "branch": "tree/solo/",
+                            "icon": "file-text",
+                            "children": [],
+                        },
+                    ],
+                }
+            ],
+        }
+    ]
+
+
+def test_sidebar_grouping_categories_and_unlabeled_last() -> None:
+    """First-seen label order; the unlabeled bucket always comes last."""
+    a = book("a", (folio("f", para_doc("1")),))
+    b = book("b", (folio("f", para_doc("2")),))
+    c = book("c", (folio("f", para_doc("3")),))
+    site = plan_site(
+        "Cats",
+        [replace(a, category_label="Herbs"), b, replace(c, category_label="Herbs")],
+    )
+    sidebar = _sidebar_context(site.files["conf.py"])
+    assert [group["label"] for group in sidebar] == ["Herbs", None]
+    assert [node["docname"] for group in sidebar for node in group["books"]] == [
+        "a/index",
+        "c/index",
+        "b/index",
+    ]
+
+
+def test_sidebar_skipped_books_absent() -> None:
+    """0026 E2: an empty grimoire contributes no row to the tree at all."""
+    site = plan_site(
+        "Skip",
+        [
+            book("void", (chapter("shell", ()),)),
+            book("live", (folio("doc", para_doc("kept")),)),
+        ],
+    )
+    sidebar = _sidebar_context(site.files["conf.py"])
+    assert len(sidebar) == 1
+    assert [node["docname"] for node in sidebar[0]["books"]] == ["live/index"]
 
 
 def test_deterministic_output() -> None:

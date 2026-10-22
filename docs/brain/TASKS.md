@@ -1,25 +1,22 @@
 # TASKS
 
-Last updated: 2026-10-22 / 0028 recorded (design baseline) — C3.5 code next
+Last updated: 2026-10-22 / C3.5 code written + docs synced — commit/preview/push next
 
 ## In progress (max 1–2)
-- M4-C3.5: theme code tranche (0027 + 0028 fully specify it) — theme
-  package + tokens/--sd-adm-*/sprite/copy-script/Pygments style +
-  THEME_BASE flip + html_theme_path + runner copy + engine-JS vendoring
-  + offline runner test + AA pair test.
+- M4-C3.5 commit + push: code complete and docs-synced (suite 75/36,
+  gates clean); owner offered a browser preview, then push + CI ×3.
 - M4-C4: packaging (build venv, worker After=redis, config keys) +
   0017 docutils-0.23 probe mechanics + M4-complete report.
 
 ## Todo (M4 next — C4 + phases)
-- [ ] M4-C3.5 code: `backend/app/sphinx/theme/scriptorium/` (theme.conf
-      no parent; layout/page/search/genindex; scriptorium.css + inline
-      Tabler sprite + scriptorium.js; Pygments style),
+- [ ] M4-C3.5 commit/push + CI ×3 (code done: theme package with
+      `inherit = none`; layout/page/search/genindex; scriptorium.css +
+      inline Tabler sprite + scriptorium.js; Pygments style,
       `THEME_BASE="scriptorium"` + `html_theme_path`, runner theme copy
-      + vendoring of the 3 engine JS (searchtools/doctools/
-      sphinx_highlight; `language_data.js` is builder-emitted), search
-      contract per 0028, offline runner regression + sourcegen conf
-      asserts + AA contrast test; local browser preview offered before
-      push.
+      + vendoring of the three engine JS **plus the two `.jinja`
+      static templates**, search contract per 0028, offline runner
+      regression (75/36) + sourcegen conf asserts + AA contrast test;
+      local browser preview offered before push).
 - [ ] M4-C4 packaging: isolated build venv + `SC_BUILD_PYTHON`,
       unit `scriptorium-worker` `After=redis`, `config.env` build keys
       (`CELERY_BROKER_URL`, `SC_*`); 0017 docutils-0.23 probe

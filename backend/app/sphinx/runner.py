@@ -105,13 +105,85 @@ def _child_limits(cfg: BuildConfig) -> None:
     resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
 
 
-def _materialize(workspace: Path, plan: SitePlan) -> None:
+_THEME_DIR = Path(__file__).resolve().parent / "theme" / "scriptorium"
+# Vendored engine assets (0027/0028 mechanics): three scripts + the two
+# `.jinja` static templates (documentation_options / language_data).
+# The vision of the theme's `inherit = none`: the basic theme chain
+# breaks, so the builder would never reach the engine's own statics;
+# vendoring the `.jinja` templates into the staged theme makes the
+# builder render them from its own global context — the engine-emitted
+# path, materialized from the pinned distribution, zero network.
+_ENGINE_ASSETS = (
+    "doctools.js",
+    "searchtools.js",
+    "sphinx_highlight.js",
+    "documentation_options.js.jinja",
+    "language_data.js.jinja",
+)
+
+
+def _sphinx_static_dir(build_python: Path) -> Path:
+    """Locate the build interpreter's own Sphinx — the pinned engine.
+
+    Business rule (0027/0028): vendored engine assets must come from the
+    SAME Sphinx distribution the build runs on, never from the app venv's
+    (they may differ once the isolated build venv exists, C4).
+    """
+    probe = subprocess.run(
+        [
+            str(build_python),
+            "-c",
+            "import sphinx; from pathlib import Path;"
+            " print(Path(sphinx.__file__).resolve().parent)",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if probe.returncode != 0:
+        raise RunnerConfigError(
+            f"SC_BUILD_PYTHON ({build_python}) cannot import Sphinx: "
+            f"{probe.stderr.strip()}"
+        )
+    return Path(probe.stdout.strip()) / "themes" / "basic" / "static"
+
+
+def _materialize(workspace: Path, plan: SitePlan, build_python: Path) -> None:
+    """Write the staged site, the theme, the style module, vendored JS.
+
+    - theme → `workspace/theme/scriptorium` (conf's `html_theme_path`);
+      the builder auto-copies its `static/` into the artifact `_static/`.
+    - the Pygments style module beside `conf.py` (the dotted
+      `scriptorium_style.ScriptoriumStyle` reference imports it from the
+      workspace root — sys.path is seeded in the staged conf).
+    - engine JS vendored from the build interpreter's pinned Sphinx into
+      the staged theme `static/` (0027 "vendored, never fetched"):
+      `doctools.js` + `sphinx_highlight.js` reach pages via the builder's
+      asset auto-list; `searchtools.js` (+ build-emitted
+      `language_data.js`) is wired by our search template. A missing
+      engine file means the engine distribution changed shape → fail
+      loud, engine/theme contracts bump together (0027).
+    """
     workspace.mkdir(parents=True, exist_ok=False)
     (workspace / ".home").mkdir()
     for relpath, text in plan.files.items():
         path = workspace / relpath
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text, encoding="utf-8", newline="\n")
+
+    theme_target = workspace / "theme" / "scriptorium"
+    shutil.copytree(_THEME_DIR, theme_target)
+    shutil.copy(_THEME_DIR / "style.py", workspace / "scriptorium_style.py")
+
+    static_dir = _sphinx_static_dir(build_python)
+    for name in _ENGINE_ASSETS:
+        source = static_dir / name
+        if not source.is_file():
+            raise RunnerConfigError(
+                f"pinned Sphinx ({static_dir}) is missing {name} — "
+                "engine/theme DOM contracts bump together (0027)"
+            )
+        shutil.copy(source, theme_target / "static" / name)
 
 
 def _log_text(
@@ -146,7 +218,7 @@ def run_build(
     artifact_dir = cfg.artifact_root / str(athenaeum_id) / str(build_number)
 
     shutil.rmtree(workspace, ignore_errors=True)
-    _materialize(workspace, plan)
+    _materialize(workspace, plan, cfg.build_python)
 
     cmd = [
         str(cfg.build_python),
