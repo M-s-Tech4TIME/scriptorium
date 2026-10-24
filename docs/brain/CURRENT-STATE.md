@@ -1,8 +1,8 @@
 # CURRENT-STATE
 
-Last updated: 2026-10-24 / Ref: b15446f baseline pushed (CI ×3) + Rule 8 adopted (0033); 0034 fixes next
+Last updated: 2026-10-24 / Ref: cbe2b22 Rule 8 + 0034 accepted/committed; push + CI next
 
-- **Phase:** **M4-C3.5 baseline committed/pushed (`b15446f`, CI ×3); Standing Rule 8 adopted (0033); fourth-feedback fixes next.**
+- **Phase:** **M4-C3.5 baseline `b15446f` green ×3; Standing Rule 8 `cbe2b22`; 0034 fixes + no-flash panel follow-up accepted/committed; push + CI next.**
   M4-C1 (`2aed3ef`): decision 0026
   (per-Athenaeum site P1, manual trigger P2, subprocess sandbox P3,
   keep-all versions P4; reconciliation: staging keyed by grimoire id
@@ -172,6 +172,11 @@ Last updated: 2026-10-24 / Ref: b15446f baseline pushed (CI ×3) + Rule 8 adopte
   Standing Rule 8 — Regression Integrity (No Collateral Breakage), the
   owner's project-wide directive that every change preserve all approved
   behavior with full gates, browser checks, and regression tests.
+  **0034 (2026-10-24, accepted):** fourth feedback — panel placeholder
+  only, code-language label fix with `Code` fallback, pager inside
+  `.sd-reading-main`, plus the pre-paint collapsed panel fix so pager
+  navigation never flashes the panel open. Preview #6 was approved;
+  preview #7 is the browser-verified no-flash follow-up.
 - **Done (cumulative):** Q1–Q23 + Q-M2-1/2 + Q-M3-1…8 + Q-002=B(0019) +
   Q-M3-9…13=A(0020) + Q-M3-16a–e=A(0025) + Q-M4-P1…P4 + E1–E3(0026) +
   theme ruling(0027) + design baseline(0028) + preview-feedback
@@ -181,18 +186,22 @@ Last updated: 2026-10-24 / Ref: b15446f baseline pushed (CI ×3) + Rule 8 adopte
   ×3; M4 C1 `2aed3ef` + C2 `3a15b52` + C3 `1e1637e` green ×3; 0028
   record `556bbce` green ×3; C3.5 baseline `b15446f` green ×3 (0029 +
   0030 + 0031 + 0032; 80 passed / 36 skipped, ruff + mypy strict clean).
-- **Last commit:** `b15446f` — `feat(m4-c3.5): complete theme feedback
-  passes 0029-0032` (35 files, +3968/−275), pushed `dev`, all three CI
-  workflows green (lint-type-test, security, packaging). It is the exact
-  owner-approved preview #5 artifact: 0029 seven-ruling pass + 0030
-  vendored Inter + 0031 second batch + 0032 unified first-party search
-  (phrase-first, all-word highlight, full-page takeover), centred dialog
-  + x close, clear-only panel field, weight 800, `#D8E7DD` inline code,
-  split panel controls, scrollspy title, island contract fix,
-  link-integrity crawl, and the h2 `base_level` staging fix. **Standing
-  Rule 8 is approved and adopted in the docs/governance commit on top
-  of `b15446f`.** Next: 0034 fourth-feedback fixes → preview #6 →
-  verdict → commit/push + CI ×3 → M4-C4.
+- **Last commit:** `cbe2b22` — `docs: adopt Standing Rule 8 regression
+  integrity` (12 files, +238/−71), on top of the approved baseline
+  `b15446f` (`feat(m4-c3.5): complete theme feedback passes 0029-0032`,
+  35 files, +3968/−275). The 0034 fix batch is committed on top
+  (`fix(m4-c3.5): apply fourth theme feedback batch`, 14 files,
+  +408/−74). `b15446f` is pushed with all three CI workflows green;
+  `cbe2b22` + 0034 are local, push + CI ×3 next.
+  The exact owner-approved preview #5 artifact is `b15446f`: 0029
+  seven-ruling pass + 0030 vendored Inter + 0031 second batch + 0032
+  unified first-party search (phrase-first, all-word highlight,
+  full-page takeover), centred dialog + x close, clear-only panel field,
+  weight 800, `#D8E7DD` inline code, split panel controls, scrollspy
+  title, island contract fix, link-integrity crawl, and the h2
+  `base_level` staging fix. **0034 fixes are committed on top; preview
+  #7 is browser-verified. Push Rule 8 + 0034 and verify CI green ×3 →
+  M4-C4.**
 - **Remote:** `git@github.com:M-s-Tech4TIME/scriptorium.git` (public).
   `dev` carries M3 complete + M4 in progress; `main` stays at release
   point (ff-only).

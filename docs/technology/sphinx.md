@@ -73,8 +73,10 @@
   custom-style spans).
   **0029 preview-feedback pass:** header anchors are the Tabler link
   glyph at every heading level; the one first-party script carries four
-  disclosed responsibilities (code-block chrome — language badge +
-  always-visible copy; search-result decoration — grimoire chip from the
+  disclosed responsibilities (code-block chrome — language badge read
+  from the outer `highlight-<lang>` wrapper, no-language/`default` shows
+  `Code` (0034), + always-visible copy; search-result decoration —
+  grimoire chip from the
   `#sd-map` island plus the heading chain extracted from the
   artifact's own pages, same-origin, no network; toc scrollspy);
   footer bar removed — Index centered under the sidebar search form,
@@ -93,7 +95,10 @@
   own body pages (chapters are folios; hierarchy is panel placement).
   The panel sticks with the article (sticky/100dvh/internal scroll)
   and collapses behind one top-bar toggle (two `layout-sidebar`
-  Tabler glyphs, persisted `localStorage`).
+  Tabler glyphs, persisted `localStorage`). 0034 follow-up: an inline
+  `<head>` script applies the persisted collapsed state before first
+  paint, so pager navigation never flashes the panel expanded; the body
+  script then swaps in the normal `.sd-panel-off` class.
   **Search (0032, superseding 0031 mechanics and 0028's search DOM
   contract):** one first-party core serves the dialog and the full
   `search.html`. The engine-emitted `searchindex.js` is only the

@@ -46,6 +46,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{% block html_title %}{{ title|striptags|e }} — {{ project|e }}{% endblock %}</title>
 
+  {#- 0034 follow-up: apply the persisted panel state before the first
+      paint. The main theme script runs at the end of <body>; without this
+      inline head script, a collapsed panel paints expanded for one frame
+      on every navigation, then the body script collapses it again. -#}
+  <script>
+    (function () {
+      try {
+        if (window.localStorage.getItem("sd-panel-open") === "closed") {
+          document.documentElement.classList.add("sd-panel-pending-off");
+        }
+      } catch (err) {
+        /* private mode / file://: keep the default open panel */
+      }
+    })();
+  </script>
+
   {#- engine asset list (pygments.css + generated styles) first, ours
       last (later in document order wins the plain cascade). -#}
   {%- for css in css_files %}
@@ -111,7 +127,9 @@
     <div class="sd-side-head">
       <form class="sd-search" action="{{ pathto('search') }}" method="get" role="search">
         <svg class="sd-icon sd-search-glyph" aria-hidden="true"><use href="#sd-i-search"></use></svg>
-        <input type="text" name="q" placeholder="Search the library"
+        {#- 0034: panel placeholder is the single word "Search"; the
+            dialog keeps its descriptive placeholder. -#}
+        <input type="text" name="q" placeholder="Search"
                aria-label="Search the library"
                autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
         <button type="button" class="sd-search-clear" aria-label="Clear the search field" title="Clear the search field">

@@ -208,13 +208,24 @@ body {
 /* 0031 7.viii: collapsed panel (per-device, scriptorium.js toggles +
    persists). The grid visually frees the room; `visibility` flips
    after the animation so focus never lands in a hidden column. */
-.sd-shell.sd-panel-off {
+.sd-shell.sd-panel-off,
+html.sd-panel-pending-off .sd-shell {
   grid-template-columns: 0 minmax(0, 1fr);
 }
-.sd-shell.sd-panel-off .sd-sidebar {
+.sd-shell.sd-panel-off .sd-sidebar,
+html.sd-panel-pending-off .sd-shell .sd-sidebar {
   border-right-width: 0;
   visibility: hidden;
   transition: visibility 0s linear 0.22s;
+}
+/* 0034 follow-up: the head script marks <html> before <body> exists, so
+   the first paint is already collapsed. No transition on that pre-JS
+   state; the body script then swaps in the normal .sd-panel-off class. */
+html.sd-panel-pending-off .sd-shell {
+  transition: none;
+}
+html.sd-panel-pending-off .sd-shell .sd-sidebar {
+  transition: none;
 }
 
 .sd-frame {
@@ -267,6 +278,9 @@ body {
 .sd-panel-toggle:active { color: var(--sd-ink); background: var(--sd-border); transform: scale(0.92); }
 .sd-panel-toggle .sd-icon { width: 18px; height: 18px; }
 .sd-shell:not(.sd-panel-off) .sd-panel-expand { display: none; }
+/* Before the body script runs, the pre-paint <html> marker must show the
+   expand control even though .sd-shell has no .sd-panel-off yet. */
+html.sd-panel-pending-off .sd-shell:not(.sd-panel-off) .sd-panel-expand { display: inline-flex; }
 
 .sd-trail {
   display: flex;
@@ -428,6 +442,9 @@ details[open] > summary > .sd-chevron { transform: rotate(90deg); }
   gap: var(--sd-s6);
   align-items: start;
 }
+/* 0034: article + pager share the first grid column; the pager must not
+   span the paper surface and run under the On-This-Page rail. */
+.sd-reading-main { min-width: 0; }
 .sd-article {
   min-width: 0;
   margin: 0; /* 0029: left-most, no auto-centering; 0031: NO width cap */

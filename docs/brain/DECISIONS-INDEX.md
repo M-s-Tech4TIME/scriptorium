@@ -37,8 +37,9 @@ Last updated: 2026-10-21 / Ref: M4-C1 (0026)
 | 0031 | Theme second-feedback batch: fluid width (no cap), RTD-style search dialog over engine index (grimoire chips, keyboard bar, Ctrl+K), icy-green inline-code/download chips, weight-700 headings, wine/plum danger + skull, first-leaf book rows + hidden staged toctrees (chapters are folios), sticky collapsible panel (persisted), scrollspy rewrite, copy→check; pathto resource-mode sidebar-link bug fixed | accepted | 2026-10-23 | owner |
 | 0032 | Theme third-feedback batch: one first-party search (on-demand sectioning, phrase-first, all-word highlight, full-page takeover), centred dialog + x close, clear-only panel field, weight 800, split panel controls, scrollspy title, island contract fix, link-integrity crawl, h2 `base_level` staging fix; amends 0027/0028/0031 | accepted | 2026-10-23 | owner |
 | 0033 | Standing Rule 8: Regression Integrity (No Collateral Breakage) — project-wide obligation to preserve all approved behavior, with pre-change impact review, full gates + browser checks, regression tests, and owner-approved breaking-change plans | accepted | 2026-10-24 | owner |
+| 0034 | Theme fourth-feedback batch: panel placeholder only, code-language label fix with `Code` fallback, pager inside `.sd-reading-main`, and pre-paint collapsed-panel state so pager navigation never flashes the panel open; Node/theme-build/browser regressions | accepted | 2026-10-24 | owner |
 
-Full records: `docs/decisions/0001-*.md` … `0033-*.md`.
+Full records: `docs/decisions/0001-*.md` … `0034-*.md`.
 Pending: none.
 
-Last updated: 2026-10-24 / Ref: 0033 recorded
+Last updated: 2026-10-24 / Ref: 0034 recorded

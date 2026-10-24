@@ -1,12 +1,14 @@
 # TASKS
 
-Last updated: 2026-10-24 / b15446f baseline green ×3 + Rule 8 adopted (0033); 0034 fixes next
+Last updated: 2026-10-24 / cbe2b22 Rule 8 + 0034 accepted/committed; push + CI next
 
 ## In progress (max 1–2)
-- M4-C3.5 0034 fourth-feedback fixes: panel placeholder only → "Search";
-  code-block language label (outer `highlight-*` wrapper, "Code"
-  fallback); pager inside `.sd-reading-main`; regression tests, preview
-  #6, owner verdict, commit + push + CI ×3.
+- M4-C3.5 0034 fourth-feedback fixes: accepted/committed (panel
+  placeholder only → "Search"; code-language outer-wrapper fix + "Code"
+  fallback; pager inside `.sd-reading-main`; pre-paint collapsed panel
+  marker so pager navigation never flashes; Node/theme-build regression
+  tests). Preview #6 approved; preview #7 browser-verified; push + CI ×3
+  next.
 - M4-C4: packaging (build venv, worker After=redis, config keys) +
   0017 docutils-0.23 probe mechanics + M4-complete report.
 
@@ -14,7 +16,11 @@ Last updated: 2026-10-24 / b15446f baseline green ×3 + Rule 8 adopted (0033); 0
 - [x] M4-C3.5 baseline: 0029 + 0030 + 0031 + 0032 committed/pushed as
       `b15446f`, CI green ×3 (lint-type-test, security, packaging).
 - [x] Commit Standing Rule 8 (0033) — approved wording, docs/governance.
-- [ ] Implement 0034 fixes → preview #6 → verdict → commit/push + CI ×3.
+- [x] Implement 0034 fixes + regression tests + preview #6.
+- [x] Fix collapsed-panel flash on pager navigation (pre-paint marker) +
+      preview #7 browser verification.
+- [x] 0034 accepted + committed (includes Rule 8).
+- [ ] Push `dev` with Rule 8 + 0034 → CI green ×3.
 - [ ] M4-C4 packaging: isolated build venv + `SC_BUILD_PYTHON`,
       unit `scriptorium-worker` `After=redis`, `config.env` build keys
       (`CELERY_BROKER_URL`, `SC_*`); 0017 docutils-0.23 probe

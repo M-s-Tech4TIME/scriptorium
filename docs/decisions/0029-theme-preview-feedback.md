@@ -53,6 +53,10 @@ stand.
    parent — replaced by the header design). The code pane scrolls
    (`overflow: auto`, max-height 30rem). Language names mapped
    (`python→Python`, `javascript→JavaScript`, …, fallback title-cased).
+   **0034 correction:** the label now reads the outer
+   `div.highlight-<lang>` wrapper (the old inner-block lookup returned an
+   empty string on every block); no-language/`default` blocks show
+   `Code` instead of icon-only.
 4. **Pager:** filled `--sd-accent-strong` green buttons (the ruled
    filled-control token), labels exactly **Previous / Next** (page titles
    removed); hover = lift + larger shadow (+ icon scale), active =

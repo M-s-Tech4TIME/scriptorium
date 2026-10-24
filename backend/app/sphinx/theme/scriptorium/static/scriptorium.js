@@ -117,15 +117,25 @@
     markdown: "Markdown",
   };
 
-  function languageName(block) {
-    var holder = block.closest("[class*=highlight]") || block;
-    var match = /(highlight-)(\w[\w-]*)/.exec(holder.className);
-    if (!match) return "";
-    var raw = match[2];
+  /** Lexer alias → display label. No language/default → "Code" (0034). */
+  function languageFromClass(className) {
+    var match = /(?:^|\s)highlight-([^\s]+)/.exec(className || "");
+    if (!match) return "Code";
+    var raw = match[1];
+    if (raw === "default" || raw === "none" || raw === "text") return "Code";
     return (
       LANG_NAMES[raw] ||
       raw.charAt(0).toUpperCase() + raw.slice(1).replace(/-+/g, " ")
     );
+  }
+
+  function languageName(block) {
+    // 0034: the lexer class is on the OUTER `div.highlight-<lang>`; the
+    // block itself is the inner `div.highlight`. `closest` must skip the
+    // inner block (the old `[class*=highlight]` matched it and returned
+    // an empty label for every code block).
+    var holder = block.closest("[class*='highlight-']") || block;
+    return languageFromClass(holder.className || "");
   }
 
   var COPY_ICON = "#sd-i-copy";
@@ -1323,6 +1333,9 @@
 
     function apply() {
       shell.classList.toggle("sd-panel-off", !open);
+      // 0034 follow-up: the head script's pre-paint marker has done its
+      // job; from here the shell class is the single source of truth.
+      document.documentElement.classList.remove("sd-panel-pending-off");
       toggles.forEach(function (button) {
         button.setAttribute("aria-expanded", open ? "true" : "false");
       });
@@ -1368,5 +1381,6 @@
     bestSnippet: bestSnippet,
     splitWords: splitWords,
     phrasePattern: phrasePattern,
+    languageFromClass: languageFromClass,
   };
 })();

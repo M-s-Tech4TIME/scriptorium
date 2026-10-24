@@ -1,6 +1,6 @@
 # HANDOFF
 
-Last updated: 2026-10-24 / Ref: b15446f baseline pushed (CI ×3) + Rule 8 adopted (0033); 0034 fixes next
+Last updated: 2026-10-24 / Ref: cbe2b22 Rule 8 + 0034 accepted/committed; push + CI next
 
 ## Was doing
 M4-C3.5 **baseline committed and pushed**: the owner-approved preview #5
@@ -12,12 +12,19 @@ panel placeholder only → "Search"; code-block language label (root cause:
 the lexer class is on the outer `highlight-*` wrapper, but the script
 matched the inner `highlight` block); pager Next must stay inside the
 article column, not cross the On-This-Page rail. Rule 8 is approved as
-written and adopted in the docs/governance commit; next is the 0034
-fix batch, preview #6, then commit/push + CI ×3.
+written and committed as `cbe2b22`; the 0034 fixes are implemented.
+Preview #6 was approved, but the owner found a one-frame expanded-panel
+flash on pager navigation while collapsed. Root cause: the stored state
+was applied at the end of `<body>`, after first paint. A tiny inline
+`<head>` script now marks `<html>` with `sd-panel-pending-off` before the
+shell exists; CSS paints the collapsed grid/sidebar/expand state, then
+the body script swaps in `.sd-panel-off` and removes the marker. Preview
+#7 is browser-verified and 0034 is committed. Push Rule 8 + 0034, then
+verify CI green ×3.
 
-M4-C3.5 **0032 third feedback batch complete (staged on the unpushed
-0029 + 0030 + 0031 work)**: the search is one first-party mechanism on
-both surfaces — engine `searchindex.js` as candidate pre-filter only,
+M4-C3.5 **0032 third feedback batch (now committed in `b15446f`):** the
+search is one first-party mechanism on both surfaces — engine
+`searchindex.js` as candidate pre-filter only,
 on-demand sectioning of up to 10 cached folios, phrase-first ranking
 (whole typed sentence +1000), all typed words highlighted (stopwords
 included), last-token prefix, OR-union candidates, 8 groups × 6 rows,
@@ -81,18 +88,9 @@ committed as `0f5fcc8` (23 files, +2034/−142, unpushed); the 0029 +
 0030 passes are the staged changeset on top.
 
 ## Next steps (in order)
-1. **Commit Standing Rule 8** (0033, this docs/governance commit): decision
-   0033, `project-details.md` §0a, `AGENTS.md`, standards/agent-guide/
-   docs index, changelog, brain. No runtime behavior.
-2. **Implement 0034 fourth-feedback fixes:** panel placeholder only →
-   "Search"; code-block language label fix (outer `highlight-*` wrapper,
-   "Code" fallback); pager inside `.sd-reading-main` so Next stays in
-   the article column. Add Node/theme-build regression tests, run full
-   gates, rebuild **preview #6**, verify with headless Chrome, and get
-   the owner's verdict.
-3. **Commit 0034**, push `dev` (includes the Rule 8 commit), verify CI
-   green ×3 (`gh run list --branch dev`), fix-on-red if needed.
-4. **M4-C4** — packaging (`packaging/` creates the isolated build venv,
+1. **Push `dev`** with Rule 8 `cbe2b22` + 0034, verify CI green ×3
+   (`gh run list --branch dev`), fix-on-red if needed.
+2. **M4-C4** — packaging (`packaging/` creates the isolated build venv,
    `SC_BUILD_PYTHON` pointed there; worker unit `After=redis`;
    `config.env` gains `CELERY_BROKER_URL` + `SC_*` build keys), the
    0017 docutils-0.23 probe mechanics, M4-complete report + brain sync.

@@ -45,6 +45,52 @@ class _LinkCollector(HTMLParser):
                 self.targets.append(value)
 
 
+class _PagerPlacement(HTMLParser):
+    """0034: prove the pager is a child of the article column, not the page."""
+
+    _VOID = {
+        "area",
+        "base",
+        "br",
+        "col",
+        "embed",
+        "hr",
+        "img",
+        "input",
+        "link",
+        "meta",
+        "param",
+        "source",
+        "track",
+        "wbr",
+    }
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.stack: list[str] = []
+        self.main_depth: int | None = None
+        self.pager_found = False
+        self.pager_in_main = False
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        classes = (dict(attrs).get("class") or "").split()
+        if "sd-reading-main" in classes:
+            self.main_depth = len(self.stack)
+        if "sd-pager" in classes:
+            self.pager_found = True
+            self.pager_in_main = self.main_depth is not None
+        if tag not in self._VOID:
+            self.stack.append(tag)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag in self._VOID:
+            return
+        if self.stack and self.stack[-1] == tag:
+            self.stack.pop()
+        if self.main_depth is not None and len(self.stack) == self.main_depth:
+            self.main_depth = None
+
+
 def _broken_internal_links(artifact: Path) -> list[str]:
     """Resolve every artifact-local href/src; return the dangling ones.
 
@@ -238,6 +284,8 @@ def test_run_build_theme_artifact(
     assert "--sd-adm-rule: #6E2142" in theme_css  # wine/plum danger
     assert "a.reference.download" in theme_css  # the download chip
     assert "sd-dlg" in theme_css  # the search dialog surface
+    assert ".sd-reading-main { min-width: 0; }" in theme_css  # 0034 pager column
+    assert "html.sd-panel-pending-off .sd-shell" in theme_css  # pre-paint collapse
     assert "top: 50%;" in theme_css and "translate(-50%, -50%)" in theme_css
     assert "sd-res-book" in theme_css  # shared chip, dialog + page (0032 ②)
     theme_js = (static / "scriptorium.js").read_text()
@@ -246,6 +294,9 @@ def test_run_build_theme_artifact(
     assert "sd-i-check" in theme_js  # copy → check success glyph (0031 ②)
     assert "sd-panel-open" in theme_js  # panel collapse persistence
     assert "sd-search-clear" in theme_js  # clear-only control (0032 ④)
+    assert 'placeholder="Search the library"' in theme_js  # dialog unchanged (0034)
+    assert "languageFromClass" in theme_js  # 0034 outer-wrapper label fix
+    assert 'classList.remove("sd-panel-pending-off")' in theme_js  # 0034 follow-up
     assert "search.html?q=" in theme_js or '?q=" + encodeURIComponent' in theme_js
     assert "sd-res-mark" in theme_js  # all-word highlight in both surfaces
     assert 'article.querySelector("h1")' in theme_js  # scrollspy title (0032 ⑨)
@@ -299,6 +350,13 @@ def test_run_build_theme_artifact(
     assert 'class="sd-side-head"' in index
     assert 'class="sd-search-clear"' in index
     assert 'type="text" name="q"' in index
+    assert 'placeholder="Search"' in index  # 0034: panel placeholder only
+    assert 'placeholder="Search the library"' not in index
+    # 0034 follow-up: the persisted collapse state is applied in <head>,
+    # before the shell exists, so the first paint cannot flash expanded.
+    assert "sd-panel-pending-off" in index
+    assert index.find("sd-panel-pending-off") < index.find("</head>")
+    assert index.find("sd-panel-pending-off") < index.find('class="sd-shell"')
     assert '<use href="#sd-i-x">' in index
     assert "sd-panel-collapse" in index
     assert "sd-panel-expand" in index
@@ -338,12 +396,17 @@ def test_run_build_theme_artifact(
     # 0029 reading layout: wide left article + hierarchical On-This-Page
     # rail (engine local toc) + the ruled green Previous/Next pager
     assert 'class="sd-reading"' in page
+    assert 'class="sd-reading-main"' in page  # 0034 article column wrapper
     assert 'class="sd-toc"' in page
     assert ">On This Page<" in page
     assert "sd-pager-prev" in page and "sd-pager-next" in page
     assert "<span>Previous</span>" in page  # pager labels are exact (0029)
     assert "<span>Next</span>" in page
     assert 'aria-label="Adjacent pages"' in page
+    placement = _PagerPlacement()
+    placement.feed(page)
+    assert placement.pager_found
+    assert placement.pager_in_main, "pager must live in the article column (0034)"
 
     # myst book coexists: md page served through myst_parser
     assert (artifact / "inquiry" / "hd.html").is_file()

@@ -16,9 +16,29 @@
 {% extends "layout.html" %}
 {% block content %}
 <div class="sd-reading">
-  <article role="main" class="sd-article">
-    {{ body }}
-  </article>
+  {#- 0034: the pager is a child of the article column, not the paper
+      surface. Its Next button therefore ends at the article edge and
+      never runs under the On-This-Page rail. -#}
+  <div class="sd-reading-main">
+    <article role="main" class="sd-article">
+      {{ body }}
+    </article>
+
+    <nav class="sd-pager" aria-label="Adjacent pages">
+      {%- if prev %}
+        <a class="sd-pager-prev" href="{{ prev.link|e }}" rel="prev">
+          <svg class="sd-icon" aria-hidden="true"><use href="#sd-i-arrow-left"></use></svg>
+          <span>Previous</span>
+        </a>
+      {%- endif %}
+      {%- if next %}
+        <a class="sd-pager-next" href="{{ next.link|e }}" rel="next">
+          <span>Next</span>
+          <svg class="sd-icon" aria-hidden="true"><use href="#sd-i-arrow-right"></use></svg>
+        </a>
+      {%- endif %}
+    </nav>
+  </div>
 
   {%- if toc %}
   <aside class="sd-toc" aria-label="On this page">
@@ -27,19 +47,4 @@
   </aside>
   {%- endif %}
 </div>
-
-<nav class="sd-pager" aria-label="Adjacent pages">
-  {%- if prev %}
-    <a class="sd-pager-prev" href="{{ prev.link|e }}" rel="prev">
-      <svg class="sd-icon" aria-hidden="true"><use href="#sd-i-arrow-left"></use></svg>
-      <span>Previous</span>
-    </a>
-  {%- endif %}
-  {%- if next %}
-    <a class="sd-pager-next" href="{{ next.link|e }}" rel="next">
-      <span>Next</span>
-      <svg class="sd-icon" aria-hidden="true"><use href="#sd-i-arrow-right"></use></svg>
-    </a>
-  {%- endif %}
-</nav>
 {% endblock %}

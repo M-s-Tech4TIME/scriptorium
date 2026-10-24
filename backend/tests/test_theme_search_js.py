@@ -1,13 +1,14 @@
-"""Search-core semantics, pinned in Node (0032 ③) — pure, offline.
+"""Theme JS core, pinned in Node (0032 ③ / 0034) — pure, offline.
 
 The theme's one search mechanism ranks **heading-delimited sections**:
 the whole typed sentence is a phrase bonus, every content word must be
 able to contribute (OR-union candidates), the last token may match as a
 prefix, every typed word is highlighted, and stopwords never create a
-hit on their own. Those rules live in `scriptorium.js`; this test runs
-that exact file in Node with a tiny DOM stub and a deterministic
-stopword set/stemmer, so a regression in the scoring core fails the
-backend suite without a browser.
+hit on their own. The same file also owns the code-block language
+label, whose lexer class lives on the outer `highlight-*` wrapper.
+These rules live in `scriptorium.js`; this test runs that exact file in
+Node with a tiny DOM stub and a deterministic stopword set/stemmer, so a
+regression fails the backend suite without a browser.
 
 Skipped only when Node is absent from the machine. GitHub's ubuntu
 runners ship Node 24; the frozen stack lists Node 24 LTS.
@@ -187,11 +188,19 @@ assert.ok(api.scoreSection(punct, {
   text: "The furnace, berserker, and mold.",
 }));
 
-console.log("search-core: ok");
+// ---- code-block language labels (0034) --------------------------------
+same(api.languageFromClass("highlight-python notranslate"), "Python");
+same(api.languageFromClass("highlight-javascript notranslate"), "JavaScript");
+same(api.languageFromClass("highlight-bash"), "Bash");
+same(api.languageFromClass("highlight-default notranslate"), "Code");
+same(api.languageFromClass("highlight"), "Code");
+same(api.languageFromClass(""), "Code");
+
+console.log("theme-js-core: ok");
 """
 
 
-def test_search_core_semantics() -> None:
+def test_theme_js_core_semantics() -> None:
     assert NODE is not None  # narrowed for mypy; skipif already guards
     env = dict(os.environ)
     env["SD_THEME_JS"] = str(JS_PATH)
