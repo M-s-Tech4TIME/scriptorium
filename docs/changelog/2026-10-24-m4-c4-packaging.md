@@ -54,5 +54,6 @@ future MyST release.
 
 ## Status
 
-C4 is committed on top of `2680738`; push + CI ×3 is the next gate.
-M4 implementation is complete; serving phase (Q-SERVE-A…E) follows.
+C4 is pushed as `1add6c8`; all three CI workflows are green. M4
+implementation is complete; serving phase (Q-SERVE-A…E) is the next
+owner gate.

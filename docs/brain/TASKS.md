@@ -1,18 +1,10 @@
 # TASKS
 
-Last updated: 2026-10-24 / 2680738 0034 pushed, CI ×3; M4-C4 complete (commit/push next)
+Last updated: 2026-10-24 / 1add6c8 M4-C4 pushed, CI ×3; M4 implementation complete; serving decisions pending
 
 ## In progress (max 1–2)
-- M4-C3.5 complete: 0034 pushed as `2680738` (panel placeholder only →
-  "Search"; code-language outer-wrapper fix + "Code" fallback; pager
-  inside `.sd-reading-main`; pre-paint collapsed panel marker so pager
-  navigation never flashes; Node/theme-build regression tests). Preview
-  #6 approved; preview #7 browser-verified; CI green ×3.
-- M4-C4 complete: isolated build venv + 27-pin engine lock, config
-  example/queue keys, both units `Requires=redis`/`After=redis`,
-  postinst artifacts/config seed/build-venv check, manual docutils-0.23
-  probe (58 passed; pin stays 0.22.4), M4 report, packaging tests
-  (suite 87 passed / 36 skipped). Commit + CI ×3 next.
+- Serving phase — blocked on owner rulings Q-SERVE-A…E (Rule 4); do not
+  implement until decided. Q-EDITOR-1 remains open/non-blocking.
 
 ## Todo (M4 next — phases)
 - [x] M4-C3.5 baseline: 0029 + 0030 + 0031 + 0032 committed/pushed as
@@ -27,7 +19,7 @@ Last updated: 2026-10-24 / 2680738 0034 pushed, CI ×3; M4-C4 complete (commit/p
       both units `Requires=redis`/`After=redis`, `config.env` build keys
       (`CELERY_BROKER_URL`, `SC_*`); 0017 docutils-0.23 probe
       mechanics; M4 report + brain.
-- [ ] Commit + push M4-C4 → CI green ×3.
+- [x] Commit + push M4-C4 → CI green ×3 (`1add6c8`).
 - [ ] Serving phase (resolve Q-SERVE-A…E first) → dedicated phase
       (brand injection + custom-CSS hooks land here, 0027)
 - [ ] URL-durability phase after serving

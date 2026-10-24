@@ -7,7 +7,7 @@ Last updated: 2026-10-24 / Ref: M4-C4 implementation
 - **M2 Editor↔source:** TipTap v1 + RST/MyST export + round-trip suite. Gate: zero-warning suite.
 - **M3 Structure/TOC UX:** tree CRUD/reorder/nest + toctree/conf.py gen. Gate: UX acceptance.
 - **M4 Build+serve+theme:** Celery → sandboxed Sphinx → artifacts + own
-  Scriptorium theme. **C1–C4 complete 2026-10-24:** build design/sandbox,
+  Scriptorium theme. **C1–C4 complete/pushed 2026-10-24 (`1add6c8`, CI ×3):** build design/sandbox,
   build API, theme passes 0029–0034, packaging build venv + docutils probe.
   Serving phase (Q-SERVE-A…E) is next; the M4 report records gate evidence
   and remaining serving scope.

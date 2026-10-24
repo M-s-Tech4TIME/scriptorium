@@ -1,6 +1,6 @@
 # M4 report — build pipeline + theme (C1–C4)
 
-Status: **implementation complete 2026-10-24** · Owner: alsechemist ·
+Status: **implementation complete and pushed 2026-10-24** (`1add6c8`, CI ×3) · Owner: alsechemist ·
 Decision: 0026 (build design), 0027–0034 (theme) · Next: serving phase
 (Q-SERVE-A…E), then URL durability and distribution.
 
@@ -62,5 +62,5 @@ Decision: 0026 (build design), 0027–0034 (theme) · Next: serving phase
 - `b15446f` — C3.5 theme passes 0029–0032 (approved preview #5).
 - `cbe2b22` — Standing Rule 8 (0033).
 - `2680738` — fourth feedback batch + no-flash panel fix (0034).
-- C4 commit — packaging build venv, config keys, Redis ordering,
+- `1add6c8` — C4 packaging build venv, config keys, Redis ordering,
   docutils probe, this report.

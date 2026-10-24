@@ -1,6 +1,6 @@
 # OPEN-QUESTIONS
 
-Last updated: 2026-10-24 / Ref: 0033 recorded (Standing Rule 8; no new questions) — serving/distribution questions parked
+Last updated: 2026-10-24 / Ref: 1add6c8 M4 complete; serving/distribution questions parked — Q-SERVE-A…E is the next owner gate
 
 | ID | Question | Blocks | Asked |
 |---|---|---|---|
@@ -37,7 +37,8 @@ via decision 0028 and the owner's sheet approval; C3.5 code follows.
 See 0027 + 0028.
 
 **Serving/distribution questions Q-SERVE-A…E, Q-DIST-A…D remain OPEN —
-parked in their table rows above; none block M4.**
+parked in their table rows above. M4 is complete; Q-SERVE-A…E is the
+next owner gate before serving implementation.**
 
 **Standing Rule 8 (approved 2026-10-24):** the owner approved the
 Regression Integrity rule as written; it is not an open question. The

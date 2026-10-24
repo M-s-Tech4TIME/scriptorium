@@ -1,6 +1,6 @@
 # PROJECT-SUMMARY (brain map, not a copy)
 
-Last updated: 2026-10-24 / Ref: 2680738 0034 pushed, CI ×3; M4-C4 complete
+Last updated: 2026-10-24 / Ref: 1add6c8 M4-C4 pushed, CI ×3; M4 implementation complete
 
 - **What:** Scriptorium — self-hosted docs platform. Browser WYSIWYG (TipTap) → valid
   Sphinx source (RST default, MyST opt-in) → sandboxed background build → served HTML.
@@ -22,7 +22,8 @@ Last updated: 2026-10-24 / Ref: 2680738 0034 pushed, CI ×3; M4-C4 complete
   sandbox runner/Celery/`builds` endpoints; migration head
   `0006buildsite`. The theme is Scriptorium's own, from scratch
   (0027–0034; engine inherited incl. vendored JS, first-party search,
-  Inter, feedback batches 0029–0034). **M4-C4 complete:** isolated `/opt/scriptorium/build-venv` from a 27-pin
+  Inter, feedback batches 0029–0034). **M4-C4 complete/pushed
+  (`1add6c8`, CI ×3):** isolated `/opt/scriptorium/build-venv` from a 27-pin
   engine-only lock, config example/queue/build keys, both units
   `Requires=redis`/`After=redis`, postinst artifacts/config seed/
   build-venv check, manual docutils-0.23 probe (58 passed; pin stays
