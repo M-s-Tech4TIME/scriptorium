@@ -5,4 +5,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: test -f packaging/nfpm.yaml && test -f packaging/systemd/scriptorium-web.service && test -f packaging/systemd/scriptorium-worker.service && echo "packaging skeleton OK"
+      - name: Packaging contract
+        run: |
+          set -eu
+          test -f packaging/nfpm.yaml
+          test -f packaging/build-requirements.lock
+          test -f packaging/config.env.example
+          test -f packaging/scripts/build-venv.sh
+          test -f packaging/scripts/postinst.sh
+          test -f packaging/systemd/scriptorium-web.service
+          test -f packaging/systemd/scriptorium-worker.service
+          test -f scripts/probe-docutils-023.sh
+          test -f .github/workflows/docutils-probe.yml
+          sh -n packaging/scripts/build-venv.sh
+          sh -n packaging/scripts/postinst.sh
+          sh -n packaging/scripts/prerm.sh
+          bash -n scripts/probe-docutils-023.sh
+          grep -q '^Requires=redis.service$' packaging/systemd/scriptorium-web.service
+          grep -q '^Requires=redis.service$' packaging/systemd/scriptorium-worker.service
+          grep -q '^After=.*redis.service' packaging/systemd/scriptorium-web.service
+          grep -q '^After=.*redis.service' packaging/systemd/scriptorium-worker.service
+          grep -q '^CELERY_BROKER_URL=' packaging/config.env.example
+          grep -q '^SC_BUILD_PYTHON=/opt/scriptorium/build-venv/bin/python$' packaging/config.env.example
+          grep -q '/opt/scriptorium/build-venv' packaging/nfpm.yaml
+          if grep -Eq '^(fastapi|sqlalchemy|celery|asyncpg|alembic)==' packaging/build-requirements.lock; then
+            echo "build venv lock contains an app dependency" >&2
+            exit 1
+          fi
+          echo "packaging contract OK"

@@ -4,7 +4,7 @@
 |---|---|---|---|---|
 | Python | 3.12.x | 3.15.0 (2026-10-09) | to Oct 2028 | python.org |
 | Sphinx | 9.1.0 | 9.1.0 (2025-12-31) | 9.x current | sphinx-doc.org/PyPI |
-| docutils | 0.22.4 (0.23 gated) | 0.23 (2026-05-27) | current | PyPI |
+| docutils | 0.22.4 (0.23 gated) | 0.23 (2026-05-27) | current; probe green 2026-10-24, MyST metadata still caps | PyPI |
 | MyST-Parser | 5.1.0 | 5.1.0 (2026-05-13) | current, needs Sphinx ≥8<10 | PyPI/changelog |
 | FastAPI | 0.143.0 | 0.143.0 (2026-10-08) | rolling — pin+lock | PyPI/GitHub |
 | SQLAlchemy | 2.1.4 | 2.1.4 (2026-10-07) | needs Py ≥3.11 | PyPI/GitHub |
@@ -24,4 +24,7 @@
 
 Distro check: U24.04 Py3.12/PG16(+PGDG18) OK; D12 Py3.11/PG15(+PGDG18, bundled 3.12) OK;
 RHEL9 Py3.9+3.11/3.12 AppStream + PG modules/PGDG OK; Fedora PG18 OK.
-Trio risk: MyST 5.x upper-bounds docutils — 0.23 gated in CI (0003).
+Trio risk: MyST 5.x upper-bounds docutils — 0.23 gated (0003). The
+manual `docutils-0.23-probe` workflow / `scripts/probe-docutils-023.sh`
+is the bump gate; its 2026-10-24 run passed 58 tests, but the pin stays
+0.22.4 until MyST lifts the metadata cap and the owner approves a bump.

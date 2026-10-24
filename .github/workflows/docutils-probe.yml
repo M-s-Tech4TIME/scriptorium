@@ -1,0 +1,14 @@
+name: docutils-0.23-probe
+# Manual gate for decision 0003/0017. Not a push gate: MyST 5.1.0 still
+# caps docutils below 0.23, so a red probe means the pin stays 0.22.4.
+on:
+  workflow_dispatch:
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: bash scripts/probe-docutils-023.sh

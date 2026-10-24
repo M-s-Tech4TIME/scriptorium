@@ -188,4 +188,15 @@ Ruled A/A/A immediately before C2 implementation:
   failures (Sphinx -W, all-empty sites, filesystem).
 - **Curated theme base:** queued for C3 but **not decided here**
   (Rule 4) — `alabaster` remains the placeholder; the owner question
-  precedes any C4 packaging.
+  precedes any C4 packaging. Resolved by 0027: the theme is
+  Scriptorium's own, from scratch.
+- **C4 implementation (2026-10-24, within P3):** the isolated build venv
+  is `/opt/scriptorium/build-venv`, generated at package-build time by
+  `packaging/scripts/build-venv.sh` from a 27-pin engine-only lock
+  (`packaging/build-requirements.lock`, constrained by the app lock).
+  `postinst` verifies it; production sets `SC_BUILD_PYTHON` there.
+  `config.env.example` carries the queue/build keys; both units
+  `Requires=redis.service` / `After=redis.service`. The docutils-0.23
+  probe is a manual workflow/script (`scripts/probe-docutils-023.sh`),
+  not a push gate. These are implementation mechanics within the
+  approved P3 ruling; no new product decision is introduced.

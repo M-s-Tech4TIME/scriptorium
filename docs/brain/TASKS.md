@@ -1,18 +1,20 @@
 # TASKS
 
-Last updated: 2026-10-24 / cbe2b22 Rule 8 + 0034 accepted/committed; push + CI next
+Last updated: 2026-10-24 / 2680738 0034 pushed, CI ×3; M4-C4 complete (commit/push next)
 
 ## In progress (max 1–2)
-- M4-C3.5 0034 fourth-feedback fixes: accepted/committed (panel
-  placeholder only → "Search"; code-language outer-wrapper fix + "Code"
-  fallback; pager inside `.sd-reading-main`; pre-paint collapsed panel
-  marker so pager navigation never flashes; Node/theme-build regression
-  tests). Preview #6 approved; preview #7 browser-verified; push + CI ×3
-  next.
-- M4-C4: packaging (build venv, worker After=redis, config keys) +
-  0017 docutils-0.23 probe mechanics + M4-complete report.
+- M4-C3.5 complete: 0034 pushed as `2680738` (panel placeholder only →
+  "Search"; code-language outer-wrapper fix + "Code" fallback; pager
+  inside `.sd-reading-main`; pre-paint collapsed panel marker so pager
+  navigation never flashes; Node/theme-build regression tests). Preview
+  #6 approved; preview #7 browser-verified; CI green ×3.
+- M4-C4 complete: isolated build venv + 27-pin engine lock, config
+  example/queue keys, both units `Requires=redis`/`After=redis`,
+  postinst artifacts/config seed/build-venv check, manual docutils-0.23
+  probe (58 passed; pin stays 0.22.4), M4 report, packaging tests
+  (suite 87 passed / 36 skipped). Commit + CI ×3 next.
 
-## Todo (M4 next — C4 + phases)
+## Todo (M4 next — phases)
 - [x] M4-C3.5 baseline: 0029 + 0030 + 0031 + 0032 committed/pushed as
       `b15446f`, CI green ×3 (lint-type-test, security, packaging).
 - [x] Commit Standing Rule 8 (0033) — approved wording, docs/governance.
@@ -20,11 +22,12 @@ Last updated: 2026-10-24 / cbe2b22 Rule 8 + 0034 accepted/committed; push + CI n
 - [x] Fix collapsed-panel flash on pager navigation (pre-paint marker) +
       preview #7 browser verification.
 - [x] 0034 accepted + committed (includes Rule 8).
-- [ ] Push `dev` with Rule 8 + 0034 → CI green ×3.
-- [ ] M4-C4 packaging: isolated build venv + `SC_BUILD_PYTHON`,
-      unit `scriptorium-worker` `After=redis`, `config.env` build keys
+- [x] Push `dev` with Rule 8 + 0034 → CI green ×3 (`2680738`).
+- [x] M4-C4 packaging: isolated build venv + `SC_BUILD_PYTHON`,
+      both units `Requires=redis`/`After=redis`, `config.env` build keys
       (`CELERY_BROKER_URL`, `SC_*`); 0017 docutils-0.23 probe
-      mechanics; M4-complete report + brain.
+      mechanics; M4 report + brain.
+- [ ] Commit + push M4-C4 → CI green ×3.
 - [ ] Serving phase (resolve Q-SERVE-A…E first) → dedicated phase
       (brand injection + custom-CSS hooks land here, 0027)
 - [ ] URL-durability phase after serving
@@ -33,12 +36,13 @@ Last updated: 2026-10-24 / cbe2b22 Rule 8 + 0034 accepted/committed; push + CI n
 
 - [x] M4-C3.5 code tranche: theme package + sourcegen + runner +
       loader (75/36 before feedback pass) + offline-but-real
-      regression + AA contrast tests — committed `0f5fcc8` (unpushed)
+      regression + AA contrast tests — committed in the `b15446f` stack
 - [x] 0032 third feedback batch (2026-10-23/24): unified first-party
       search (phrase-first/all-word/full-page), dialog centring + x,
       clear-only field, weight 800, `#D8E7DD` inline, split toggles,
       scrollspy title, island contract, link crawl, h2 `base_level`
-      fix — working tree, suite 80/36, preview #5 served
+      fix — committed/pushed in `b15446f`; suite 80/36 at that point;
+      preview #5 approved
 - [x] M4-C3.5 preview #1 owner review + seven rulings (decision 0029,
       2026-10-22): all approved; Tabler kept ("Tabler it is"); credit
       holder = librarian display name; date = engine last-updated

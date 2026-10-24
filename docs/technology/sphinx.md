@@ -1,7 +1,7 @@
 # Technology — Sphinx 9.1.0 + docutils 0.22.4 + MyST-Parser 5.1.0
 
 - Versions (locked): Sphinx 9.1.0 (2025-12-31), docutils 0.22.4 (0.23 gated —
-  MyST 5.x upper-bounds docutils; verify in CI before bump, decision 0003),
+  MyST 5.x upper-bounds docutils; manual probe before bump, decision 0003),
   MyST-Parser 5.1.0 (2026-05-13, needs Sphinx ≥8<10, markdown-it-py ~4.2).
 - Why: documentation engine core; RST default + MyST opt-in per project (§5).
 - Used: isolated build venv only (never app deps, Rule 5.4); `backend/app/sphinx/`;
@@ -144,7 +144,22 @@
   by construction of the pinned stack, not a kernel namespace.
   Artifact on `ok`: `{SC_ARTIFACT_ROOT}/{athenaeum}/{build_number}/`
   (html/ + build.log); `SC_BUILD_PYTHON` defaults to `sys.executable`
-  pre-packaging (isolated build venv required in production, C4).
+  pre-packaging.
+- **C4 build venv (0026 P3):** `packaging/scripts/build-venv.sh` creates
+  `/opt/scriptorium/build-venv` from
+  `packaging/build-requirements.lock` (27 exact pins, constrained by the
+  app lock; Sphinx/docutils/MyST only). The script installs with
+  `--no-deps` and asserts FastAPI/SQLAlchemy/Celery/asyncpg/Alembic are
+  absent. `postinst` fails loud if the venv is missing; production sets
+  `SC_BUILD_PYTHON=/opt/scriptorium/build-venv/bin/python`. No installs
+  happen at build time.
+- **0017 docutils-0.23 probe:** `scripts/probe-docutils-023.sh` creates
+  an isolated venv from the app lock, force-installs `docutils==0.23`
+  with `--no-deps`, and runs the round-trip/sourcegen/real-Sphinx-build
+  suites under `-W error`. It is exposed as the manual
+  `docutils-0.23-probe` workflow, not a push gate: a red probe means the
+  pin stays 0.22.4. Probe run 2026-10-24: 58 passed with 0.23; the pin
+  remains 0.22.4 because MyST's metadata cap is still the gate.
 - Verified: 2026-10-16 (sphinx-doc.org/PyPI; lock resolved 2026-10-16);
   theme design baseline verified against Sphinx 9.1.0 in-repo probe
   (2026-10-22); C3.5 verified offline-but-real (2026-10-22): full

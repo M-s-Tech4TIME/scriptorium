@@ -10,5 +10,8 @@
   when missing. Task `app.worker.tasks.run_athenaeum_build` (single
   JSON build-id arg) executes `app.sphinx.execute.execute_build_sync` —
   the same executor the dev/CI `SC_BUILD_DISPATCH=inline` mode uses.
-  The systemd worker unit must start after Redis (packaging note, C4).
+  **C4 packaging:** `scriptorium-worker.service` declares
+  `Requires=redis.service` and starts `After=redis.service` (plus
+  postgres/network); `CELERY_BROKER_URL` ships in the 0600
+  `/etc/scriptorium/config.env` example.
 - Verified: 2026-10-16 (PyPI/changelog; lock resolved 2026-10-16).

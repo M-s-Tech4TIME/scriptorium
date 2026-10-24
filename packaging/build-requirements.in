@@ -1,0 +1,9 @@
+# Isolated Sphinx build stack (0026 P3, Rule 5.4).
+#
+# This venv is the ONLY interpreter that runs user-content builds. It must
+# never contain FastAPI/SQLAlchemy/Celery/app deps. Compile with:
+#   uv pip compile packaging/build-requirements.in --constraint backend/requirements.lock \
+#     --python-version 3.12 --no-annotate -o packaging/build-requirements.lock
+sphinx==9.1.0
+docutils==0.22.4
+myst-parser==5.1.0

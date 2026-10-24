@@ -19,6 +19,8 @@
   transition by running uvicorn with `--proxy-headers
   --forwarded-allow-ips` (M4 deployment docs).
 - CI: `redis:8.10.2` service on the backend job (`REDIS_URL=redis://…/1`).
-  Ops/packaging (M4): `scriptorium-web` systemd gets `Requires=redis` /
-  `After=redis` — config doc will carry the same.
+  Ops/packaging (M4-C4): both `scriptorium-web` and
+  `scriptorium-worker` declare `Requires=redis.service` and start
+  `After=redis.service`; the packaged `config.env.example` carries
+  `REDIS_URL` (limiter DB 1) and `CELERY_BROKER_URL` (broker DB 0).
 - Verified: 2026-10-20 (releases.sh / eosl.date: 8.10.2 current stable).

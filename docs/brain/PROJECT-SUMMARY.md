@@ -1,6 +1,6 @@
 # PROJECT-SUMMARY (brain map, not a copy)
 
-Last updated: 2026-10-21 / Ref: M4-C2 landed (3a15b52)
+Last updated: 2026-10-24 / Ref: 2680738 0034 pushed, CI ×3; M4-C4 complete
 
 - **What:** Scriptorium — self-hosted docs platform. Browser WYSIWYG (TipTap) → valid
   Sphinx source (RST default, MyST opt-in) → sandboxed background build → served HTML.
@@ -17,20 +17,24 @@ Last updated: 2026-10-21 / Ref: M4-C2 landed (3a15b52)
   RST export = one mark per run + fail-loud matrix; MyST carries the editor
   set via HTML paths. See `docs/technology/conversion.md` + 0017.
 - **M4 status (as of this sync):** M3 C1–C6 complete, green ×3
-  (0021–0025 landed). **M4-C1 + C2 + C3 LANDED:** 0026 per-Athenaeum
-  numbered builds + `app/sphinx/sourcegen.py` deterministic staging +
-  sandbox runner/Celery/`builds` endpoints (`c6c407d`+`fadef93`+
-  `1e1637e` CI ×3); migration head `0006buildsite`;
-  suite baseline `66 passed, 36 skipped`. **0027 recorded: the theme is
-  Scriptorium's own, from scratch (no builtin/third-party inheritance;
-  engine fully inherited incl. vendored engine JS)** — C3.5
-  implementation awaits the owner's design-consult tokens; then C4
-  packaging. Owner ruled the artifact to be a portable static
-  website + design mandates (security parity; structure locked,
-  skin open). Terminology: "grimoire" everywhere (0018). Auth
-  surface = login/refresh/logout only. Live API tests drive the app
-  via `httpx.ASGITransport` (starlette.testclient import warns →
-  Rule 6).
-- **Config keys (auth path):** `SECRET_KEY` (JWT), `SCRIPTORIUM_COOKIE_SECURE`
-  (prod sets Secure), `REDIS_URL` (limiter, fail-closed when missing),
-  `SCRIPTORIUM_RATELIMIT_LOGIN_MAX` / `_WINDOW_S` (0019, optional).
+  (0021–0025 landed). **M4-C1 + C2 + C3 + C3.5 complete:** 0026
+  per-Athenaeum numbered builds, `sourcegen.py` deterministic staging,
+  sandbox runner/Celery/`builds` endpoints; migration head
+  `0006buildsite`. The theme is Scriptorium's own, from scratch
+  (0027–0034; engine inherited incl. vendored JS, first-party search,
+  Inter, feedback batches 0029–0034). **M4-C4 complete:** isolated `/opt/scriptorium/build-venv` from a 27-pin
+  engine-only lock, config example/queue/build keys, both units
+  `Requires=redis`/`After=redis`, postinst artifacts/config seed/
+  build-venv check, manual docutils-0.23 probe (58 passed; pin stays
+  0.22.4), M4 report. Suite 87 passed / 36 skipped. Owner ruled the
+  artifact to be a portable static website + design mandates (security
+  parity; structure locked, skin open). Terminology: "grimoire"
+  everywhere (0018). Auth surface = login/refresh/logout only. Live
+  API tests drive the app via `httpx.ASGITransport`
+  (starlette.testclient import warns → Rule 6).
+- **Config keys:** `SECRET_KEY` (JWT; empty fails loud), `DATABASE_URL`,
+  `SCRIPTORIUM_COOKIE_SECURE` (prod sets Secure), `REDIS_URL` (limiter,
+  fail-closed when missing), `CELERY_BROKER_URL` (worker), and the
+  `SC_BUILD_*` / `SC_SPHINX_*` build paths/limits; optional
+  `SCRIPTORIUM_RATELIMIT_LOGIN_MAX` / `_WINDOW_S` (0019). Packaged
+  example at `packaging/config.env.example` (0600 seed).

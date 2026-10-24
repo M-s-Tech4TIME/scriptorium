@@ -1,6 +1,6 @@
 # Layout + naming (monorepo under scriptorium/, decision 0012)
 
-Last updated: 2026-10-16 / Ref: uncommitted (subdir move)
+Last updated: 2026-10-24 / Ref: M4-C4 packaging layout
 
 Repo root contains only `scriptorium/` (+ `.git`). All work happens under `scriptorium/`.
 
@@ -10,7 +10,8 @@ project-scriptorium/
     ├── AGENTS.md  project-details.md  docker-compose.yml
     ├── backend/ (FastAPI: app/{routers,schemas,models,convert,sphinx,worker}/ alembic/ tests/ pyproject.toml)
     ├── frontend/ (React+TS+TipTap: src/{editor,components,pages}/ package.json tsconfig.json)
-    ├── packaging/ (nfpm.yaml systemd/scriptorium-{web,worker}.service scripts/{setup,migrate})
+    ├── packaging/ (nfpm.yaml; build-requirements.{in,lock}; config.env.example;
+    │   systemd/scriptorium-{web,worker}.service; scripts/{build-venv,postinst,prerm})
     ├── docs/  scripts/  dist/ (gitignored)
     └── .github/workflows/ (NOTE: GitHub requires workflows at repo-root .github/ — see OPEN-QUESTIONS.md)
 ```

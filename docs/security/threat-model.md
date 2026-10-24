@@ -1,12 +1,18 @@
 # Threat model (initial, Q22 / §10)
 
-Last updated: 2026-10-16 / Ref: uncommitted
+Last updated: 2026-10-24 / Ref: M4-C4 packaging contract
 
 ## Primary risk: untrusted content → Sphinx code exec
 - Generated-only `conf.py`; extension allowlist (any addition = Rule 4 + record).
-- Isolated build venv (no app deps); sandbox: `NoNewPrivileges`, `PrivateTmp`, net-off,
-  CPU/mem/time limits, per-job temp dir; single-build-per-project; timeouts.
+- Isolated build venv (M4-C4: 27-pin engine-only lock, `--no-deps`, app-dep
+  absence asserted; `/opt/scriptorium/build-venv`); sandbox:
+  `NoNewPrivileges`, `PrivateTmp`, CPU/mem/time limits, per-job temp dir;
+  single-build-per-project; timeouts. Egress isolation is by construction
+  of the pinned stack (no credentials/proxy in the whitelisted env), not
+  a kernel namespace — disclosed P3 limitation.
 - No remote fetch at build; link-check opt-in with allowlist (SSRF guard).
+- Package install: `config.env` seeded 0600 only when absent; `postinst`
+  never migrates or fetches; worker/web `Requires=redis.service`.
 
 ## App risks → mitigations
 - XSS (built HTML + editor): output encoding, CSP `default-src 'self'`, SVG sanitize, upload allowlist + size caps.

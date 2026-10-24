@@ -1,6 +1,7 @@
 [Unit]
 Description=Scriptorium worker (Celery build queue)
-After=network.target postgresql.service redis.service scriptorium-web.service
+Requires=redis.service
+After=network.target postgresql.service redis.service
 [Service]
 User=scriptorium
 Group=scriptorium

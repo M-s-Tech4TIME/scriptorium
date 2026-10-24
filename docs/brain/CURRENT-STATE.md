@@ -1,8 +1,8 @@
 # CURRENT-STATE
 
-Last updated: 2026-10-24 / Ref: cbe2b22 Rule 8 + 0034 accepted/committed; push + CI next
+Last updated: 2026-10-24 / Ref: 2680738 0034 pushed, CI ×3; M4-C4 complete (commit/push next)
 
-- **Phase:** **M4-C3.5 baseline `b15446f` green ×3; Standing Rule 8 `cbe2b22`; 0034 fixes + no-flash panel follow-up accepted/committed; push + CI next.**
+- **Phase:** **M4-C3.5 complete: `b15446f` baseline, `cbe2b22` Rule 8, `2680738` 0034 — all pushed, CI green ×3. M4-C4 packaging/probe/report complete; commit + CI ×3 next.**
   M4-C1 (`2aed3ef`): decision 0026
   (per-Athenaeum site P1, manual trigger P2, subprocess sandbox P3,
   keep-all versions P4; reconciliation: staging keyed by grimoire id
@@ -141,10 +141,13 @@ Last updated: 2026-10-24 / Ref: cbe2b22 Rule 8 + 0034 accepted/committed; push +
   Inter reading face (sans, "Notion look", Option B mechanics, Google
   Fonts source, OFL vendored + NOTICE; fallback = ruled UI sans stack;
   RTD chain dropped).
-  **Next: M4-C4** (build
-  venv + packaging config, worker `After=redis`, 0017 docutils-0.23
-  probe mechanics, M4-complete report) → serving phase (Q-SERVE-A…E) →
-  URL durability → Distribution (Q-DIST-A…D).
+  **M4-C4 complete (2026-10-24):** isolated build venv
+  (`packaging/scripts/build-venv.sh` + 27-pin engine lock), config
+  example/queue keys, both units `Requires=redis`/`After=redis`,
+  postinst artifacts/config seed/build-venv check, manual docutils-0.23
+  probe (58 passed; pin stays 0.22.4), and the M4 report. Suite is
+  87 passed / 36 skipped. Commit + CI ×3 next; then serving phase
+  (Q-SERVE-A…E) → URL durability → Distribution (Q-DIST-A…D).
 - **Owner decisions:** 0018 (grimoire rename, per-user categories, auth
   semantics) → **amended by 0020 (2026-10-21):** native hierarchy — categories
   per-Athenaeum (Q-M3-9=A), `grimoires.athenaeum_id` NOT NULL (Q-M3-10=A),
@@ -186,22 +189,21 @@ Last updated: 2026-10-24 / Ref: cbe2b22 Rule 8 + 0034 accepted/committed; push +
   ×3; M4 C1 `2aed3ef` + C2 `3a15b52` + C3 `1e1637e` green ×3; 0028
   record `556bbce` green ×3; C3.5 baseline `b15446f` green ×3 (0029 +
   0030 + 0031 + 0032; 80 passed / 36 skipped, ruff + mypy strict clean).
-- **Last commit:** `cbe2b22` — `docs: adopt Standing Rule 8 regression
-  integrity` (12 files, +238/−71), on top of the approved baseline
-  `b15446f` (`feat(m4-c3.5): complete theme feedback passes 0029-0032`,
-  35 files, +3968/−275). The 0034 fix batch is committed on top
-  (`fix(m4-c3.5): apply fourth theme feedback batch`, 14 files,
-  +408/−74). `b15446f` is pushed with all three CI workflows green;
-  `cbe2b22` + 0034 are local, push + CI ×3 next.
+- **Last commit:** `2680738` — `fix(m4-c3.5): apply fourth theme feedback
+  batch` (14 files, +410/−76), pushed `dev`; all three CI workflows green
+  (lint-type-test, security, packaging). It sits on `cbe2b22` (Standing
+  Rule 8, 12 files, +238/−71) and the approved baseline `b15446f`
+  (`feat(m4-c3.5): complete theme feedback passes 0029-0032`, 35 files,
+  +3968/−275). 0034 is the owner-approved fourth batch plus the no-flash
+  collapsed-panel follow-up (preview #7).
   The exact owner-approved preview #5 artifact is `b15446f`: 0029
   seven-ruling pass + 0030 vendored Inter + 0031 second batch + 0032
   unified first-party search (phrase-first, all-word highlight,
   full-page takeover), centred dialog + x close, clear-only panel field,
   weight 800, `#D8E7DD` inline code, split panel controls, scrollspy
   title, island contract fix, link-integrity crawl, and the h2
-  `base_level` staging fix. **0034 fixes are committed on top; preview
-  #7 is browser-verified. Push Rule 8 + 0034 and verify CI green ×3 →
-  M4-C4.**
+  `base_level` staging fix. **0034 is pushed and CI green ×3; preview
+  #7 is browser-verified. M4-C4 is complete; commit + CI ×3 next.**
 - **Remote:** `git@github.com:M-s-Tech4TIME/scriptorium.git` (public).
   `dev` carries M3 complete + M4 in progress; `main` stays at release
   point (ff-only).

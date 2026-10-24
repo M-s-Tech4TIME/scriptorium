@@ -1,6 +1,6 @@
 # HANDOFF
 
-Last updated: 2026-10-24 / Ref: cbe2b22 Rule 8 + 0034 accepted/committed; push + CI next
+Last updated: 2026-10-24 / Ref: 2680738 0034 pushed, CI ×3; M4-C4 complete (commit/push next)
 
 ## Was doing
 M4-C3.5 **baseline committed and pushed**: the owner-approved preview #5
@@ -19,8 +19,13 @@ was applied at the end of `<body>`, after first paint. A tiny inline
 `<head>` script now marks `<html>` with `sd-panel-pending-off` before the
 shell exists; CSS paints the collapsed grid/sidebar/expand state, then
 the body script swaps in `.sd-panel-off` and removes the marker. Preview
-#7 is browser-verified and 0034 is committed. Push Rule 8 + 0034, then
-verify CI green ×3.
+#7 is browser-verified, 0034 is pushed as `2680738`, and all three CI
+workflows are green. M4-C4 packaging/probe/report is complete:
+isolated build venv + 27-pin engine lock, config example
+and queue/build keys, both units `Requires=redis`/`After=redis`,
+postinst artifacts/config seed/build-venv check, manual docutils-0.23
+probe (58 passed; pin stays 0.22.4), M4 report, and packaging
+regressions (suite 87 passed / 36 skipped). Commit + CI ×3 next.
 
 M4-C3.5 **0032 third feedback batch (now committed in `b15446f`):** the
 search is one first-party mechanism on both surfaces — engine
@@ -69,9 +74,8 @@ changelog `2026-10-23-m4-theme-second-feedback.md` + OPEN-QUESTIONS
 Q-EDITOR-1 (editor language-suggestion combobox — recommendation
 parked, not approved). Fixture rebuild: inspection library + a fourth
 staging rung + console block, rebuilt and SERVING on `0.0.0.0:8321`
-(14 pages; `lang 200`, deeper page reachable). Earlier (0029, still
-uncommitted on top of unpushed `0f5fcc8`): link-icon anchors at every
-heading level (¶ hidden; Tabler kept), search-hit decoration (grimoire
+(14 pages; `lang 200`, deeper page reachable). Earlier (0029):
+link-icon anchors at every heading level (¶ hidden; Tabler kept), search-hit decoration (grimoire
 chip + heading chain — trimmed of the page-title dup per 0031,
 same-origin; themed highlight is engine-native), code-block header
 bars (language badge + persistent copy — fixed the copy bug: the
@@ -83,23 +87,20 @@ by <librarian>. Last updated on <date>." / "Compiled by Scriptorium."
 via `html_last_updated_fmt` + `site_credit` from `users.display`),
 wide-left reading layout + sticky On-This-Page rail (`{{ toc }}` +
 scrollspy, hides <1200px). Records 0029/0030 + 0028 pointer amended;
-sphinx.md + changelogs + brain synced. The C3.5 code tranche itself is
-committed as `0f5fcc8` (23 files, +2034/−142, unpushed); the 0029 +
-0030 passes are the staged changeset on top.
+sphinx.md + changelogs + brain synced. The entire C3.5 stack (0029–
+0034) was committed/pushed as `b15446f` … `2680738` after owner
+approval; M4-C4 is complete and waits on the commit + CI gate.
 
 ## Next steps (in order)
-1. **Push `dev`** with Rule 8 `cbe2b22` + 0034, verify CI green ×3
-   (`gh run list --branch dev`), fix-on-red if needed.
-2. **M4-C4** — packaging (`packaging/` creates the isolated build venv,
-   `SC_BUILD_PYTHON` pointed there; worker unit `After=redis`;
-   `config.env` gains `CELERY_BROKER_URL` + `SC_*` build keys), the
-   0017 docutils-0.23 probe mechanics, M4-complete report + brain sync.
-5. **Junk-sweep before every gate:** re-read written files; grep the
-   standing junk markers before committing.
-6. Serving phase — resolve Q-SERVE-A…E first, then implement (theme
+1. **Junk-sweep + full gates for M4-C4:** re-read written files; grep
+   the standing junk markers; ruff/format/mypy/pytest `-W error` and the
+   packaging contract before committing.
+2. **Commit M4-C4**, push `dev`, verify CI green ×3, fix-on-red if
+   needed. M4 build/theme implementation is then complete.
+3. Serving phase — resolve Q-SERVE-A…E first, then implement (theme
    brand-injection hooks + custom-CSS wiring land there, 0027;
    `[data-theme]` second scheme is its own later ruling, 0028).
-7. URL-durability phase after serving; Distribution-phase concepts
+4. URL-durability phase after serving; Distribution-phase concepts
    (Q-DIST-A…D) presented before their implementation (incl. the React
    shell format).
 

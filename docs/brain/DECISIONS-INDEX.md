@@ -29,7 +29,7 @@ Last updated: 2026-10-21 / Ref: M4-C1 (0026)
 | 0023 | Tree endpoints (D1=A delete-refusal, D2=A owner-only): chapters/folios, cycle guard, displacement reorder, nesting unrestricted (RTD) | accepted | 2026-10-21 | owner |
 | 0024 | Folio documents: expected_version→409, version+history append, server-derived source cache, import→422, editor/owner saves | accepted | 2026-10-21 | owner |
 | 0025 | Grimoire duplication (Q-M3-16a–e): caller-slug w/ auto-suffix, owner-only roster, head-as-v1, any owned target lib, copy-of-copy allowed | accepted | 2026-10-21 | owner |
-| 0026 | M4 build design (Q-M4-P1…P4): per-Athenaeum sites, manual trigger, subprocess sandbox, keep-all + numbered builds; artifact = portable static site; design mandates (security parity, skin-open) | accepted | 2026-10-21 | owner |
+| 0026 | M4 build design (Q-M4-P1…P4): per-Athenaeum sites, manual trigger, subprocess sandbox, keep-all + numbered builds; artifact = portable static site; design mandates (security parity, skin-open); C4 implementation note 2026-10-24 (isolated build venv, config keys, Redis ordering, docutils probe) | accepted | 2026-10-21 | owner |
 | 0027 | M4-C3.5 theme: Scriptorium's own, from scratch (no builtin/third-party inheritance); full engine inheritance incl. vendored engine JS + pinned DOM contracts; brand hooks serving-phase | accepted | 2026-10-21 | owner |
 | 0028 | M4-C3.5 design baseline: consult tokens accepted (fixed dark-chrome/cream scheme), Tabler inline-SVG sprite (16 icons), 11-anchor per-type callout palette (`--sd-adm-*`), custom Pygments style, first-party copy script (0027 JS clause amended), zero extensions v1, all-caps bold verdigris category labels (D15 revised) | accepted | 2026-10-22 | owner |
 | 0029 | C3.5 preview-feedback rulings: link-icon anchors at every heading level (Tabler kept), search hits = scope + heading chain + matched snippet (island + same-origin extraction), code-block chrome w/ language + persistent copy, green Previous/Next pager, footer bar removed + Index under search + per-page credit (librarian display name, engine last-updated date), wide-left reading + On-This-Page rail, inspection fixture | accepted | 2026-10-22 | owner |
@@ -42,4 +42,4 @@ Last updated: 2026-10-21 / Ref: M4-C1 (0026)
 Full records: `docs/decisions/0001-*.md` … `0034-*.md`.
 Pending: none.
 
-Last updated: 2026-10-24 / Ref: 0034 recorded
+Last updated: 2026-10-24 / Ref: 0026 C4 implementation note; 0034 recorded
