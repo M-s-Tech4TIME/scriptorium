@@ -1,22 +1,24 @@
 # TASKS
 
-Last updated: 2026-10-22 / C3.5 code written + docs synced — commit/preview/push next
+Last updated: 2026-10-24 / 0032 third batch implemented — preview #5 serving → owner look → commit/push next
 
 ## In progress (max 1–2)
-- M4-C3.5 commit + push: code complete and docs-synced (suite 75/36,
-  gates clean); owner offered a browser preview, then push + CI ×3.
+- M4-C3.5 preview #5 + owner look + commit/push: 0029 seven rulings +
+  0030 vendored Inter + 0031 second batch + 0032 third batch (one
+  first-party search: phrase-first, all-word highlight, full-page
+  takeover; centred dialog + x close; clear-only X; weight 800;
+  `#D8E7DD` inline; split panel controls; scrollspy title; island
+  contract; link crawl; h2 `base_level` fix) implemented; docs synced
+  (suite 80/36, gates clean); fixture rebuilt + served on 0.0.0.0:8321;
+  on the owner's verdict FOUR commits (0029 + 0030 + 0031 + 0032) +
+  push `dev` + CI ×3.
 - M4-C4: packaging (build venv, worker After=redis, config keys) +
   0017 docutils-0.23 probe mechanics + M4-complete report.
 
 ## Todo (M4 next — C4 + phases)
-- [ ] M4-C3.5 commit/push + CI ×3 (code done: theme package with
-      `inherit = none`; layout/page/search/genindex; scriptorium.css +
-      inline Tabler sprite + scriptorium.js; Pygments style,
-      `THEME_BASE="scriptorium"` + `html_theme_path`, runner theme copy
-      + vendoring of the three engine JS **plus the two `.jinja`
-      static templates**, search contract per 0028, offline runner
-      regression (75/36) + sourcegen conf asserts + AA contrast test;
-      local browser preview offered before push).
+- [ ] M4-C3.5 owner verdict on preview #5 → four commits (0029 pass,
+      0030 fonts, 0031 batch, 0032 third batch) + push `dev` + CI green
+      ×3 (fix-on-red).
 - [ ] M4-C4 packaging: isolated build venv + `SC_BUILD_PYTHON`,
       unit `scriptorium-worker` `After=redis`, `config.env` build keys
       (`CELERY_BROKER_URL`, `SC_*`); 0017 docutils-0.23 probe
@@ -27,6 +29,17 @@ Last updated: 2026-10-22 / C3.5 code written + docs synced — commit/preview/pu
 - [ ] Distribution phase (Q-DIST-A…D) + React shell format — concepts
       ratified in 0026, presented before implementation
 
+- [x] M4-C3.5 code tranche: theme package + sourcegen + runner +
+      loader (75/36 before feedback pass) + offline-but-real
+      regression + AA contrast tests — committed `0f5fcc8` (unpushed)
+- [x] 0032 third feedback batch (2026-10-23/24): unified first-party
+      search (phrase-first/all-word/full-page), dialog centring + x,
+      clear-only field, weight 800, `#D8E7DD` inline, split toggles,
+      scrollspy title, island contract, link crawl, h2 `base_level`
+      fix — working tree, suite 80/36, preview #5 served
+- [x] M4-C3.5 preview #1 owner review + seven rulings (decision 0029,
+      2026-10-22): all approved; Tabler kept ("Tabler it is"); credit
+      holder = librarian display name; date = engine last-updated
 - [x] Owner ruled the theme 2026-10-21 (decision 0027): Scriptorium's
       own from-scratch theme, full engine inheritance, engine-JS
       vendoring + pinned DOM contracts — record tranche committed
@@ -41,6 +54,10 @@ Last updated: 2026-10-22 / C3.5 code written + docs synced — commit/preview/pu
       record tranche committed
 - [x] Owner ruled M4 C2/C3 edge cases A/A/A 2026-10-21 (E1 422-empty,
       E2 skip+note, E3 409-serialization) — recorded 0026 §Edge rulings
+- [x] Owner ruled typography 2026-10-23 (decision 0030): vendored
+      Inter (Option B, sans "Notion look", Google Fonts source),
+      fallback = ruled UI sans stack; RTD chain considered + dropped —
+      record tranche committed with this sync
 - [x] M4-C2: deterministic sourcegen + 14 offline tests (3a15b52, ×3)
 - [x] M4-C3: runner + Celery + build endpoints (c6c407d → fadef93 →
       1e1637e, ×3): E1/E3 live, numbering, artifact bytes, visibility,

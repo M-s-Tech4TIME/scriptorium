@@ -58,9 +58,10 @@ def _contrast(fg: str, bg: str) -> float:
 
 
 def _tokens(css: str) -> dict[str, str]:
-    root_block = re.search(r":root\s*\{([^}]*)\}", css)
-    assert root_block, ":root token block missing"
-    found = {name: hexv for name, hexv in _HEX.findall(root_block.group(1))}
+    # all :root blocks (the consult block + the 0029–0031 addendum)
+    found: dict[str, str] = {}
+    for block in re.findall(r":root\s*\{([^}]*)\}", css):
+        found.update(_HEX.findall(block))
     assert found, "no --sd-* tokens found in :root"
     return found
 
@@ -120,6 +121,11 @@ def test_root_tokens_present() -> None:
         "ok",
         "warn",
         "err",
+        # 0031 addendum tokens (AA pairs for the icy-green chips)
+        "code-inline-bg",
+        "code-inline-ink",
+        "chip-bg",
+        "chip-ink",
     ):
         assert name in tokens, f"--sd-{name} missing from the consult token set"
 
@@ -140,6 +146,9 @@ def test_aa_pairs_readability() -> None:
         ("link/bg", "link", "bg"),  # category labels (exception B)
         # filled controls use accent-strong (0028)
         ("on-accent/accent-strong", "on-accent", "accent-strong"),
+        # 0031: the icy-green chip pair (inline code, download + hit + dialog chips)
+        ("code-inline-ink/code-inline-bg", "code-inline-ink", "code-inline-bg"),
+        ("chip-ink/chip-bg", "chip-ink", "chip-bg"),
     ]
     for label, fg, bg in pairs:
         assert fg in root and bg in root, label

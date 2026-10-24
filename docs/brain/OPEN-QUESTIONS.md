@@ -1,6 +1,6 @@
 # OPEN-QUESTIONS
 
-Last updated: 2026-10-22 / Ref: 0028 recorded (design baseline) — serving/distribution questions parked
+Last updated: 2026-10-24 / Ref: 0032 recorded (third feedback batch; no new questions) — serving/distribution questions parked
 
 | ID | Question | Blocks | Asked |
 |---|---|---|---|
@@ -8,6 +8,7 @@ Last updated: 2026-10-22 / Ref: 0028 recorded (design baseline) — serving/dist
 | Q-002 | Login rate limiting: RESOLVED — owner approved Option B 2026-10-20 (in-app Redis fixed window, fail-closed; decision 0019). Implement before M4. | — | closed 2026-10-20 |
 | Q-M3-16a–e | Duplication sub-decisions: RESOLVED by owner 2026-10-21 — caller-supplied slug w/ optional auto-suffix; owner-only roster; head-as-v1 (no history clone); any owned target library; copy-of-copy allowed. Decision 0025. | — | closed 2026-10-21 |
 | Q-C3.5-A | **Curated default theme base — RESOLVED by owner ruling 2026-10-21 (decision 0027):** the theme is Scriptorium's own, built from the ground up (no builtin/third-party inheritance); the Sphinx engine is fully inherited/utilized incl. vendored engine JS. **Design baseline landed 2026-10-22 (decision 0028):** the external design consult answered D1–D17; the owner approved the full token/icon/palette/copy-script sheet — C3.5 code is fully specified (no design decisions outstanding). | — | closed 2026-10-21 (record complete 2026-10-22) |
+| Q-EDITOR-1 | **Code-block language suggestion set in the editor** (from batch #2 platform facts, 2026-10-23): the theme shows user-defined language labels on code chrome; the EDITOR needs an accessible picker for it. Recommended (not yet approved): an accessible combobox (ARIA 1.2 pattern) seeded from the vendored Pygments lexer names, storing a display label + lexer alias separately (custom languages via the field falling back to plain text). Also covers: whether display-name inheritance auto-fills from the lexer or stays free-form. Owner verdict needed; blocks nothing in the theme (M4-C4/M5). | editor phase | 2026-10-23 |
 | Q-SERVE-A | What gets served — latest OK build only, or owner-selected published builds (stable/latest pointers)? | serving phase | 2026-10-21 |
 | Q-SERVE-B | Visibility model — public vs authenticated (private) docs; per-Athenaeum toggle? | serving phase | 2026-10-21 |
 | Q-SERVE-C | Serving mechanics — FastAPI static mount vs nginx alias; reading straight from the artifacts dir? | serving phase | 2026-10-21 |
@@ -37,6 +38,13 @@ See 0027 + 0028.
 
 **Serving/distribution questions Q-SERVE-A…E, Q-DIST-A…D remain OPEN —
 parked in their table rows above; none block M4.**
+
+**0032 search scope (not an open question):** the owner approved
+client-side on-demand sectioning with ~10 candidate folios and
+progressive render; a build-time section index is the documented scale
+upgrade, deferred. `searchtools.js` stays in the vendored asset set
+(0027) although no page loads it — removing it would reopen 0027 and is
+not part of this tranche.
 
 **Design-baseline sub-items (all RESOLVED 2026-10-22, decision 0028, no
 open remainder):** single fixed scheme (D3 supersedes D2), no logo file

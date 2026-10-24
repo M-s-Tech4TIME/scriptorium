@@ -226,10 +226,14 @@ def _scan_heading_skips(blocks: list[Node], last: list[int]) -> None:
 PARAGRAPHISH = {"paragraph", "blockquote", "bulletList", "orderedList"}
 
 
-def export_myst(doc: Node) -> str:
-    """Render a canonical TipTap doc → MyST (CommonMark)."""
+def export_myst(doc: Node, *, base_level: int = 0) -> str:
+    """Render a canonical TipTap doc → MyST (CommonMark).
+
+    `base_level` mirrors `export_rst`: the staged page title is level 1,
+    so body headings may start at h2; standalone exports keep 0.
+    """
     if doc.get("type") != "doc":
         raise ConversionError("Expected a doc node at the root.")
-    last: list[int] = [0]
+    last: list[int] = [base_level]
     _scan_heading_skips(doc.get("content") or [], last)
     return _blocks_str(doc.get("content") or [], "") + "\n"

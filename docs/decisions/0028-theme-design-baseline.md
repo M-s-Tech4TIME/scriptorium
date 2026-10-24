@@ -4,7 +4,19 @@
 - **Decided:** 2026-10-22 (owner approved the full Rule-4 decision sheet
   in conversation — ①A ②A ③B ⑤, ⑥1–⑥3 — plus two ruled exceptions
   (below), then confirmed the finalized exception specs and the
-  uniform body-ink rule)
+  uniform body-ink rule); **amended the same day by decision 0029**
+  (`0029-theme-preview-feedback.md`): preview-feedback rulings —
+  header anchors swap to a hyperlink icon, search-result decoration,
+  code-block chrome, green Previous/Next pager, footer-bar removal +
+  per-page credit, wide reading layout + On-This-Page rail. 0029
+  elaborates these rulings and supersedes ONLY the 740px article
+  measure (wide `--sd-col-wide` reading column); the token system,
+  palette, icon set (Tabler, + the `code` symbol), copy-script clause
+  and AA floor all stand as ruled here. **Amended 2026-10-23 by 0032**:
+  the `searchtools.js`-driven search-page contract below is superseded
+  by the first-party full-search takeover; `searchtools.js` remains
+  vendored per 0027 but no page loads it. The 0032 record is the current
+  search contract.
 - **Scope:** the M4-C3.5 implementation mechanics of the theme
   (0027)*—*the design layer. Serving-phase concerns (brand injection,
   custom-CSS wiring, dark-scheme policy) remain out of scope per 0026
@@ -213,26 +225,36 @@ discovered the exact shape needed by an `inherit = none` theme:
   injection; our templates render the provided asset lists with our own
   tags (`css_tag`/`js_tag`) — no hand-copied engine script tags.
 
-## Search DOM contract (read off the vendored `searchtools.js` — pinned, engine-bump-synced)
+## Search contract (current; the engine-renderer contract was retired by 0032)
 
-- Search page: a `form action="" method="get"` whose `input[name="q"]`
-  is prefilled with `?q=` (`Search.init()` self-runs on ready);
-  optional `#search-progress` node; required `#search-results` node
-  (Search appends its title/summary/`ul.search` there).
-- Article pages carry `role="main"` around the document body (result
-  summaries are extracted from it via `fetch` with
-  `DOCUMENTATION_OPTIONS.SHOW_SEARCH_SUMMARY`).
-- `<html data-content_root="#">` attribute from the builder context
-  (`ctx['content_root']`) — needed for summary fetches.
-- Script wiring on the search page: `searchindex.js` (project-relative,
-  deferred), `searchtools.js` + `language_data.js` from `_static/` —
-  included by our own `search.html` (the engine's asset auto-list does
-  **not** add these; the basic theme template did).
-- `Search.renderItem` output (`li.kind-<title|object|text|index>` with
-  `a` + span) is styled from our CSS; the default flag toggles
-  (`NAVIGATION_WITH_KEYS`, `ENABLE_SEARCH_SHORTCUTS`) stay off in v1 —
-  `/` keyboard focus and arrow navigation ship with a later ruling.
+The original contract below was read off the vendored `searchtools.js`
+and pinned the engine's page-level renderer. **0032 retired that
+renderer**: the search page and the dialog now share the first-party
+core in `scriptorium.js`, and no page loads `searchtools.js`.
+
+- Search page (`search.html`): a first-party
+  `form.sd-searchpage-form action="" method="get"` with
+  `input[name="q"]` (prefilled from `?q=`), a `#search-results` live
+  region, and a `<noscript>` JavaScript-required notice. No
+  `#search-progress` node and no `searchtools.js` tag.
+- Script wiring: `language_data.js` in the head (classic script, so its
+  `stopwords`/stemmer bindings exist before the body-end core), the
+  build-emitted `searchindex.js` project-relative + deferred as the
+  candidate pre-filter, and `scriptorium.js` as the one search core.
+- Article pages carry `role="main"` as an accessibility landmark. The
+  first-party core fetches the artifact's own pages and extracts
+  heading-delimited sections; it does **not** use the engine's
+  `DOCUMENTATION_OPTIONS.SHOW_SEARCH_SUMMARY` path.
+- `<html data-content_root="#">` still comes from the builder context;
+  the first-party script uses it for artifact-relative retrieval.
+- The dialog and full page share `.sd-res-*` markup: folio header row,
+  section rows (heading chain + highlighted snippet), grimoire chip.
+  Keyboard: ↑/↓/Enter in the dialog, Esc/backdrop/Tabler x close;
+  `Ctrl+K` opens. Engine shortcut flags stay off.
 - `genindex.html` is plain HTML (no extra engine JS required).
+- The historical `Search.renderItem` (`li.kind-*`) styling contract is
+  gone with the renderer; `searchtools.js` stays in `_static` only
+  because 0027's vendored-asset list has not been reopened.
 
 ## v1 scope boundary (unchanged from 0027, now design-complete)
 

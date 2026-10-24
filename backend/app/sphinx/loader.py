@@ -14,7 +14,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import Athenaeum, Document, Grimoire, GrimoireCategory, Node
+from app.models import Athenaeum, Document, Grimoire, GrimoireCategory, Node, User
 from app.sphinx.sourcegen import StagedBook, snapshot_nodes
 
 
@@ -24,11 +24,18 @@ class SnapshotMissing(LookupError):
 
 async def load_site_snapshot(
     session: AsyncSession, athenaeum_id: uuid.UUID
-) -> tuple[Athenaeum, list[StagedBook]]:
-    """Slice one Athenaeum into the ordered per-book snapshot material."""
+) -> tuple[Athenaeum, list[StagedBook], str]:
+    """Slice one Athenaeum into the ordered per-book snapshot material.
+
+    The third element is the librarian's display name — the copyright
+    holder of the site ("© Copyright by …", 0029).
+    """
     athenaeum = await session.get(Athenaeum, athenaeum_id)
     if athenaeum is None:
         raise SnapshotMissing(f"Athenaeum {athenaeum_id} not found.")
+
+    owner = await session.get(User, athenaeum.owner_id)
+    site_credit = owner.display if owner is not None else ""
 
     categories = await session.scalars(
         select(GrimoireCategory)
@@ -97,4 +104,4 @@ async def load_site_snapshot(
                 ),
             )
         )
-    return athenaeum, books
+    return athenaeum, books, site_credit

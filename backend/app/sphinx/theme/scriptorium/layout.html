@@ -15,7 +15,7 @@
   current page's ancestry branch).
 -#}
 {% macro sd_node(node, depth) %}
-  {%- set here = pagename == node.docname -%}
+  {%- set here = (not node.container|default(False)) and (pagename == node.docname) -%}
   {%- set on_path = pagename.startswith(node.branch) -%}
   {%- if node.children %}
   <details class="sd-node sd-node-cont sd-depth-{{ depth }}{% if here %} sd-here{% endif %}"
@@ -23,14 +23,18 @@
     <summary>
       <svg class="sd-icon sd-chevron" aria-hidden="true"><use href="#sd-i-chevron-right"></use></svg>
       <svg class="sd-icon sd-marker" aria-hidden="true"><use href="#sd-i-{{ node.icon }}"></use></svg>
-      <a href="{{ pathto(node.docname, 1) }}">{{ node.title|e }}</a>
+      {#- pathto WITHOUT a flag: a docname → document URI (the .html
+          suffix). The `, 1` two-arg form means RESOURCE mode in this
+          engine (9.1) and silently drops the suffix — the CI finding
+          that showed suffix-less sidebar links. -#}
+      <a href="{{ pathto(node.docname) }}">{{ node.title|e }}</a>
     </summary>
     {%- for child in node.children %}{{ sd_node(child, depth + 1) }}{% endfor -%}
   </details>
   {%- else %}
   <div class="sd-node sd-node-leaf sd-depth-{{ depth }}{% if here %} sd-here sd-current{% endif %}">
     <svg class="sd-icon sd-marker" aria-hidden="true"><use href="#sd-i-{{ node.icon }}"></use></svg>
-    <a href="{{ pathto(node.docname, 1) }}" {% if here %}aria-current="page"{% endif %}>{{ node.title|e }}</a>
+    <a href="{{ pathto(node.docname) }}" {% if here %}aria-current="page"{% endif %}>{{ node.title|e }}</a>
   </div>
   {%- endif %}
 {% endmacro %}
@@ -71,6 +75,7 @@
   <symbol id="sd-i-chevron-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6l6 -6" /></symbol>
   <symbol id="sd-i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" /><path d="M21 21l-6 -6" /></symbol>
   <symbol id="sd-i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7m0 2.667a2.667 2.667 0 0 1 2.667 -2.667h8.666a2.667 2.667 0 0 1 2.667 2.667v8.666a2.667 2.667 0 0 1 -2.667 2.667h-8.666a2.667 2.667 0 0 1 -2.667 -2.667z" /><path d="M4.012 16.737a2.005 2.005 0 0 1 -1.012 -1.737v-10c0 -1.1 .9 -2 2 -2h10c.75 0 1.158 .385 1.5 1" /></symbol>
+  <symbol id="sd-i-code" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8l-4 4l4 4" /><path d="M17 8l4 4l-4 4" /><path d="M14 4l-4 16" /></symbol>
   <symbol id="sd-i-alert-triangle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4" /><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z" /><path d="M12 16h.01" /></symbol>
   <symbol id="sd-i-alert-octagon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12.802 2.165l5.575 2.389c.48 .206 .863 .589 1.07 1.07l2.388 5.574c.22 .512 .22 1.092 0 1.604l-2.389 5.575c-.206 .48 -.589 .863 -1.07 1.07l-5.574 2.388c-.512 .22 -1.092 .22 -1.604 0l-5.575 -2.389a2.036 2.036 0 0 1 -1.07 -1.07l-2.388 -5.574a2.036 2.036 0 0 1 0 -1.604l2.389 -5.575c.206 -.48 .589 -.863 1.07 -1.07l5.574 -2.388a2.036 2.036 0 0 1 1.604 0z" /><path d="M12 8v4" /><path d="M12 16h.01" /></symbol>
   <symbol id="sd-i-bulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h1m8 -9v1m8 8h1m-15.4 -6.4l.7 .7m12.1 -.7l-.7 .7" /><path d="M9 16a5 5 0 1 1 6 0a3.5 3.5 0 0 0 -1 3a2 2 0 0 1 -4 0a3.5 3.5 0 0 0 -1 -3" /><path d="M9.7 17l4.6 0" /></symbol>
@@ -81,6 +86,13 @@
   <symbol id="sd-i-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l14 0" /><path d="M5 12l6 6" /><path d="M5 12l6 -6" /></symbol>
   <symbol id="sd-i-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l14 0" /><path d="M13 18l6 -6" /><path d="M13 6l6 6" /></symbol>
   <symbol id="sd-i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" /></symbol>
+  <symbol id="sd-i-skull" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4c4.418 0 8 3.358 8 7.5c0 1.901 -.755 3.637 -2 4.96l0 2.54a1 1 0 0 1 -1 1h-10a1 1 0 0 1 -1 -1v-2.54c-1.245 -1.322 -2 -3.058 -2 -4.96c0 -4.142 3.582 -7.5 8 -7.5z" /><path d="M10 17v3" /><path d="M14 17v3" /><path d="M9 11m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M15 11m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /></symbol>
+  <symbol id="sd-i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5l10 -10" /></symbol>
+  <symbol id="sd-i-panel-collapse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" /><path d="M9 4v16" /><path d="M15 10l-2 2l2 2" /></symbol>
+  <symbol id="sd-i-panel-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" /><path d="M9 4v16" /><path d="M14 10l2 2l-2 2" /></symbol>
+  {#- 0032 ④: the owner's reference dismiss glyph (Tabler "x"). Used by
+      the panel field's clear control and the dialog close button. -#}
+  <symbol id="sd-i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></symbol>
 </svg>
 
 {#- Drawer toggle: CSS-only (consult D9). The label lives in the top bar.
@@ -91,13 +103,33 @@
 
 <div class="sd-shell">
 
-  <aside class="sd-sidebar" aria-label="Library contents">
-    <form class="sd-search" action="{{ pathto('search') }}" method="get" role="search">
-      <svg class="sd-icon sd-search-glyph" aria-hidden="true"><use href="#sd-i-search"></use></svg>
-      <input type="search" name="q" placeholder="Search the library"
-             aria-label="Search the library"
-             autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
-    </form>
+  <aside class="sd-sidebar" id="sd-sidebar" aria-label="Library contents">
+    {#- 0032 ⑧: the collapse control belongs to the panel header, right
+        of the search field. `type=text` removes the browser's native
+        clear glyph — the field carries our own Tabler x control, which
+        clears without opening the dialog (0032 ④). -#}
+    <div class="sd-side-head">
+      <form class="sd-search" action="{{ pathto('search') }}" method="get" role="search">
+        <svg class="sd-icon sd-search-glyph" aria-hidden="true"><use href="#sd-i-search"></use></svg>
+        <input type="text" name="q" placeholder="Search the library"
+               aria-label="Search the library"
+               autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+        <button type="button" class="sd-search-clear" aria-label="Clear the search field" title="Clear the search field">
+          <svg class="sd-icon" aria-hidden="true"><use href="#sd-i-x"></use></svg>
+        </button>
+      </form>
+      <button type="button" class="sd-panel-toggle sd-panel-collapse" aria-expanded="true" aria-controls="sd-sidebar" title="Collapse the contents panel" aria-label="Collapse the contents panel">
+        <svg class="sd-icon" aria-hidden="true"><use href="#sd-i-panel-collapse"></use></svg>
+      </button>
+    </div>
+
+    {#- 0029: the footer bar is gone; Index lives centered just below
+        the search form (the Search link is removed — the form serves). -#}
+    <nav class="sd-side-links" aria-label="Site links">
+      {%- if hasdoc('genindex') -%}
+        <a href="{{ pathto('genindex') }}">Index</a>
+      {%- endif -%}
+    </nav>
 
     <nav class="sd-tree">
       {%- for cat in sidebar_categories %}
@@ -111,6 +143,13 @@
 
   <div class="sd-frame">
     <header class="sd-topbar">
+      {#- 0032 ⑧: with the panel closed this expand control is the
+          top-left-most thing in the frame (the owner-ruled corner).
+          Its stroke keeps the chrome ink (decision 6, batch #3). The
+          drawer under 900px keeps its own label. -#}
+      <button type="button" class="sd-panel-toggle sd-panel-expand" aria-expanded="false" aria-controls="sd-sidebar" title="Expand the contents panel" aria-label="Expand the contents panel">
+        <svg class="sd-icon" aria-hidden="true"><use href="#sd-i-panel-expand"></use></svg>
+      </button>
       <label for="sd-drawer" class="sd-drawer-label">Contents</label>
       <nav class="sd-trail" aria-label="Breadcrumb">
         <a class="sd-trail-root" href="{{ pathto('index') }}">{{ project|e }}</a>
@@ -123,21 +162,36 @@
 
     <main class="sd-main" id="sd-content">
       {% block content %}{% endblock %}
-    </main>
 
-    <footer class="sd-foot">
-      {%- if hasdoc('genindex') -%}
-        <a href="{{ pathto('genindex') }}">Index</a>
-      {%- endif -%}
-      {%- if hasdoc('search') -%}
-        <a href="{{ pathto('search') }}">Search</a>
-      {%- endif -%}
-      <span class="sd-foot-note">Compiled by Scriptorium</span>
-    </footer>
+      {#- 0029: the bottom bar is removed; the credit is an end-of-content
+          block on EVERY page: copyright by the librarian (html_context
+          `site_credit`, materialized by sourcegen), the engine's
+          `last_updated` (html_last_updated_fmt — in Scriptorium's staging
+          every build rewrites all sources, so this is the date of this
+          artifact), then the platform line on the next line. -#}
+      <footer class="sd-credit">
+        {%- if site_credit or last_updated -%}
+          {%- if site_credit %}&copy; Copyright by {{ site_credit|e }}.{% endif %}
+          {%- if last_updated %} Last updated on {{ last_updated|e }}.{% endif %}
+          <span class="sd-credit-compiled">Compiled by Scriptorium.</span>
+        {%- endif -%}
+      </footer>
+    </main>
   </div>
 </div>
 
-{#- First-party support script (0028 ③B): code-copy buttons only. -#}
+{#- 0029/0032 search data island: the grimoire map, always renderable
+    (file:// included) and explicitly namespaced. 0032 ① fixed the
+    contract: the script reads `books` (the island used to be the raw
+    slug map, so every chip rendered without its name). The island also
+    feeds the dialog + full search page chip; section text comes from
+    the artifact's own pages via same-origin retrieval (no network). -#}
+<script type="application/json" id="sd-map">{% set sd_map = {"books": book_categories or {}} %}{{ sd_map|tojson }}</script>
+
+{#- First-party support script (0028 ③B as amended by 0029–0032):
+    code-copy buttons with the success check, the ONE search mechanism
+    (section-level dialog + full search page), On-This-Page scrollspy,
+    panel collapse, panel-field clear. Zero dependencies, zero network. -#}
 <script src="{{ pathto('_static/scriptorium.js', 1) }}"></script>
 </body>
 </html>

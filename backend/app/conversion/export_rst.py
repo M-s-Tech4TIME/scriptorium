@@ -272,12 +272,18 @@ def _scan_heading_skips(blocks: list[Node], last: list[int]) -> None:
 PARAGRAPHISH = {"paragraph", "blockquote", "bulletList", "orderedList"}
 
 
-def export_rst(doc: Node) -> str:
-    """Render a canonical TipTap doc → reStructuredText."""
+def export_rst(doc: Node, *, base_level: int = 0) -> str:
+    """Render a canonical TipTap doc → reStructuredText.
+
+    `base_level` is the heading level the surrounding staging context has
+    already introduced (sourcegen prepends the page title as level 1, so a
+    body may legitimately start at h2). Standalone exports keep the 0017
+    default (0): a first heading above h1 is still a fail-loud skip.
+    """
     if doc.get("type") != "doc":
         raise ConversionError("Expected a doc node at the root.")
     roles: set[str] = set()
-    last: list[int] = [0]
+    last: list[int] = [base_level]
     _scan_heading_skips(doc.get("content") or [], last)
     body = _blocks_str(doc.get("content") or [], "", roles)
     if roles:

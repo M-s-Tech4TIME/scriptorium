@@ -138,16 +138,35 @@ def test_myst_conf_and_md_pages() -> None:
 
 
 def test_rst_only_conf_has_no_myst() -> None:
-    site = plan_site("Classic", [book("b", (folio("f", para_doc("x")),))])
+    site = plan_site(
+        "Classic",
+        [book("b", (folio("f", para_doc("x")),))],
+        site_credit="Alsechemist",
+    )
     conf = site.files["conf.py"]
     assert "myst_parser" not in conf
     assert '".md"' not in conf
     assert "html_theme = 'scriptorium'" in conf  # own theme, no parent (0027)
     assert 'html_theme_path = ["theme"]' in conf
     assert "pygments_style = 'scriptorium_style.ScriptoriumStyle'" in conf
+    # 0029: "Last updated on …" is conf-driven (build-date semantics)
+    assert 'html_last_updated_fmt = "%B %d, %Y"' in conf
     assert "html_static_path = []" in conf
     # the sidebar tree is always materialized once pages exist
     assert "html_context = {'sidebar_categories': [{" in conf
+    # 0029 context: decoration island + the credit holder
+    assert "'book_categories': {'b': {'label': '', 'title': 'B'}}" in conf
+    assert "'site_credit': 'Alsechemist'" in conf
+
+
+def test_book_categories_map_labels() -> None:
+    """The 0029 island maps each published book to its label/title."""
+    site = plan_site(
+        "Map",
+        [replace(book("a", (folio("f", para_doc("x")),)), category_label="Herbs")],
+    )
+    conf = site.files["conf.py"]
+    assert "'book_categories': {'a': {'label': 'Herbs', 'title': 'A'}}" in conf
 
 
 def test_unrestricted_nesting_parent_pages() -> None:
@@ -237,9 +256,12 @@ def test_sidebar_tree_in_conf_context() -> None:
             "books": [
                 {
                     "title": "Tree",
-                    "docname": "tree/index",
+                    # 0031: clicking the grimoire opens the beginning —
+                    # the first published folio with its own body
+                    "docname": "tree/spells/leaf",
                     "branch": "tree/",
                     "icon": "book",
+                    "container": True,  # never marked current in the panel
                     "children": [
                         {
                             "title": "Spells",  # container page exists (toctree)
@@ -282,9 +304,9 @@ def test_sidebar_grouping_categories_and_unlabeled_last() -> None:
     sidebar = _sidebar_context(site.files["conf.py"])
     assert [group["label"] for group in sidebar] == ["Herbs", None]
     assert [node["docname"] for group in sidebar for node in group["books"]] == [
-        "a/index",
-        "c/index",
-        "b/index",
+        "a/f",
+        "c/f",
+        "b/f",
     ]
 
 
@@ -299,7 +321,58 @@ def test_sidebar_skipped_books_absent() -> None:
     )
     sidebar = _sidebar_context(site.files["conf.py"])
     assert len(sidebar) == 1
-    assert [node["docname"] for node in sidebar[0]["books"]] == ["live/index"]
+    assert [node["docname"] for node in sidebar[0]["books"]] == ["live/doc"]
+
+
+def test_hidden_toctrees_first_leaf_and_site_index() -> None:
+    """0031 ⑦: staged trees are engine-required but rendering-hidden.
+
+    - grimoire master + chapter toctrees carry `:hidden:` (the page
+      renders its own content; the panel is the tree);
+    - the sidebar book row points at the FIRST content-bearing folio
+      (tree order) — never a bare tree page; the master stays unlinked;
+    - the SITE root index keeps its visible toctree (library landing).
+    """
+    site = plan_site(
+        "Orch",
+        [
+            book(
+                "b",
+                (
+                    chapter("c1", (folio("f1", para_doc("one")),)),
+                    folio("f2", para_doc("two")),
+                ),
+            )
+        ],
+    )
+    files = site.files
+    assert "   :hidden:" in files["b/index.rst"]
+    assert "   C1 </b/c1>" in files["b/index.rst"]
+    chapter_page = files["b/c1.rst"]
+    assert "   :hidden:" in chapter_page
+    assert "   F1 </b/c1/f1>" in chapter_page
+    leaf_page = files["b/c1/f1.rst"]
+    assert "one" in leaf_page
+    assert ":hidden:" not in leaf_page  # a leaf stages no toctree at all
+    site_index = files["index.rst"]
+    assert "   B </b/index>" in site_index
+    assert ":hidden:" not in site_index
+
+    sidebar = _sidebar_context(files["conf.py"])
+    row = sidebar[0]["books"][0]
+    assert row["docname"] == "b/c1/f1"  # the beginning, not the master
+    assert row["container"] is True
+
+
+def test_myst_child_toctree_hidden_option() -> None:
+    site = plan_site(
+        "Mystic2",
+        [book("m", (chapter("ch", (folio("f", para_doc("body")),)),), fmt="myst")],
+    )
+    chapter_md = site.files["m/ch.md"]
+    assert "```{toctree}" in chapter_md
+    assert "   :hidden:" in chapter_md
+    assert "F </m/ch/f>" in chapter_md
 
 
 def test_deterministic_output() -> None:
@@ -339,6 +412,48 @@ def test_staging_error_fail_loud() -> None:
     )
     with pytest.raises(StagingError, match="folio 'flip': Heading level skip"):
         plan_site("Broken", [book("b", (folio("flip", bad),))])
+
+
+def test_body_subheadings_stage_under_the_generated_title() -> None:
+    """0032 finding: a page body may start at h2.
+
+    sourcegen prepends the page title as level 1, so an authored h2 is a
+    legal child section, not a heading-level skip. The writer therefore
+    validates from the staging context (base_level=1) while standalone
+    exports keep the 0017 default.
+    """
+    body = body_doc(
+        {
+            "type": "heading",
+            "attrs": {"level": 2},
+            "content": [{"type": "text", "text": "The Forge"}],
+        },
+        {
+            "type": "paragraph",
+            "content": [{"type": "text", "text": "The furnace breathes."}],
+        },
+        {
+            "type": "heading",
+            "attrs": {"level": 3},
+            "content": [{"type": "text", "text": "Anvil Notes"}],
+        },
+    )
+    rst_site = plan_site("T", [book("b", (folio("p", body),))])
+    rst = rst_site.files["b/p.rst"]
+    assert "P\n=\n" in rst  # generated page title (level 1)
+    assert "The Forge\n---------\n" in rst  # authored h2 is legal
+    assert "Anvil Notes\n~~~~~~~~~~~\n" in rst  # authored h3 nests below
+
+    myst_book = StagedBook(
+        slug="m",
+        title="M",
+        source_format="myst",
+        nodes=(SnapshotNode(id="p", kind="folio", slug="p", title="P", tiptap=body),),
+    )
+    myst = plan_site("T", [myst_book]).files["m/p.md"]
+    assert "# P\n" in myst
+    assert "## The Forge\n" in myst
+    assert "### Anvil Notes\n" in myst
 
 
 def test_snapshot_nodes_folds_rows_and_order() -> None:

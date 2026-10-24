@@ -9,6 +9,12 @@
   0026 mandate 2). Serving-phase concerns — per-site brand injection,
   custom-CSS hook wiring, dark-mode presentation policy, URL shapes —
   are **not** in scope here and reuse 0026's phase boundary.
+- **Amended 2026-10-23 by 0032** (search consumer): the vendored engine
+  asset set is unchanged (`searchtools.js` is still copied per this
+  record), but no artifact page loads it after the first-party search
+  takeover. The engine's build-emitted `searchindex.js` and
+  `language_data.js` remain the index/language source. The search-page
+  DOM contract in ruling 4 is superseded by 0032's first-party form.
 
 ## Owner ruling
 
@@ -33,10 +39,10 @@
    0026 mandate 1 (no third-party scripts in artifacts).
 4. **DOM contracts are pinned with the engine.** Our templates must
    provide the exact element ids/classes the engine's own JS expects
-   (search page markup per `searchtools.js`, doctools hooks). The
-   vendored JS version and these contracts are bumped as one conscious,
-   CI-tested sync event — search UI sagging under an engine bump is not
-   possible silently.
+   (doctools hooks; the search-page renderer contract is superseded by
+   0032). The vendored JS version and these contracts are bumped as one
+   conscious, CI-tested sync event — search UI sagging under an engine
+   bump is not possible silently.
 
 ## Mechanics (committed for the C3.5 tranche)
 

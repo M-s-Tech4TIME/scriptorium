@@ -94,11 +94,54 @@ bytes in any artifact.
 - **Lint/type/format**: `ruff check` + `ruff format` clean, `mypy
   --strict` clean (50 files).
 
+## 0029 preview-feedback pass (same day, second owner look)
+
+The owner viewed the first browser preview and returned seven rulings —
+all approved (search spec amended in chat; "Tabler it is" on the icon
+set; librarian's display name as the copyright holder; engine last-updated
+date). Implemented as decision **0029**:
+
+- **Header anchors:** the engine ¶ replaced by a hyperlink icon at
+  every heading level (Tabler `link`, `currentColor` CSS mask, ¶ hidden
+  via zero font-size).
+- **Search results:** full decoration — scope line
+  **Category › Grimoire** (from the blanket-page `#sd-map` island),
+  heading/sub-heading chain read from the artifact's own pages
+  (same-origin, no network — the same retrieval the vendored engine
+  already performs for its summary); the themed highlighted match is
+  engine-native (`span.highlighted` themed by the `.highlighted`
+  token); scope-only on file:// previews (browser-blocked retrieval,
+  disclosed).
+- **Code blocks:** header bar with code icon + language name and the
+  always-visible copy button (also fixes the copy-button bug: the
+  button was positioned inside a detached, never-inserted wrapper);
+  scrolling pane (`overflow: auto`, max-height).
+- **Pager:** ruled green `--sd-accent-strong` buttons, labels exactly
+  Previous / Next, hover lift + shadow, active press.
+- **Footer bar removed:** Index centered just below the sidebar search
+  form; Search link gone (the form serves); per-page credit block
+  ("© Copyright by <librarian>. Last updated on <date>." /
+  "Compiled by Scriptorium.").
+- **Reading layout:** wide-left article column (`--sd-col-wide: 896px`,
+  consult `:root` kept verbatim; the two new layout tokens ride a
+  labeled addendum `:root`) + sticky **On This Page** rail rendering
+  `{{ toc }}` with a first-party scrollspy (rail hides <1200px).
+- **sourcegen/loader/execute:** conf gains `html_last_updated_fmt`;
+  context gains `book_categories` (slug → {label, title}) +
+  `site_credit`; loader fetches the Athenaeum owner's `users.display`.
+- **Tests:** physiology asserts updated (footer absence, side links,
+  island, credit, reading grid, rail, pager labels) + the
+  `book_categories` island test (76 passed / 36 skipped, `-W error`
+  clean, ruff + mypy strict clean).
+
 ## Not in this tranche
 
 Packaging (M4-C4), serving-phase hooks (brand injection, custom-CSS
 hook, dark-mode policy per 0026 mandate 2), and any `docs/technology/`
-addition for new deps — none added at runtime.
+addition for new deps — none added at runtime. Callout emission from
+TipTap stays a serving-phase schema question (0029 ruling 7: the demo
+fixture handcrafts staged sources; the fail-loud corpus discipline
+stands).
 
 ## Next
 

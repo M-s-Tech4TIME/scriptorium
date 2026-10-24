@@ -32,8 +32,12 @@ Last updated: 2026-10-21 / Ref: M4-C1 (0026)
 | 0026 | M4 build design (Q-M4-P1…P4): per-Athenaeum sites, manual trigger, subprocess sandbox, keep-all + numbered builds; artifact = portable static site; design mandates (security parity, skin-open) | accepted | 2026-10-21 | owner |
 | 0027 | M4-C3.5 theme: Scriptorium's own, from scratch (no builtin/third-party inheritance); full engine inheritance incl. vendored engine JS + pinned DOM contracts; brand hooks serving-phase | accepted | 2026-10-21 | owner |
 | 0028 | M4-C3.5 design baseline: consult tokens accepted (fixed dark-chrome/cream scheme), Tabler inline-SVG sprite (16 icons), 11-anchor per-type callout palette (`--sd-adm-*`), custom Pygments style, first-party copy script (0027 JS clause amended), zero extensions v1, all-caps bold verdigris category labels (D15 revised) | accepted | 2026-10-22 | owner |
+| 0029 | C3.5 preview-feedback rulings: link-icon anchors at every heading level (Tabler kept), search hits = scope + heading chain + matched snippet (island + same-origin extraction), code-block chrome w/ language + persistent copy, green Previous/Next pager, footer bar removed + Index under search + per-page credit (librarian display name, engine last-updated date), wide-left reading + On-This-Page rail, inspection fixture | accepted | 2026-10-22 | owner |
+| 0030 | Theme typography: vendored Inter (variable, latin, Google Fonts source per owner) replaces the serif reading face — body + headings; fallback = ruled UI sans stack (RTD chain considered and dropped); OFL 1.1 vendored + NOTICE row; AA untouched | accepted | 2026-10-23 | owner |
+| 0031 | Theme second-feedback batch: fluid width (no cap), RTD-style search dialog over engine index (grimoire chips, keyboard bar, Ctrl+K), icy-green inline-code/download chips, weight-700 headings, wine/plum danger + skull, first-leaf book rows + hidden staged toctrees (chapters are folios), sticky collapsible panel (persisted), scrollspy rewrite, copy→check; pathto resource-mode sidebar-link bug fixed | accepted | 2026-10-23 | owner |
+| 0032 | Theme third-feedback batch: one first-party search (on-demand sectioning, phrase-first, all-word highlight, full-page takeover), centred dialog + x close, clear-only panel field, weight 800, split panel controls, scrollspy title, island contract fix, link-integrity crawl, h2 `base_level` staging fix; amends 0027/0028/0031 | accepted | 2026-10-23 | owner |
 
-Full records: `docs/decisions/0001-*.md` … `0028-*.md`. 
+Full records: `docs/decisions/0001-*.md` … `0032-*.md`.
 Pending: none.
 
-Last updated: 2026-10-22 / Ref: 0028 recorded
+Last updated: 2026-10-24 / Ref: 0032 recorded

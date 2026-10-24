@@ -9,6 +9,15 @@ outline-icon subset vendored from Tabler Icons, release v3.36.0
 derivative stroke normalization to 1.75 was applied per the design
 consult.
 
+Third-party fonts (decision 0030): the reading faces in
+backend/app/sphinx/theme/scriptorium/static/fonts/ (inter-latin.woff2,
+inter-latin-italic.woff2 — variable, latin subset) are Inter,
+Copyright 2020 The Inter Project Authors (https://github.com/rsms/inter),
+licensed under the SIL Open Font License, Version 1.1; the full license
+text is vendored alongside the fonts (OFL-Inter.txt). Retrieved from
+Google Fonts (fonts.googleapis.com) on 2026-10-23 per the owner's
+sourcing ruling; served locally by the artifact (zero network).
+
 This repository is publicly visible solely to use free CI runners.
 Visibility grants no license: no use, reuse, modification, redistribution,
 or commercial exploitation is permitted without prior written agreement

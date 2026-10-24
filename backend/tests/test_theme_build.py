@@ -1,4 +1,4 @@
-"""M4-C3.5 theme regression tests (decisions 0027/0028) — offline but real.
+"""M4-C3.5 theme regression tests (decisions 0027/0028, amended 0029–0032).
 
 The runner test executes the actual sandboxed build (subprocess, `-W`,
 RLIMITs, whitelisted env) with the test interpreter as build python —
@@ -7,15 +7,22 @@ no DB, no network. It pins the artifact physiology:
 - the own from-scratch theme (no parent-theme leakage in `_static`),
 - vendored engine JS (byte-identical to the pinned engine, 0027),
 - engine-generated `pygments.css` from the custom style module (0028 ②A),
-- the pinned search DOM contract (0028), genindex, sidebar tree.
+- the first-party search page/dialog contract (0032), genindex, sidebar
+  tree, and **every internal link resolves to a real file** (the 0032
+  link-integrity crawl — the batch-#1 404/directory-listing class of bug
+  can never ship silently again).
 """
 
 from __future__ import annotations
 
+import json
+import re
 import sys
 import uuid
+from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
+from urllib.parse import unquote, urlsplit
 
 import pytest
 
@@ -23,6 +30,49 @@ import sphinx
 
 from app.sphinx.runner import RunnerConfigError, _materialize, run_build
 from app.sphinx.sourcegen import SitePlan, SnapshotNode, StagedBook, plan_site
+
+
+class _LinkCollector(HTMLParser):
+    """Collect every href/src in one artifact page (link-integrity crawl)."""
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.targets: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        for name, value in attrs:
+            if name in {"href", "src"} and value:
+                self.targets.append(value)
+
+
+def _broken_internal_links(artifact: Path) -> list[str]:
+    """Resolve every artifact-local href/src; return the dangling ones.
+
+    0032 ⑤: the crawler is deliberately dumb and total — any internal
+    link that does not land on a FILE fails the build test. That covers
+    the old suffix-less grimoire href (404) and a chapter href that the
+    dev server answered with a directory listing.
+    """
+    broken: list[str] = []
+    for page in sorted(artifact.rglob("*.html")):
+        collector = _LinkCollector()
+        collector.feed(page.read_text())
+        for raw in collector.targets:
+            parts = urlsplit(raw)
+            if parts.scheme or parts.netloc or not parts.path:
+                continue  # external, mailto:, data:, fragment-only
+            target = (page.parent / unquote(parts.path)).resolve()
+            if (
+                artifact.resolve() not in target.parents
+                and target != artifact.resolve()
+            ):
+                broken.append(
+                    f"{page.relative_to(artifact)} -> {raw} (escapes artifact)"
+                )
+            elif not target.is_file():
+                kind = "directory" if target.is_dir() else "missing"
+                broken.append(f"{page.relative_to(artifact)} -> {raw} ({kind})")
+    return broken
 
 
 def para(text: str) -> dict[str, Any]:
@@ -79,7 +129,7 @@ def _plan() -> SitePlan:
         ),
         category_label=None,
     )
-    return plan_site("Athos", [letters, inquiry])
+    return plan_site("Athos", [letters, inquiry], site_credit="Alsechemist")
 
 
 def test_materialize_stages_theme_style_and_engine_js(tmp_path: Path) -> None:
@@ -99,6 +149,10 @@ def test_materialize_stages_theme_style_and_engine_js(tmp_path: Path) -> None:
     static = theme / "static"
     assert (static / "scriptorium.css").is_file()
     assert (static / "scriptorium.js").is_file()
+    fonts = static / "fonts"  # 0030: vendored Inter faces + their OFL text
+    assert (fonts / "inter-latin.woff2").is_file()
+    assert (fonts / "inter-latin-italic.woff2").is_file()
+    assert (fonts / "OFL-Inter.txt").is_file()
 
     # Pygments style module beside conf.py (`scriptorium_style.ScriptoriumStyle`)
     style = ws / "scriptorium_style.py"
@@ -157,6 +211,7 @@ def test_run_build_theme_artifact(
     assert {p.name for p in static.glob("*")} == {
         "scriptorium.css",
         "scriptorium.js",
+        "fonts",  # 0030 — vendored Inter woff2 files live under this dir
         "doctools.js",
         "searchtools.js",
         "sphinx_highlight.js",
@@ -166,6 +221,34 @@ def test_run_build_theme_artifact(
         "english-stemmer.js",
         "pygments.css",
     }
+    fonts = static / "fonts"
+    assert {p.name for p in fonts.glob("*")} == {
+        "inter-latin.woff2",
+        "inter-latin-italic.woff2",
+        "OFL-Inter.txt",  # full OFL text vendored beside the faces
+    }
+    theme_css = (static / "scriptorium.css").read_text()
+    assert "@font-face" in theme_css
+    assert "fonts/inter-latin.woff2" in theme_css
+    assert '--sd-font-body: "Inter", system-ui' in theme_css  # 0030 override
+    # 0031/0032 rulings, pinned at the stylesheet level:
+    assert "--sd-col-wide" not in theme_css  # fluid width (no column cap)
+    assert "font-weight: 800" in theme_css  # content headings (0032 ⑦)
+    assert "--sd-code-inline-bg: #D8E7DD" in theme_css  # darker inline (0032 ⑥)
+    assert "--sd-adm-rule: #6E2142" in theme_css  # wine/plum danger
+    assert "a.reference.download" in theme_css  # the download chip
+    assert "sd-dlg" in theme_css  # the search dialog surface
+    assert "top: 50%;" in theme_css and "translate(-50%, -50%)" in theme_css
+    assert "sd-res-book" in theme_css  # shared chip, dialog + page (0032 ②)
+    theme_js = (static / "scriptorium.js").read_text()
+    assert "sd-dlg" in theme_js  # the first-party search dialog (0031 ①)
+    assert "sd-dlg-close" in theme_js  # Tabler x close (0032 ⑦)
+    assert "sd-i-check" in theme_js  # copy → check success glyph (0031 ②)
+    assert "sd-panel-open" in theme_js  # panel collapse persistence
+    assert "sd-search-clear" in theme_js  # clear-only control (0032 ④)
+    assert "search.html?q=" in theme_js or '?q=" + encodeURIComponent' in theme_js
+    assert "sd-res-mark" in theme_js  # all-word highlight in both surfaces
+    assert 'article.querySelector("h1")' in theme_js  # scrollspy title (0032 ⑨)
     options_js = (static / "documentation_options.js").read_text()
     assert "DOCUMENTATION_OPTIONS" in options_js
     assert "NAVIGATION_WITH_KEYS: false" in options_js
@@ -190,14 +273,77 @@ def test_run_build_theme_artifact(
     assert "_static/documentation_options.js" in index
     assert "_static/sphinx_highlight.js" in index
 
+    # 0029 shell rulings: footer bar gone, Index centered under the
+    # search form, the decoration island, and the credit block
+    assert "sd-foot" not in index
+    assert 'class="sd-side-links"' in index
+    assert "&copy; Copyright by Alsechemist." in index
+    assert "Last updated on " in index  # html_last_updated_fmt (0029)
+    assert ">Compiled by Scriptorium.</span>" in index
+    assert 'id="sd-map"' in index
+    # 0032 ①: the island is explicitly namespaced and parseable; the
+    # pre-fix raw map made every grimoire chip icon-only
+    island_match = re.search(
+        r'<script type="application/json" id="sd-map">(.*?)</script>', index
+    )
+    assert island_match is not None
+    island = json.loads(island_match.group(1))
+    assert island["books"]["letters"] == {
+        "label": "Correspondence",
+        "title": "Letters",
+    }
+
+    # 0032 ④/⑧: own clear control in the panel field (type=text removes
+    # the native glyph), the collapse control beside it, and the expand
+    # control in the top bar
+    assert 'class="sd-side-head"' in index
+    assert 'class="sd-search-clear"' in index
+    assert 'type="text" name="q"' in index
+    assert '<use href="#sd-i-x">' in index
+    assert "sd-panel-collapse" in index
+    assert "sd-panel-expand" in index
+
+    # 0031 shell rulings: the reworked sidebar book row — the grimoire
+    # row opens the beginning (its first content-bearing folio), never
+    # the master; the master stays reachable only off the landing's
+    # visible toctree and the pager chain (both engine-native, both
+    # outside the panel)
+    assert 'href="letters/one.html"' in index  # sidebar book row (first leaf)
+    load_angle = index.find("sd-tree")
+    assert 'href="letters/one.html"' in index[load_angle:]
+
+    # hidden staged toctrees (0031 ⑦): the master page exists as the
+    # hierarchy holder; the tree renders EMPTY in the article (the
+    # engine emits an empty wrapper div for hidden toctrees, no links)
+    assert (artifact / "letters" / "index.html").is_file()
+    page_master = (artifact / "letters" / "index.html").read_text()
+    assert "toctree-wrapper" in page_master  # engine keeps an empty holder
+    assert "toctree-l1" not in page_master  # …but the list is gone
+    assert (
+        "<li"
+        not in page_master[page_master.find("sd-article") : page_master.find("sd-toc")]
+    )
+    assert (artifact / "inquiry" / "index.html").is_file()
+
     # a content page: role="main" article, aligned trail, highlight spans
     page = (artifact / "letters" / "one.html").read_text()
     assert 'role="main"' in page
     assert 'class="sd-article"' in page
     assert "sd-trail-parent" in page  # breadcrumb chain carries the book
+    assert 'href="index.html" class="sd-trail-parent"' in page  # 9.1 pathto
     assert 'class="k"' in page  # custom style spans (keyword role)
     assert 'class="nf"' in page  # function role
     assert "<details" in page  # collapsible sidebar tree
+
+    # 0029 reading layout: wide left article + hierarchical On-This-Page
+    # rail (engine local toc) + the ruled green Previous/Next pager
+    assert 'class="sd-reading"' in page
+    assert 'class="sd-toc"' in page
+    assert ">On This Page<" in page
+    assert "sd-pager-prev" in page and "sd-pager-next" in page
+    assert "<span>Previous</span>" in page  # pager labels are exact (0029)
+    assert "<span>Next</span>" in page
+    assert 'aria-label="Adjacent pages"' in page
 
     # myst book coexists: md page served through myst_parser
     assert (artifact / "inquiry" / "hd.html").is_file()
@@ -205,16 +351,22 @@ def test_run_build_theme_artifact(
     assert 'role="main"' in myst
     assert "claims" in myst
 
-    # search page: pinned DOM contract (0028) + script wiring
+    # search page: first-party takeover (0032 ②) — same core as the
+    # dialog, `?q=` deep link, the engine's result renderer is GONE
     search = (artifact / "search.html").read_text()
     for marker in (
         'name="q"',
         'id="search-results"',
-        'id="search-progress"',
-        "_static/searchtools.js",
+        "sd-searchpage-form",
+        "sd-searchpage-lede",
         "_static/language_data.js",
+        'id="sd-map"',
+        "the whole sentence",
     ):
         assert marker in search
+    assert "_static/searchtools.js" not in search
+    assert 'id="search-progress"' not in search
+    assert 'class="admonition warning"' in search  # no-JS notice survives
     assert 'searchindex.js" defer="defer"' in search  # root-relative, deferred
     assert (artifact / "searchindex.js").is_file()
 
@@ -222,6 +374,12 @@ def test_run_build_theme_artifact(
     gen = (artifact / "genindex.html").read_text()
     assert "Index" in gen
     assert "sd-genindex" in gen
+
+    # 0032 ⑤: every internal href/src in the whole artifact resolves to a
+    # real FILE. This is the regression gate for the batch-#1 404/
+    # directory-listing class (suffix-less grimoire/chapter hrefs).
+    broken = _broken_internal_links(artifact)
+    assert not broken, "\n".join(broken)
 
     # ok ⇒ workspace removed, log stored in the artifact
     builds_root = tmp_path / "builds"

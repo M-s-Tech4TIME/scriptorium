@@ -1,46 +1,101 @@
 # HANDOFF
 
-Last updated: 2026-10-22 / Ref: C3.5 code written + docs synced — commit/preview/push next
+Last updated: 2026-10-24 / Ref: 0032 third batch implemented — preview #5 SERVING on 0.0.0.0:8321 → owner look → commits/push next
 
 ## Was doing
-M4-C3.5 **code tranche complete, docs synced** (this staging): the
-Scriptorium theme package shipped (`backend/app/sphinx/theme/
-scriptorium/`: `theme.conf` `inherit = none`, four templates,
-`scriptorium.css`, `scriptorium.js`, `style.py`), `sourcegen` wired
-(`THEME_BASE`, `html_theme_path`, `pygments_style`, sidebar rows →
-`html_context{'sidebar_categories'}`), loader fetches category labels,
-runner `_materialize` stages theme + style module + engine assets and
-fails loud, NOTICE + 0028 amendment + sphinx.md + changelog +
-CURRENT-STATE. Two build-mechanics discoveries fixed en route (see
-Gotchas): Sphinx 9.1 requires explicit `theme.inherit = none`, and with
-a parentless theme the two `.jinja` static templates
-(`documentation_options.js.jinja`/`language_data.js.jinja`) must be
-vendored or the artifact 404s their rendered scripts (silent under
-`-W`). Gates green locally: `75 passed, 36 skipped` (`-W error`, zero
-warnings), `ruff check`/`format` clean, `mypy --strict` clean;
-`types-Pygments==2.21.0.20260819` added dev-only (typing stubs for
-mypy strict — reported to owner for visibility, same league as
-existing dev pins). Junk sweep clean.
+M4-C3.5 **0032 third feedback batch complete (staged on the unpushed
+0029 + 0030 + 0031 work)**: the search is one first-party mechanism on
+both surfaces — engine `searchindex.js` as candidate pre-filter only,
+on-demand sectioning of up to 10 cached folios, phrase-first ranking
+(whole typed sentence +1000), all typed words highlighted (stopwords
+included), last-token prefix, OR-union candidates, 8 groups × 6 rows,
+progressive render; `search.html` is a first-party takeover (`?q=`,
+no-JS notice, `searchtools.js` unloaded) sharing the `.sd-res-*` rows;
+the dialog is centred with internal scroll and a Tabler x close; the
+panel clear is clear-only; content headings are 800; inline code is
+`#D8E7DD`; collapse sits beside the search field and expand is the
+top-bar far-left control (chrome ink); the scrollspy includes the
+page-title entry and activates the final heading at the bottom; the
+island is `{"books": …}`. The theme-build test crawls every internal
+link (missing/directory/escape fails). **Staging finding fixed:**
+`export_rst`/`export_myst` gained `base_level=0`; sourcegen passes 1
+because it prepends the page title, so authored h2 bodies are legal
+while standalone exports stay fail-loud. Suite **80 passed / 36
+skipped** (`-W error`), ruff + `mypy --strict` clean; preview #5
+rebuilt and served on `0.0.0.0:8321`; headless Chrome verified search,
+dialog geometry, clear, toggles, and scrollspy.
+
+M4-C3.5 **0031 second feedback batch complete (staged on the unpushed
+0029 + 0030 work)**: all ten owner rulings applied — fluid reading
+width (the `--sd-col-wide` cap deleted everywhere), RTD-style search
+dialog on every page (panel field + `Ctrl+K`; engine index via shim;
+hits grouped by folio with matched heading + highlighted snippet rows
+and a grimoire chip on each row's bottom; ↑/↓/Enter/Esc bar; engine
+`search.html` untouched as fallback — superseded by 0032), icy-green
+inline-code +
+download chips (AA tip family; download glyph CSS-mask), weight-700
+headings, wine/plum danger + skull (error keeps vermilion), panel
+rows → first content-bearing folio with `:hidden:` staged toctrees +
+`"container": True`, sticky collapsible panel (persisted, top-bar
+toggle, two `layout-sidebar` glyphs), scrollspy rewrite
+(last-heading-above-offset; IntersectionObserver removed), copy→check
+icon swap. **CI finding fixed in passing:** engine 9.1's
+`pathto(docname, 1)` is RESOURCE mode — sidebar links were
+suffix-less; now `pathto(docname)` (document form), pinned by tests.
+At that point the suite was **78 passed / 36 skipped** (`-W error`),
+ruff + `mypy --strict` clean. Records:
+`docs/decisions/0031-theme-second-feedback.md` +
+DECISIONS-INDEX + 0029 amendment pointer + sphinx.md contract block +
+changelog `2026-10-23-m4-theme-second-feedback.md` + OPEN-QUESTIONS
+Q-EDITOR-1 (editor language-suggestion combobox — recommendation
+parked, not approved). Fixture rebuild: inspection library + a fourth
+staging rung + console block, rebuilt and SERVING on `0.0.0.0:8321`
+(14 pages; `lang 200`, deeper page reachable). Earlier (0029, still
+uncommitted on top of unpushed `0f5fcc8`): link-icon anchors at every
+heading level (¶ hidden; Tabler kept), search-hit decoration (grimoire
+chip + heading chain — trimmed of the page-title dup per 0031,
+same-origin; themed highlight is engine-native), code-block header
+bars (language badge + persistent copy — fixed the copy bug: the
+button was wired onto a detached wrapper and never inserted), ruled
+green Previous/Next pager (hover lift + active press, AA pair
+preserved), footer bar removed (Index centered under the sidebar
+search form; per-page credit "© Copyright
+by <librarian>. Last updated on <date>." / "Compiled by Scriptorium."
+via `html_last_updated_fmt` + `site_credit` from `users.display`),
+wide-left reading layout + sticky On-This-Page rail (`{{ toc }}` +
+scrollspy, hides <1200px). Records 0029/0030 + 0028 pointer amended;
+sphinx.md + changelogs + brain synced. The C3.5 code tranche itself is
+committed as `0f5fcc8` (23 files, +2034/−142, unpushed); the 0029 +
+0030 passes are the staged changeset on top.
 
 ## Next steps (in order)
-1. **C3.5 commit + preview + push:** owner offered a local browser
-   preview of a built artifact (a probe build is materializable via
-   `runner._materialize` + `sphinx -W -b html` with the dev venv as
-   build python); commit
-   (`feat(m4-c3.5): …` Conventional style, author
-   `alsechemist <239932722+alsechemist@users.noreply.github.com>` +
-   `Co-authored-by: OpenCode <opencode@local>`), push `dev`, verify CI
-   green ×3 (`gh run list --branch dev`), fix-on-red if needed.
-2. **M4-C4** — packaging (`packaging/` creates the isolated build venv,
+1. **Preview #5 SERVING on 0.0.0.0:8321 → owner look:** the rebuilt
+   inspection fixture carries all 0032 rulings — try the full sentence
+   `Inside the furnace the berserker` on the search page and in the
+   dialog (panel field or Ctrl+K), the clear-only X, the split
+   collapse/expand controls, weight-800 headings, `#D8E7DD` inline
+   code, and scrollspy top/deep/bottom. file:// works but degrades
+   dialog snippets to links (0032 disclosure). Serve command:
+   `python3 -m http.server 8321 --bind 0.0.0.0 -d .preview/site` from
+   the workspace root.
+2. **Commit + push:** on the owner's verdict, FOUR Conventional
+   commits (0029 seven-ruling pass; 0030 vendored Inter; 0031 second
+   batch; 0032 third batch + h2 fix) — author
+   `alsechemist
+   <239932722+alsechemist@users.noreply.github.com>` +
+   `Co-authored-by: OpenCode <opencode@local>` — push `dev` including
+   `0f5fcc8`, verify CI green ×3 (`gh run list --branch dev`),
+   fix-on-red if needed.
+3. **M4-C4** — packaging (`packaging/` creates the isolated build venv,
    `SC_BUILD_PYTHON` pointed there; worker unit `After=redis`;
    `config.env` gains `CELERY_BROKER_URL` + `SC_*` build keys), the
    0017 docutils-0.23 probe mechanics, M4-complete report + brain sync.
-3. **Junk-sweep before every gate:** re-read written files; grep the
+4. **Junk-sweep before every gate:** re-read written files; grep the
    standing junk markers before committing.
-4. Serving phase — resolve Q-SERVE-A…E first, then implement (theme
+5. Serving phase — resolve Q-SERVE-A…E first, then implement (theme
    brand-injection hooks + custom-CSS wiring land there, 0027;
    `[data-theme]` second scheme is its own later ruling, 0028).
-5. URL-durability phase after serving; Distribution-phase concepts
+6. URL-durability phase after serving; Distribution-phase concepts
    (Q-DIST-A…D) presented before their implementation (incl. the React
    shell format).
 
@@ -76,6 +131,30 @@ existing dev pins). Junk sweep clean.
 - Categories/grimoire category checks are athenaeum-scoped now: a category
   of another (even own) athenaeum → 404.
 - Keep per-step work small; write files one at a time (past derailments).
+- **Jinja island gotcha (0029):** `{{ x or {}|tojson }}` binds OR first —
+  the dict leaks as a Python repr (single quotes), not JSON; set the
+  value first (`{% set sd_map = … %}`). The engine's Jinja also renders
+  the island with alphabetically sorted keys — assert order-independently.
+  The 0032 contract is `{"books": {slug: {label, title}}}`; the script
+  normalizes the legacy raw map.
+- **Staging heading context (0032):** `export_rst`/`export_myst` default
+  `base_level=0` for standalone exports; `sourcegen._page_body` passes
+  `base_level=1` because it prepends the page title at h1. Do not relax
+  the standalone default — a body h3 directly under the generated title
+  must still fail loud.
+- **Search (0032):** `searchindex.js` is only the candidate pre-filter;
+  `language_data.js` must load once (it declares `const stopwords`);
+  `searchtools.js` is vendored but no page loads it. Full search needs
+  JavaScript; `file://` degrades snippets to links.
+- **Headless Chrome scroll tests:** with `scroll-behavior: smooth`
+  (no-preference) `scrollTo` does not update under virtual time; use
+  `--force-prefers-reduced-motion`, and dispatch a synthetic `scroll`
+  event because programmatic scroll does not emit one in this harness.
+  The spy itself measures directly on scroll (no rAF).
+- **Link integrity (0032):** the theme-build test resolves every
+  artifact-local `href`/`src` to a FILE; a directory target is a failure
+  (the old dev-server directory-listing symptom). `pathto(docname, 1)`
+  is resource mode in 9.1 — use `pathto(docname)` for document links.
 - 0006: `ck_builds_site` (exactly one of grimoire_id / athenaeum_id);
   `Build` has a two-era key pattern — new code writes Athenaeum-keyed
   rows; `uq_builds_athenaeum_number` needs explicit max(build_number)+1

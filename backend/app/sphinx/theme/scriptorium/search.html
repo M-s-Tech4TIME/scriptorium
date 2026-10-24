@@ -1,43 +1,50 @@
 {#-
-  Scriptorium theme — search page (0027/0028).
+  Scriptorium theme — search page (0027/0028, rewritten by 0032 ②).
 
-  Pinned contract with the vendored `searchtools.js` (Sphinx 9.1.0):
-  - the form submits `q` (GET, action="") and any `input[name="q"]`
-    gets the current query prefilled by `Search.init()` (self-runs);
-  - optional `#search-progress` node is filled while preparing;
-  - required `#search-results` node collects the rendered results
-    (`h2` / `p.search-summary` / `ul.search > li.kind-*`);
-  - the page must load `searchtools.js` + `language_data.js`
-    (from `_static`) and the build-emitted `searchindex.js`
-    (project-relative, deferred) — the engine's asset auto-list does
-    not add these; our template does.
-  Document pages draw result summaries via fetch from `[role="main"]`.
+  The page is the full-surface twin of the search dialog: the SAME
+  first-party core (`scriptorium.js`) plans the query, fetches candidate
+  folios, scores HEADING-DELIMITED SECTIONS, and renders the SAME
+  grouped result rows (page header row + section rows + grimoire chip)
+  on paper. `?q=` is the deep link; the field pre-fills from it and the
+  form re-renders in place (history keeps the query in the URL).
+
+  The engine's `searchtools.js` is intentionally NOT loaded: it renders
+  page-level, AND-only hits — the exact behaviour batch #3 removed. The
+  build-emitted `searchindex.js` still rides along as the candidate
+  pre-filter, and `language_data.js` supplies stopwords + the stemmer.
+  Search therefore requires JavaScript on this static artifact (the
+  noscript block states it). `language_data.js` is a classic script in
+  the head so its `const stopwords` binding exists before our body-end
+  script runs; `searchindex.js` stays project-relative + deferred.
 -#}
 {% extends "layout.html" %}
 {% block html_title %}Search — {{ project|e }}{% endblock %}
 {% block page_scripts %}
-  <script src="{{ pathto('_static/searchtools.js', 1) }}"></script>
   <script src="{{ pathto('_static/language_data.js', 1) }}"></script>
 {% endblock %}
 {% block content %}
 <section class="sd-searchpage">
-  <h1 id="search-documentation">Search</h1>
+  <header class="sd-searchpage-head">
+    <h1 id="search-documentation">Search</h1>
+    <p class="sd-searchpage-lede">
+      Every word and the whole sentence are searched. Results are grouped
+      by folio and ranked by the closest sentence.
+    </p>
+  </header>
   <noscript>
     <div class="admonition warning" role="alert">
       <p class="admonition-title">JavaScript required</p>
       <p>Please activate JavaScript to enable the search functionality.</p>
     </div>
   </noscript>
-  <p class="sd-search-hint">Searching for multiple words only shows matches that contain all words.</p>
-  <form class="sd-searchpage-form" action="" method="get">
+  <form class="sd-searchpage-form" action="" method="get" role="search">
     <svg class="sd-icon" aria-hidden="true"><use href="#sd-i-search"></use></svg>
     <input type="text" name="q" aria-labelledby="search-documentation" value=""
            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
-    <input type="submit" value="search" />
-    <span id="search-progress"></span>
+    <input type="submit" value="Search" />
   </form>
-  <div id="search-results"></div>
-  {#- The build-emitted full-text index (project-relative), deferred. -#}
+  <div id="search-results" class="sd-searchpage-results" aria-live="polite"></div>
+  {#- The build-emitted full-text index (candidate pre-filter), deferred. -#}
   <script src="{{ pathto('searchindex.js', 1) }}" defer="defer"></script>
 </section>
 {% endblock %}

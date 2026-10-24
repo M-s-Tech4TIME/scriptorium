@@ -5,9 +5,17 @@
    distinct anchors; body ink stays uniform --sd-page-ink). Same tokens
    later serve the editor shell — one design language, two scopes.
 
-   Zero-network: system font stacks only; icons are the inline sprite
-   in layout.html plus CSS-mask data URIs below (no CDN, no webfonts,
-   no icon fonts). */
+   Zero-network: served from the artifact itself, always — icons are
+   the inline sprite in layout.html plus CSS-mask data URIs below (no
+   CDN, no icon fonts); the reading face (0030) is Inter VENDORED here
+   in static/fonts (Google Fonts source per owner ruling), so no
+   request ever leaves the artifact.
+
+   0031 (second feedback batch): fluid reading width (no column cap —
+   the article fills the paper area to the rail), weight-700 headings,
+   icy-green inline code + download chips (the AA-tested tip pair),
+   danger in the wine/plum family with the skull glyph, sticky
+   collapsible panel, and the search dialog's dark-chrome surface. */
 
 :root {
   /* chrome (dark forest) */
@@ -35,6 +43,49 @@
   --sd-col: 740px; --sd-sidebar: 268px; --sd-topbar: 56px; --sd-bp-drawer: 900px; --sd-bp-small: 600px;
   /* spacing, 4px base */
   --sd-s1: 4px; --sd-s2: 8px; --sd-s3: 12px; --sd-s4: 16px; --sd-s5: 24px; --sd-s6: 32px; --sd-s7: 48px; --sd-s8: 64px;
+}
+
+/* 0029/0030/0031 extensions — preview-feedback + typography + second
+   feedback batch. Kept OUT of the consult :root above so the token
+   block stays verbatim-matched with references/tokens.css; this is the
+   Scriptorium addendum. `--sd-font-body` here is the owner-ruled brand
+   override (consult D16 option): Inter, vendored from Google Fonts
+   (0030) — sans reading face, fallback = the ruled UI sans stack.
+   0031: the article column carries NO cap (fluid width ruling); the
+   chip tokens reuse the AA-tested tip pair for the inline-code +
+   download + grimoire-chip greens. */
+:root {
+  --sd-toc-rail: 252px; /* On-This-Page rail width */
+  --sd-font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  /* 0032 ⑥: the inline-code field deepened one step (owner: "a bit
+     more darker"); the AA pair was recomputed against the same ink. */
+  --sd-code-inline-bg: #D8E7DD;
+  --sd-code-inline-ink: #2E5C43;
+  --sd-chip-bg: #EAF1EB;
+  --sd-chip-ink: #2E5C43;
+  /* 0032 ⑧: expanded-panel control hover fill on paper/chrome */
+  --sd-res-paper-hover: #E7ECE4;
+}
+
+/* The vendored reading faces (0030 — owner-ruled, Google Fonts source,
+   OFL 1.1 — see static/fonts/OFL-Inter.txt). Variable: weight 100-900 +
+   optical size axis; `var(--sd-font-heading)` follows automatically.
+   Subsets: latin — the engine's default language is English; anything
+   outside the subset falls back to the ruled sans stack. Served from
+   the artifact itself: still zero network. */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("fonts/inter-latin.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("fonts/inter-latin-italic.woff2") format("woff2");
 }
 
 /* Callout palette (0028 exception A) — 11 distinct anchors. Local
@@ -78,8 +129,10 @@
   --sd-adm-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 9v4'/%3E%3Cpath d='M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z'/%3E%3Cpath d='M12 16h.01'/%3E%3C/svg%3E");
 }
 .admonition.danger {
-  --sd-adm-rule: #A63E36; --sd-adm-bg: #F3E7E6; --sd-adm-ink: #6B241F;
-  --sd-adm-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12.802 2.165l5.575 2.389c.48 .206 .863 .589 1.07 1.07l2.388 5.574c.22 .512 .22 1.092 0 1.604l-2.389 5.575c-.206 .48 -.589 .863 -1.07 1.07l-5.574 2.388c-.512 .22 -1.092 .22 -1.604 0l-5.575 -2.389a2.036 2.036 0 0 1 -1.07 -1.07l-2.388 -5.574a2.036 2.036 0 0 1 0 -1.604l2.389 -5.575c.206 -.48 .589 -.863 1.07 -1.07l5.574 -2.388a2.036 2.036 0 0 1 1.604 0z'/%3E%3Cpath d='M12 8v4'/%3E%3Cpath d='M12 16h.01'/%3E%3C/svg%3E");
+  /* 0031: wine/plum family + the skull glyph — distinctly separate from
+     the vermilion error below (owner ruling 7.iii). */
+  --sd-adm-rule: #6E2142; --sd-adm-bg: #F5E9F0; --sd-adm-ink: #5C1B36;
+  --sd-adm-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 4c4.418 0 8 3.358 8 7.5c0 1.901 -.755 3.637 -2 4.96l0 2.54a1 1 0 0 1 -1 1h-10a1 1 0 0 1 -1 -1v-2.54c-1.245 -1.322 -2 -3.058 -2 -4.96c0 -4.142 3.582 -7.5 8 -7.5z'/%3E%3Cpath d='M10 17v3'/%3E%3Cpath d='M14 17v3'/%3E%3Cpath d='M9 11m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0'/%3E%3Cpath d='M15 11m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0'/%3E%3C/svg%3E");
 }
 .admonition.error {
   --sd-adm-rule: var(--sd-err); --sd-adm-bg: #F3E8E7; --sd-adm-ink: #6F2A25;
@@ -133,15 +186,35 @@ body {
   display: grid;
   grid-template-columns: var(--sd-sidebar) minmax(0, 1fr);
   min-height: 100dvh;
+  /* 0031: the collapse toggle animates the panel away smoothly */
+  transition: grid-template-columns 0.22s ease;
 }
 
 .sd-sidebar {
   grid-column: 1;
+  position: sticky; /* 0031 7.ix: the panel scrolls WITH the article */
+  top: 0;
+  height: 100vh;
+  height: 100dvh;
+  min-width: 0;
+  overflow: hidden;
   background: var(--sd-bg);
   color: var(--sd-ink);
   border-right: var(--sd-rule) solid var(--sd-border);
   display: flex;
   flex-direction: column;
+}
+
+/* 0031 7.viii: collapsed panel (per-device, scriptorium.js toggles +
+   persists). The grid visually frees the room; `visibility` flips
+   after the animation so focus never lands in a hidden column. */
+.sd-shell.sd-panel-off {
+  grid-template-columns: 0 minmax(0, 1fr);
+}
+.sd-shell.sd-panel-off .sd-sidebar {
+  border-right-width: 0;
+  visibility: hidden;
+  transition: visibility 0s linear 0.22s;
 }
 
 .sd-frame {
@@ -167,6 +240,34 @@ body {
 
 .sd-drawer-label { display: none; }
 
+/* 0031 7.viii / 0032 ⑧: two physical controls. The COLLAPSE control
+   lives in the panel header beside the search field; the EXPAND control
+   is the top-left-most thing in the top bar and appears only while the
+   panel is off. Stroke stays the chrome ink (owner decision 6) — no
+   accent recolour; hover and active press are preserved on both. */
+.sd-panel-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  padding: 0;
+  color: var(--sd-ink-muted);
+  background: transparent;
+  border: 0;
+  border-radius: var(--sd-radius);
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease,
+    transform 0.1s ease;
+}
+.sd-panel-toggle:hover { color: var(--sd-ink); background: var(--sd-surface); }
+.sd-panel-toggle:active { color: var(--sd-ink); background: var(--sd-border); transform: scale(0.92); }
+.sd-panel-toggle .sd-icon { width: 18px; height: 18px; }
+.sd-shell:not(.sd-panel-off) .sd-panel-expand { display: none; }
+
 .sd-trail {
   display: flex;
   align-items: center;
@@ -181,14 +282,24 @@ body {
 .sd-trail-root:hover, .sd-trail-parent:hover { color: var(--sd-ink); text-decoration: underline; }
 .sd-trail-sep { color: var(--sd-ink-faint); }
 
-/* Sidebar: search box + tree */
+/* Sidebar header: search field + the collapse control beside it
+   (0032 ⑧). The field carries our own clear control (0032 ④) — the
+   browser's native search-field glyph is gone with `type=text`. */
+.sd-side-head {
+  display: flex;
+  align-items: center;
+  gap: var(--sd-s2);
+  margin: var(--sd-s3);
+}
 .sd-search {
   display: flex;
   align-items: center;
   gap: var(--sd-s2);
   height: 36px;
-  margin: var(--sd-s3);
-  padding: 0 var(--sd-s3);
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0 var(--sd-s3) 0 var(--sd-s3);
   background: var(--sd-surface);
   border: var(--sd-rule) solid var(--sd-border);
   border-radius: var(--sd-radius);
@@ -196,6 +307,7 @@ body {
 .sd-search-glyph { color: var(--sd-ink-faint); }
 .sd-search input {
   width: 100%;
+  min-width: 0;
   border: 0;
   background: transparent;
   color: var(--sd-ink);
@@ -205,6 +317,38 @@ body {
 .sd-search input::placeholder { color: var(--sd-ink-faint); }
 .sd-search input:focus { outline: none; }
 .sd-search:focus-within { border-color: var(--sd-link); }
+/* 0032 ④: clear-only control, Tabler x (the owner's reference glyph). */
+.sd-search-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex: none;
+  padding: 0;
+  color: var(--sd-ink-faint);
+  background: transparent;
+  border: 0;
+  border-radius: var(--sd-radius);
+  cursor: pointer;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.12s ease, color 0.12s ease, background-color 0.12s ease;
+}
+.sd-search.sd-has-value .sd-search-clear { visibility: visible; opacity: 1; }
+.sd-search-clear:hover { color: var(--sd-ink); background: var(--sd-border); }
+.sd-search-clear:active { transform: scale(0.9); }
+.sd-search-clear .sd-icon { width: 14px; height: 14px; }
+
+/* 0029: Index centered just below the search bar (footer bar removed). */
+.sd-side-links {
+  text-align: center;
+  padding: var(--sd-s1) 0 var(--sd-s2);
+  font-family: var(--sd-font-ui);
+  font-size: 0.85em;
+}
+.sd-side-links a { color: var(--sd-ink-muted); text-decoration: none; letter-spacing: 0.04em; }
+.sd-side-links a:hover { color: var(--sd-ink); text-decoration: underline; }
 
 .sd-tree {
   padding: var(--sd-s2) var(--sd-s3) var(--sd-s5);
@@ -271,23 +415,57 @@ details[open] > summary > .sd-chevron { transform: rotate(90deg); }
 .sd-chevron { color: var(--sd-ink-faint); transition: transform 0.15s ease; transform-origin: center; }
 
 /* ---------------------------------------------------------------- */
-/* Paper: the article column                                         */
+/* Paper: wide left column + On-This-Page rail (0029)                */
 /* ---------------------------------------------------------------- */
 .sd-main {
   flex: 1;
   background: var(--sd-page);
   padding: 0 var(--sd-s6);
 }
-.sd-article {
-  max-width: var(--sd-col);
-  margin: 0 auto;
-  padding: var(--sd-s7) 0 var(--sd-s8);
+.sd-reading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--sd-toc-rail);
+  gap: var(--sd-s6);
+  align-items: start;
 }
+.sd-article {
+  min-width: 0;
+  margin: 0; /* 0029: left-most, no auto-centering; 0031: NO width cap */
+  padding: var(--sd-s7) 0 var(--sd-s5);
+}
+
+.sd-toc {
+  position: sticky;
+  top: calc(var(--sd-topbar) + var(--sd-s4));
+  max-height: calc(100dvh - var(--sd-topbar) - var(--sd-s6));
+  overflow-y: auto;
+  padding: var(--sd-s7) 0 var(--sd-s7) var(--sd-s4);
+  border-left: var(--sd-rule) solid var(--sd-page-border);
+  font-family: var(--sd-font-ui);
+  font-size: 0.82em;
+  line-height: 1.5;
+}
+.sd-toc-head {
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.09em;
+  color: var(--sd-page-link);
+  margin-bottom: var(--sd-s2);
+}
+.sd-toc ul { list-style: none; margin: 0; padding: 0; }
+.sd-toc ul ul { margin-top: var(--sd-s1); padding-left: var(--sd-s4); }
+.sd-toc li { margin: 0 0 var(--sd-s1); }
+.sd-toc a { color: var(--sd-page-faint); text-decoration: none; display: block; }
+.sd-toc a:hover { color: var(--sd-page-link); }
+.sd-toc li li a { font-size: 0.93em; color: var(--sd-page-faint); }
+/* scrollspy (0031 7.v rewrite): the section currently being read */
+.sd-toc a.sd-toc-active { color: var(--sd-page-link); font-weight: 600; }
 
 .sd-article section { margin: 0 0 var(--sd-s6); }
 .sd-article :is(h1, h2, h3, h4, h5, h6) {
   font-family: var(--sd-font-heading);
-  font-weight: 600;
+  font-weight: 800; /* 0032 ⑦: owner raised the content headings one step */
   line-height: 1.25;
   color: var(--sd-page-ink);
   margin: var(--sd-s7) 0 var(--sd-s3);
@@ -297,7 +475,7 @@ details[open] > summary > .sd-chevron { transform: rotate(90deg); }
 .sd-article h3 { font-size: var(--sd-h3); }
 .sd-article h4 { font-size: var(--sd-h4); }
 .sd-article h5 { font-size: var(--sd-h5); }
-.sd-article h6 { font-size: var(--sd-h6); color: var(--sd-page-faint); }
+.sd-article h6 { font-size: var(--sd-h6); } /* 0031 7.iv: no grey runt */
 
 .sd-article p { margin: 0 0 var(--sd-s4); }
 .sd-article :is(ul, ol) { margin: 0 0 var(--sd-s4); padding-left: var(--sd-s6); }
@@ -308,18 +486,33 @@ details[open] > summary > .sd-chevron { transform: rotate(90deg); }
 .sd-article a { color: var(--sd-page-link); text-underline-offset: 2px; }
 .sd-article a:hover { color: var(--sd-accent-strong); }
 
-/* Headerlinks (engine-emitted "¶" anchors) stay quiet until hovered. */
+/* Headerlink anchors (0029): a hyperlink icon on EVERY heading level,
+   revealed on hover; the engine's "¶" text is hidden by zero font-size,
+   the visible glyph is a currentColor mask of the pinned Tabler
+   "link" icon (same style as the admonition masks). */
 .sd-article .headerlink {
   opacity: 0;
   margin-left: var(--sd-s2);
-  font-family: var(--sd-font-ui);
-  font-size: 0.7em;
-  vertical-align: middle;
   color: var(--sd-page-faint);
   text-decoration: none;
+  font-size: 0; /* hides the engine-emitted ¶ text */
+  vertical-align: middle;
+}
+.sd-article .headerlink::after {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 15l6 -6'/%3E%3Cpath d='M11 6l.463 -.536a5 5 0 0 1 7.071 7.072l-.534 .464'/%3E%3Cpath d='M13 18l-.397 .534a5.068 5.068 0 0 1 -7.127 0a4.972 4.972 0 0 1 0 -7.071l.524 -.463'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 15l6 -6'/%3E%3Cpath d='M11 6l.463 -.536a5 5 0 0 1 7.071 7.072l-.534 .464'/%3E%3Cpath d='M13 18l-.397 .534a5.068 5.068 0 0 1 -7.127 0a4.972 4.972 0 0 1 0 -7.071l.524 -.463'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 .sd-article :is(h1, h2, h3, h4, h5, h6):hover .headerlink,
-.sd-article .headerlink:focus { opacity: 1; }
+.sd-article .headerlink:focus {
+  opacity: 1;
+  color: var(--sd-page-link);
+}
+.sd-article .headerlink:hover { color: var(--sd-accent-strong); }
 
 /* D14: quote = 3px accent rule on --sd-surface */
 .sd-article blockquote {
@@ -373,8 +566,10 @@ details[open] > summary > .sd-chevron { transform: rotate(90deg); }
 /* Rubric field-lists (docutils). */
 .sd-article .rubric { font-family: var(--sd-font-ui); font-weight: 600; color: var(--sd-page-ink); }
 
-/* In-article toctrees render quietly (the sidebar is the real tree). */
+/* In-article toctrees render quietly (the sidebar is the real tree);
+   empty holders (hidden staged trees on master pages) take no room. */
 .sd-article .toctree-wrapper { margin: var(--sd-s6) 0; }
+.sd-article .toctree-wrapper:not(:has(> *)) { margin: 0; }
 .sd-article .toctree-wrapper ul { list-style: none; padding: 0; }
 .sd-article .toctree-wrapper .toctree-l1 > a { font-weight: 600; }
 .sd-article .toctree-wrapper ul ul { padding-left: var(--sd-s5); margin: 0; }
@@ -383,16 +578,25 @@ details[open] > summary > .sd-chevron { transform: rotate(90deg); }
 /* ---------------------------------------------------------------- */
 /* Code: dark block on paper + engine Pygments palette               */
 /* ---------------------------------------------------------------- */
+/* Inline code (0031 7.ii): icy-green chip with the darker green ink —
+   the AA-tested tip pair in --sd-code-inline-*; pre blocks keep their
+   dark console look through the reset rule below. */
 .sd-article code {
   font-family: var(--sd-font-mono);
   font-size: 0.85em;
-  background: var(--sd-code-bg);
-  color: var(--sd-code-text);
+  background: var(--sd-code-inline-bg);
+  color: var(--sd-code-inline-ink);
   padding: 2px 5px;
   border-radius: var(--sd-radius);
-  border: var(--sd-rule) solid var(--sd-border);
+  border: 0;
 }
-.sd-article :is(pre, .highlight) code { border: 0; padding: 0; font-size: inherit; }
+.sd-article :is(pre, .highlight) code {
+  border: 0;
+  padding: 0;
+  font-size: inherit;
+  background: none;
+  color: inherit;
+}
 .sd-article .highlight {
   position: relative;
   background: var(--sd-code-bg);
@@ -403,7 +607,8 @@ details[open] > summary > .sd-chevron { transform: rotate(90deg); }
 .sd-article .highlight pre {
   margin: 0;
   padding: var(--sd-s4);
-  overflow-x: auto;
+  overflow: auto; /* 0029: scroll within the block (x and y) */
+  max-height: 30rem;
   color: var(--sd-code-text);
   font-size: 0.875em;
   line-height: 1.55;
@@ -417,11 +622,39 @@ details[open] > summary > .sd-chevron { transform: rotate(90deg); }
   background-color: var(--sd-surface);
 }
 
-/* Copy button (0028 ③B) — scriptorium.js inserts it per highlight. */
+/* 0029 code-block chrome — scriptorium.js wraps .highlight with a
+   header bar: code icon + language name (left) and the copy button
+   (right, always visible). The pane scrolls under a sticky bar. */
+.sd-cb {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.sd-cb-head {
+  display: flex;
+  align-items: center;
+  gap: var(--sd-s2);
+  padding: var(--sd-s2) var(--sd-s3);
+  background: var(--sd-surface);
+  border-bottom: var(--sd-rule) solid var(--sd-border);
+  font-family: var(--sd-font-ui);
+  font-size: 0.8em;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+.sd-cb-lang {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sd-s2);
+  color: var(--sd-ink);
+}
+.sd-cb-lang .sd-icon { color: var(--sd-link); }
+.sd-cb-lang > span:empty { display: none; }
+.sd-cb-head .sd-copy { position: static; margin-left: auto; }
+
+/* Copy button (0028 ③B / 0029): lives in the block header, always in
+   reach; on success (0031) it flips to the green check for a beat. */
 .sd-copy {
-  position: absolute;
-  top: var(--sd-s2);
-  right: var(--sd-s2);
   width: 28px;
   height: 28px;
   display: inline-flex;
@@ -434,9 +667,44 @@ details[open] > summary > .sd-chevron { transform: rotate(90deg); }
   cursor: pointer;
   padding: 0;
 }
-.sd-copy:hover { color: var(--sd-ink); }
+.sd-copy:hover { color: var(--sd-ink); border-color: var(--sd-link); }
 .sd-copy.sd-copied { color: var(--sd-ok); border-color: var(--sd-ok); }
 .sd-copy .sd-icon { pointer-events: none; }
+
+/* ---------------------------------------------------------------- */
+/* Download chip (0031 7.i) — :download:/the engine-emitted           */
+/* `a.reference.download` renders as a green-tinted pill with the    */
+/* Tabler download glyph (same mask style as the anchors/rule icons). */
+.sd-article a.reference.download {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 2px 0;
+  padding: 3px 10px;
+  background: var(--sd-chip-bg);
+  color: var(--sd-chip-ink);
+  border-radius: 16px;
+  font-family: var(--sd-font-ui);
+  font-size: 0.85em;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform 0.15s ease;
+}
+.sd-article a.reference.download::before {
+  content: "";
+  width: 14px;
+  height: 14px;
+  flex: none;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2'/%3E%3Cpath d='M7 11l5 5l5 -5'/%3E%3Cpath d='M12 4l0 12'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2'/%3E%3Cpath d='M7 11l5 5l5 -5'/%3E%3Cpath d='M12 4l0 12'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.sd-article a.reference.download:hover {
+  color: var(--sd-page-link);
+  background: #DDE9E1;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgb(15 26 21 / 12%);
+}
 
 /* Search-term highlighting from sphinx_highlight.js */
 .highlighted { background: var(--sd-page-note-bg); color: var(--sd-page-ink); }
@@ -479,9 +747,15 @@ details[open] > summary > .sd-chevron { transform: rotate(90deg); }
 /* ---------------------------------------------------------------- */
 /* Search page + results                                             */
 /* ---------------------------------------------------------------- */
-.sd-searchpage { max-width: var(--sd-col); margin: 0 auto; padding: var(--sd-s7) 0 var(--sd-s8); }
-.sd-searchpage h1 { font-family: var(--sd-font-heading); font-weight: 600; font-size: var(--sd-h1); margin: 0 0 var(--sd-s4); }
-.sd-search-hint { color: var(--sd-page-faint); font-family: var(--sd-font-ui); font-size: 0.9em; }
+.sd-searchpage { padding: var(--sd-s7) 0 var(--sd-s8); }
+.sd-searchpage h1 { font-family: var(--sd-font-heading); font-weight: 800; font-size: var(--sd-h1); margin: 0 0 var(--sd-s2); }
+.sd-searchpage-lede {
+  margin: 0 0 var(--sd-s4);
+  max-width: 52em;
+  color: var(--sd-page-faint);
+  font-family: var(--sd-font-ui);
+  font-size: 0.95em;
+}
 .sd-searchpage-form {
   display: flex;
   align-items: center;
@@ -500,6 +774,7 @@ details[open] > summary > .sd-chevron { transform: rotate(90deg); }
   font-family: var(--sd-font-ui);
   font-size: 0.95em;
 }
+.sd-searchpage-form input[type="text"]:focus { outline: none; border-color: var(--sd-page-link); }
 .sd-searchpage-form input[type="submit"] {
   height: 38px;
   padding: 0 var(--sd-s4);
@@ -512,23 +787,136 @@ details[open] > summary > .sd-chevron { transform: rotate(90deg); }
   cursor: pointer;
 }
 .sd-searchpage-form input[type="submit"]:hover { background: var(--sd-accent); }
-#search-progress { color: var(--sd-page-faint); font-family: var(--sd-font-ui); font-size: 0.9em; }
-#search-results ul.search { list-style: none; margin: var(--sd-s4) 0; padding: 0; }
-#search-results li { border-bottom: var(--sd-rule) solid var(--sd-page-border); padding: var(--sd-s3) 0; }
-#search-results a { color: var(--sd-page-link); font-weight: 500; text-decoration: none; }
-#search-results a:hover { color: var(--sd-accent-strong); text-decoration: underline; }
-#search-results ul.search p.context {
-  margin: var(--sd-s1) 0 0;
-  color: var(--sd-page-faint);
+.sd-searchpage-form input[type="submit"]:active { transform: scale(0.98); }
+
+/* ---------------------------------------------------------------- */
+/* Search results — ONE shared surface (0032 ②)                     */
+/* The dialog (dark chrome) and the full page (paper) render the     */
+/* SAME `.sd-res-*` rows; the container supplies the colour roles.   */
+/* ---------------------------------------------------------------- */
+.sd-dlg-body,
+.sd-searchpage-results {
+  --sd-res-ink: var(--sd-ink);
+  --sd-res-muted: var(--sd-ink-muted);
+  --sd-res-faint: var(--sd-ink-faint);
+  --sd-res-link: var(--sd-link);
+  --sd-res-hover: var(--sd-surface);
+  --sd-res-chip-bg: rgb(46 139 106 / 16%);
+  --sd-res-chip-ink: var(--sd-link);
+  --sd-res-chip-border: 1px solid rgb(79 179 154 / 32%);
+  --sd-res-pad: var(--sd-s4);
+}
+.sd-searchpage-results {
+  --sd-res-ink: var(--sd-page-ink);
+  --sd-res-muted: var(--sd-page-faint);
+  --sd-res-faint: var(--sd-page-faint);
+  --sd-res-link: var(--sd-page-link);
+  --sd-res-hover: var(--sd-res-paper-hover);
+  --sd-res-chip-bg: var(--sd-chip-bg);
+  --sd-res-chip-ink: var(--sd-chip-ink);
+  --sd-res-chip-border: 0;
+  --sd-res-pad: 0;
+  margin-top: var(--sd-s4);
+  font-family: var(--sd-font-ui);
+}
+.sd-res-count {
+  margin: 0 0 var(--sd-s2);
+  padding: 0 var(--sd-res-pad);
+  color: var(--sd-res-faint);
+  font-family: var(--sd-font-ui);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+}
+.sd-res-state {
+  margin: 0;
+  padding: var(--sd-s3) var(--sd-res-pad) var(--sd-s4);
+  color: var(--sd-res-faint);
+  font-family: var(--sd-font-ui);
   font-size: 0.9em;
 }
-#search-results p.search-summary { color: var(--sd-page-faint); font-family: var(--sd-font-ui); font-size: 0.9em; }
+.sd-res-group { margin: 0 0 var(--sd-s1); }
+.sd-searchpage-results .sd-res-group {
+  margin-bottom: var(--sd-s3);
+  padding-bottom: var(--sd-s3);
+  border-bottom: var(--sd-rule) solid var(--sd-page-border);
+}
+.sd-res-head {
+  display: flex;
+  align-items: center;
+  gap: var(--sd-s2);
+  padding: 7px var(--sd-res-pad);
+  font-family: var(--sd-font-ui);
+}
+.sd-res-head .sd-icon { color: var(--sd-res-faint); }
+.sd-res-head a {
+  flex: 1;
+  min-width: 0;
+  color: var(--sd-res-ink);
+  font-weight: 600;
+  font-size: 0.95em;
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sd-res-item { padding: 6px var(--sd-res-pad) 6px calc(var(--sd-res-pad) + 28px); }
+.sd-res-item a { display: block; min-width: 0; color: inherit; text-decoration: none; }
+.sd-res-trail {
+  display: block;
+  color: var(--sd-res-muted);
+  font-family: var(--sd-font-ui);
+  font-size: 0.76em;
+  line-height: 1.35;
+  margin-bottom: 1px;
+}
+.sd-res-what {
+  color: var(--sd-res-ink);
+  font-family: var(--sd-font-ui);
+  font-size: 0.9em;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sd-res-snip {
+  margin: 3px 0 0;
+  color: var(--sd-res-muted);
+  font-family: var(--sd-font-ui);
+  font-size: 0.82em;
+  line-height: 1.45;
+  max-height: 3.1em;
+  overflow: hidden;
+}
+.sd-res-mark { color: var(--sd-res-link); font-weight: 600; background: none; padding: 0; }
+.sd-res-book {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 5px;
+  padding: 2px 9px;
+  background: var(--sd-res-chip-bg);
+  color: var(--sd-res-chip-ink);
+  border: var(--sd-res-chip-border);
+  border-radius: 16px;
+  font-family: var(--sd-font-ui);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+.sd-res-book .sd-icon { width: 12px; height: 12px; }
+/* hover + the keyboard's roving highlight are the same state */
+.sd-res-head:hover,
+.sd-res-item:hover,
+.sd-res-head.sd-res-active,
+.sd-res-item.sd-res-active {
+  background: var(--sd-res-hover);
+}
 
 /* ---------------------------------------------------------------- */
 /* Global index                                                      */
 /* ---------------------------------------------------------------- */
-.sd-genindex { max-width: var(--sd-col); margin: 0 auto; padding: var(--sd-s7) 0 var(--sd-s8); }
-.sd-genindex h1 { font-family: var(--sd-font-heading); font-weight: 600; font-size: var(--sd-h1); margin: 0 0 var(--sd-s4); }
+.sd-genindex { padding: var(--sd-s7) 0 var(--sd-s8); }
+.sd-genindex h1 { font-family: var(--sd-font-heading); font-weight: 800; font-size: var(--sd-h1); margin: 0 0 var(--sd-s4); }
 .sd-jumpbox { font-family: var(--sd-font-ui); font-size: 0.9em; margin-bottom: var(--sd-s5); }
 .sd-jumpbox a { color: var(--sd-page-link); text-decoration: none; }
 .sd-jumpbox a:hover { color: var(--sd-accent-strong); text-decoration: underline; }
@@ -549,59 +937,179 @@ details[open] > summary > .sd-chevron { transform: rotate(90deg); }
 .sd-main-ref { font-weight: 600; }
 
 /* ---------------------------------------------------------------- */
-/* Prev/next pager + site footer                                     */
+/* Prev/next pager (0029: ruled green, Previous/Next only) + credit   */
 /* ---------------------------------------------------------------- */
 .sd-pager {
   display: flex;
   flex-wrap: wrap;
   gap: var(--sd-s4);
-  max-width: var(--sd-col);
-  margin: 0 auto;
+  margin: var(--sd-s5) 0 0;
   padding: 0 0 var(--sd-s7);
 }
 .sd-pager a {
   display: inline-flex;
   align-items: center;
   gap: var(--sd-s2);
-  max-width: calc(50% - var(--sd-s4));
-  padding: var(--sd-s3) var(--sd-s4);
-  background: var(--sd-page);
-  border: var(--sd-rule) solid var(--sd-page-border);
+  min-width: 140px;
+  justify-content: center;
+  padding: 10px 18px;
+  background: var(--sd-accent-strong);
+  border: 0;
   border-radius: var(--sd-radius);
-  color: var(--sd-page-ink);
+  color: var(--sd-on-accent);
   font-family: var(--sd-font-ui);
-  font-size: 0.9em;
+  font-size: 0.92em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   text-decoration: none;
+  box-shadow: 0 1px 2px rgb(15 26 21 / 25%);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
 }
-.sd-pager a:hover { background: var(--sd-page-note-bg); border-color: var(--sd-page-note); }
-.sd-pager-next { margin-left: auto; text-align: right; }
-.sd-pager .sd-icon { color: var(--sd-page-faint); }
+.sd-pager a:hover {
+  background: var(--sd-accent-strong);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgb(15 26 21 / 30%);
+}
+.sd-pager a:hover .sd-icon { transform: scale(1.1); }
+.sd-pager a:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 1px 2px rgb(15 26 21 / 25%);
+}
+.sd-pager .sd-icon { color: var(--sd-on-accent); transition: transform 0.15s ease; }
+.sd-pager-prev .sd-icon { margin-left: -2px; }
+.sd-pager-next { margin-left: auto; }
+.sd-pager-next .sd-icon { margin-right: -2px; }
 
-.sd-foot {
+/* 0029: end-of-content credit on every page (the bottom bar is gone). */
+.sd-credit {
+  margin: 0;
+  padding: 0 0 var(--sd-s7);
+  border-top: var(--sd-rule) solid var(--sd-page-border);
+  padding-top: var(--sd-s4);
+  color: var(--sd-page-faint);
+  font-family: var(--sd-font-ui);
+  font-size: 0.85em;
+}
+.sd-credit-compiled { display: block; margin-top: var(--sd-s1); }
+
+/* ---------------------------------------------------------------- */
+/* Search dialog (0031, re-centred by 0032 ③) — first-party overlay over
+   the shared section search. Dark-chrome surface: it floats over the
+   paper page like the sidebar's own language. Vertically + horizontally
+   centred at ALL times; with no results it hugs its content, with
+   results it grows to the capped height and scrolls internally, so the
+   centre never drifts. */
+.sd-dlg-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgb(15 26 21 / 55%);
+}
+.sd-dlg-backdrop[hidden] { display: none; }
+
+.sd-dlg {
+  position: fixed;
+  z-index: 41;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(680px, calc(100vw - 32px));
+  max-height: min(78dvh, 720px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--sd-bg);
+  color: var(--sd-ink);
+  border: var(--sd-rule) solid var(--sd-border);
+  border-radius: var(--sd-radius);
+  box-shadow: 0 18px 48px rgb(0 0 0 / 45%);
+}
+.sd-dlg[hidden] { display: none; }
+.sd-dlg-lock { overflow: hidden; }
+
+.sd-dlg-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sd-s3);
+  flex: none;
+  padding: var(--sd-s2) var(--sd-s4);
+  border-bottom: var(--sd-rule) solid var(--sd-border);
+}
+.sd-dlg-row .sd-icon { color: var(--sd-link); width: 17px; height: 17px; }
+.sd-dlg-input {
+  flex: 1;
+  height: 40px;
+  border: 0;
+  background: transparent;
+  color: var(--sd-ink);
+  font-family: var(--sd-font-ui);
+  font-size: 1em;
+  min-width: 0;
+}
+.sd-dlg-input:focus { outline: none; }
+.sd-dlg-input::placeholder { color: var(--sd-ink-faint); }
+/* 0032 ②/④: the owner's Tabler x reference, explicit dialog close. */
+.sd-dlg-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  padding: 0;
+  color: var(--sd-ink-faint);
+  background: transparent;
+  border: 0;
+  border-radius: var(--sd-radius);
+  cursor: pointer;
+  transition: color 0.15s ease, background-color 0.15s ease, transform 0.1s ease;
+}
+.sd-dlg-close:hover { color: var(--sd-ink); background: var(--sd-surface); }
+.sd-dlg-close:active { transform: scale(0.9); }
+.sd-dlg-close .sd-icon { width: 16px; height: 16px; color: currentColor; }
+
+.sd-dlg-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--sd-s2) 0 var(--sd-s3);
+}
+
+.sd-dlg-foot {
   display: flex;
   align-items: center;
   gap: var(--sd-s4);
-  padding: var(--sd-s4) var(--sd-s5);
-  background: var(--sd-bg);
+  flex: none;
+  padding: var(--sd-s2) var(--sd-s4);
   border-top: var(--sd-rule) solid var(--sd-border);
-  font-family: var(--sd-font-ui);
-  font-size: 0.85em;
   color: var(--sd-ink-faint);
+  font-family: var(--sd-font-ui);
+  font-size: 0.75rem;
 }
-.sd-foot a { color: var(--sd-ink-muted); text-decoration: none; }
-.sd-foot a:hover { color: var(--sd-ink); text-decoration: underline; }
-.sd-foot-sep { color: var(--sd-ink-faint); }
-.sd-foot-note { margin-left: auto; }
+.sd-dlg-foot .sd-dlg-full { margin-left: auto; color: var(--sd-link); text-decoration: none; }
+.sd-dlg-foot .sd-dlg-full:hover { text-decoration: underline; }
 
 /* ---------------------------------------------------------------- */
-/* Responsive: drawer under 900px (CSS-only checkbox), tight @600    */
+/* Responsive: rail fades first, drawer under 900px, tight @600      */
 /* ---------------------------------------------------------------- */
+@media (max-width: 1200px) {
+  /* 0029: On-This-Page rail yields the full width to the article */
+  .sd-reading { grid-template-columns: minmax(0, 1fr); }
+  .sd-toc { display: none; }
+}
+
 @media (max-width: 900px) {
   .sd-shell { grid-template-columns: minmax(0, 1fr); }
+  /* the collapse toggle is a desktop affordance; the drawer owns mobile */
+  .sd-panel-toggle { display: none; }
   .sd-drawer-label {
     display: inline-flex;
     align-items: center;
     gap: var(--sd-s2);
+    padding: 10px 12px; /* 0031: touch-sized target */
     color: var(--sd-ink-muted);
     font-size: 0.9em;
     cursor: pointer;
@@ -619,14 +1127,16 @@ details[open] > summary > .sd-chevron { transform: rotate(90deg); }
   .sd-drawer-toggle:not(:checked) ~ .sd-shell .sd-sidebar { display: none; }
   .sd-drawer-toggle:checked ~ .sd-shell .sd-sidebar { display: block; }
   .sd-trail { overflow: hidden; text-overflow: ellipsis; }
+  /* 0032 ③: still centred on small screens — only the cap changes. */
+  .sd-dlg { width: calc(100vw - 24px); max-height: 84dvh; }
 }
 
 @media (max-width: 600px) {
   .sd-main { padding: 0 var(--sd-s3); }
   .sd-article { padding: var(--sd-s5) 0 var(--sd-s6); }
   .sd-article h1 { font-size: 1.75rem; }
-  .sd-pager a { max-width: 100%; }
-  .sd-foot { flex-wrap: wrap; }
+  .sd-pager { width: 100%; }
+  .sd-pager a { flex: 1 1 auto; }
 }
 
 /* Consult-footer focus + reduced-motion lines (verbatim semantics). */

@@ -1,26 +1,43 @@
 {#-
-  Scriptorium theme — document page (0027/0028).
+  Scriptorium theme — document page (0027/0028, amended 0029/0032).
   The engine-generated `body` carries the staged title (first h1),
-  sections, and any code blocks. `role="main"` on the article is the
-  pinned search contract (vendored searchtools.js extracts summaries
-  from `[role="main"]`).
+  sections, and any code blocks. `role="main"` is the article landmark;
+  the first-party search reads the artifact's own pages directly and
+  does not depend on the engine's `[role="main"]` summary extraction
+  (`searchtools.js` is not loaded — 0032 ②).
+
+  0029 rulings: the article sits at the left edge of the paper area and
+  uses most of its width; a sticky right rail renders the page's own
+  heading tree (`{{ toc }}` keeps the authored hierarchy; the first-party
+  script scrollspies it). Footer bar removed — the credit block lives in
+  layout, after the content. Pager labels are exactly Previous / Next on
+  the ruled green fill.
 -#}
 {% extends "layout.html" %}
 {% block content %}
-<article role="main" class="sd-article">
-  {{ body }}
-</article>
+<div class="sd-reading">
+  <article role="main" class="sd-article">
+    {{ body }}
+  </article>
+
+  {%- if toc %}
+  <aside class="sd-toc" aria-label="On this page">
+    <div class="sd-toc-head">On This Page</div>
+    {{ toc }}
+  </aside>
+  {%- endif %}
+</div>
 
 <nav class="sd-pager" aria-label="Adjacent pages">
   {%- if prev %}
     <a class="sd-pager-prev" href="{{ prev.link|e }}" rel="prev">
       <svg class="sd-icon" aria-hidden="true"><use href="#sd-i-arrow-left"></use></svg>
-      <span>{{ prev.title|striptags|e }}</span>
+      <span>Previous</span>
     </a>
   {%- endif %}
   {%- if next %}
     <a class="sd-pager-next" href="{{ next.link|e }}" rel="next">
-      <span>{{ next.title|striptags|e }}</span>
+      <span>Next</span>
       <svg class="sd-icon" aria-hidden="true"><use href="#sd-i-arrow-right"></use></svg>
     </a>
   {%- endif %}

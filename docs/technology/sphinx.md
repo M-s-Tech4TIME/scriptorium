@@ -28,9 +28,10 @@
   which with a parentless theme only reach the artifact when vendored
   (the builder then renders them from its own global context;
   `language_data.js`, stemmer JS, `searchindex.js`, `pygments.css`
-  remain engine-emitted); the theme's search DOM ids are pinned to what
-  the vendored
-  `searchtools.js` expects and are bumped together with the engine.
+  remain engine-emitted); the search consumer is first-party (0032):
+  `searchindex.js` + `language_data.js` are still engine-emitted and
+  bump together with the engine, while `searchtools.js` stays vendored
+  but unloaded.
   Implementation template surface: `layout.html`, `page.html`,
   `search.html`, `genindex.html` + one stylesheet
   (`backend/app/sphinx/theme/scriptorium/`); brand injection /
@@ -67,8 +68,66 @@
   unlabeled bucket last; the offline-but-real test executes a full
   sandboxed `-W` build with the test interpreter as build python and
   asserts the artifact physiology (exact `_static` inventory incl.
-  the two `.jinja`-rendered scripts, byte-identical vendoring,
-  search DOM contract, role="main", custom-style spans).
+  the two `.jinja`-rendered scripts, byte-identical vendoring, the
+  then-current search DOM contract — superseded by 0032 — role="main",
+  custom-style spans).
+  **0029 preview-feedback pass:** header anchors are the Tabler link
+  glyph at every heading level; the one first-party script carries four
+  disclosed responsibilities (code-block chrome — language badge +
+  always-visible copy; search-result decoration — grimoire chip from the
+  `#sd-map` island plus the heading chain extracted from the
+  artifact's own pages, same-origin, no network; toc scrollspy);
+  footer bar removed — Index centered under the sidebar search form,
+  per-page credit block ("© Copyright by <librarian display name>.
+  Last updated on <build date>." / "Compiled by Scriptorium." from
+  `html_last_updated_fmt`); reading layout wide-left with the sticky
+  `{{ toc }}` On-This-Page rail; pager = ruled green
+  Previous/Next on `--sd-accent-strong`.
+  **0031 second-feedback pass (amends 0029):** reading width FLUID (no
+  column cap); the sidebar tree is the only hierarchy location — staged
+  grimoire/chapter toctrees go `:hidden:` (engine-required,
+  rendering-empty; master docs render no list), the site index keeps
+  its visible toctree, and grimoire rows in the panel point at the
+  FIRST content-bearing folio (`_first_reading_docname` in tree order;
+  `"container": True` rows never mark current) — chapters render their
+  own body pages (chapters are folios; hierarchy is panel placement).
+  The panel sticks with the article (sticky/100dvh/internal scroll)
+  and collapses behind one top-bar toggle (two `layout-sidebar`
+  Tabler glyphs, persisted `localStorage`).
+  **Search (0032, superseding 0031 mechanics and 0028's search DOM
+  contract):** one first-party core serves the dialog and the full
+  `search.html`. The engine-emitted `searchindex.js` is only the
+  candidate pre-filter; `language_data.js` supplies stopwords + the
+  English stemmer. A query keeps every typed word for display/phrase/
+  highlight (stopwords included), scores unique content words
+  (stopwords/numbers excluded, stopword-only fallback), takes the
+  OR-union of ~10 candidate folios (exact stems, then a guarded prefix
+  scan both directions; title terms 3×), fetches those pages
+  same-origin (cached), splits them into heading-delimited sections, and
+  ranks phrase-first (exact whole sentence +1000; coverage, capped
+  frequency, heading hits below); the last token may prefix-match; every
+  typed word is highlighted. Results are folio groups with a header
+  row, heading-chain/snippet rows, and a grimoire chip; render is
+  progressive with a per-surface epoch. The dialog is centred
+  (horizontal + vertical) and grows to `min(78dvh, 720px)` with internal
+  scroll; Esc/backdrop/Tabler x close; `Ctrl+K` opens. `search.html`
+  takes the full surface (`?q=` prefill, history query, no-JS notice)
+  and no longer loads `searchtools.js`; the engine's page-level result
+  renderer is retired, while `searchtools.js` remains in the vendored
+  asset set (0027) unloaded. `file://` previews degrade to
+  folio/heading links without snippets (disclosed). A build-time section
+  index is the documented scale upgrade, not this tranche.
+  **Engine finding (9.1):** `pathto(docname, 1)` = RESOURCE mode
+  (the second positional is `resource`, not a relative flag) — all
+  sidebar document links must use `pathto(docname)` to get the `.html`
+  target; pinned by theme-build tests. The same test now crawls every
+  internal `href`/`src` and fails on missing files, directories, or
+  paths escaping the artifact (0032 ⑤).
+  **Staging finding (0032):** `export_rst`/`export_myst` accept
+  `base_level: int = 0`. `sourcegen._page_body` passes `base_level=1`
+  because it prepends the page title at level 1, so an authored body may
+  start at `h2` (and then use `h3`); standalone exports keep the 0017
+  fail-loud default, so a first heading above `h1` still raises.
 - **Runner (M4-C3, 0026 P3):** `app/sphinx/runner.py` materializes the
   plan into `/var/lib/scriptorium/builds/{build_id}/` (FHS default;
   `SC_BUILD_ROOT` dev override) and runs `python -m sphinx -W -b html .
@@ -89,7 +148,17 @@
   engine-emitted stemmer/pygments/searchindex), byte-identical vendoring
   against the pinned engine, `html_context` dict typing (list rejected
   by the engine's config validator; `inherit = none` is mandatory in
-  9.1), search DOM contract, and AA pairs computed from the stylesheet
-  in `tests/test_theme_contrast.py`. Dev-only typing stub
+  9.1), the search contract (first-party since 0032), and AA pairs
+  computed from the stylesheet in `tests/test_theme_contrast.py`.
+  Dev-only typing stub
   `types-Pygments==2.21.0.20260819` added (mypy strict on the style
   module; no runtime impact).
+- **Fonts (0030):** the reading face is Inter, vendored — variable
+  woff2 (upright + italic, latin subset, weight 100–900) under
+  `theme/scriptorium/static/fonts/` with the OFL 1.1 text beside them
+  and a NOTICE row; retrieved from Google Fonts 2026-10-23 per the
+  owner's ruling; `@font-face` (`font-display: swap`) + the ruled
+  `--sd-font-body` override (fallback = the ruled UI sans stack) live
+  in the addendum `:root`, so the consult token block stays verbatim.
+  Served from the artifact's `_static/fonts/` — zero network holds.
+  UI chrome / code remain system stacks; reading scale/AA unchanged.

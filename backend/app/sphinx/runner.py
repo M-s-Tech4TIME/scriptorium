@@ -108,6 +108,8 @@ def _child_limits(cfg: BuildConfig) -> None:
 _THEME_DIR = Path(__file__).resolve().parent / "theme" / "scriptorium"
 # Vendored engine assets (0027/0028 mechanics): three scripts + the two
 # `.jinja` static templates (documentation_options / language_data).
+# `searchtools.js` remains in the vendored set (0027 contract) although
+# the 0032 first-party search no longer loads it on any page.
 # The vision of the theme's `inherit = none`: the basic theme chain
 # breaks, so the builder would never reach the engine's own statics;
 # vendoring the `.jinja` templates into the staged theme makes the
@@ -159,8 +161,10 @@ def _materialize(workspace: Path, plan: SitePlan, build_python: Path) -> None:
     - engine JS vendored from the build interpreter's pinned Sphinx into
       the staged theme `static/` (0027 "vendored, never fetched"):
       `doctools.js` + `sphinx_highlight.js` reach pages via the builder's
-      asset auto-list; `searchtools.js` (+ build-emitted
-      `language_data.js`) is wired by our search template. A missing
+      asset auto-list; `searchtools.js` stays in the vendored asset set
+      for the 0027 contract but no page loads it after the 0032
+      first-party search takeover; `language_data.js` is build-emitted
+      and supplies stopwords/stemmer to the first-party core. A missing
       engine file means the engine distribution changed shape → fail
       loud, engine/theme contracts bump together (0027).
     """
