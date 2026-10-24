@@ -1,6 +1,6 @@
 # OPEN-QUESTIONS
 
-Last updated: 2026-10-24 / Ref: 0032 recorded (third feedback batch; no new questions) — serving/distribution questions parked
+Last updated: 2026-10-24 / Ref: 0033 recorded (Standing Rule 8; no new questions) — serving/distribution questions parked
 
 | ID | Question | Blocks | Asked |
 |---|---|---|---|
@@ -38,6 +38,10 @@ See 0027 + 0028.
 
 **Serving/distribution questions Q-SERVE-A…E, Q-DIST-A…D remain OPEN —
 parked in their table rows above; none block M4.**
+
+**Standing Rule 8 (approved 2026-10-24):** the owner approved the
+Regression Integrity rule as written; it is not an open question. The
+next theme batch (0034) is the first change executed under it.
 
 **0032 search scope (not an open question):** the owner approved
 client-side on-demand sectioning with ~10 candidate folios and

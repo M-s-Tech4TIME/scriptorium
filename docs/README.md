@@ -17,4 +17,4 @@
 - `roadmap/` — phases, milestones, gates.
 
 ## Status (2026-10-16)
-Foundation seeded (M0). Approved: Q1–Q23, Rules 1–6. See `brain/DECISIONS-INDEX.md`.
+Foundation seeded (M0). Approved: Q1–Q23, Rules 1–8. See `brain/DECISIONS-INDEX.md`.

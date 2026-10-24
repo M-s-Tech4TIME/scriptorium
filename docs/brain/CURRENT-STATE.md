@@ -1,8 +1,8 @@
 # CURRENT-STATE
 
-Last updated: 2026-10-24 / Ref: 0032 third-feedback pass implemented, preview #5 serving — owner verdict → commits/push
+Last updated: 2026-10-24 / Ref: b15446f baseline pushed (CI ×3) + Rule 8 adopted (0033); 0034 fixes next
 
-- **Phase:** **M4-C3.5 feedback pass implemented (not yet pushed at recording time).**
+- **Phase:** **M4-C3.5 baseline committed/pushed (`b15446f`, CI ×3); Standing Rule 8 adopted (0033); fourth-feedback fixes next.**
   M4-C1 (`2aed3ef`): decision 0026
   (per-Athenaeum site P1, manual trigger P2, subprocess sandbox P3,
   keep-all versions P4; reconciliation: staging keyed by grimoire id
@@ -168,30 +168,31 @@ Last updated: 2026-10-24 / Ref: 0032 third-feedback pass implemented, preview #5
   first-leaf book rows, sticky collapsible panel, wine danger, chips,
   copy→check; then the unified first-party search, weight 800, split
   toggles, clear-only X, centred dialog, scrollspy title, link crawl and
-  the h2 staging fix (0032 amends 0027/0028/0031).
+  the h2 staging fix (0032 amends 0027/0028/0031). **0033 (2026-10-24):**
+  Standing Rule 8 — Regression Integrity (No Collateral Breakage), the
+  owner's project-wide directive that every change preserve all approved
+  behavior with full gates, browser checks, and regression tests.
 - **Done (cumulative):** Q1–Q23 + Q-M2-1/2 + Q-M3-1…8 + Q-002=B(0019) +
   Q-M3-9…13=A(0020) + Q-M3-16a–e=A(0025) + Q-M4-P1…P4 + E1–E3(0026) +
   theme ruling(0027) + design baseline(0028) + preview-feedback
   rulings(0029) + typography(0030) + second feedback batch(0031) +
-  third feedback batch(0032);
-  Rules 1–7. M0 locks; M1 green (2539391); M2 A–C green; M3 C1–C6 green
+  third feedback batch(0032) + Standing Rule 8(0033);
+  Rules 1–8. M0 locks; M1 green (2539391); M2 A–C green; M3 C1–C6 green
   ×3; M4 C1 `2aed3ef` + C2 `3a15b52` + C3 `1e1637e` green ×3; 0028
-  record `556bbce` green ×3; C3.5 code tranche staged (`0f5fcc8`) +
-  0029 pass + 0030 fonts + 0031 batch + 0032 batch on top (all gates
-  green locally: 80 passed / 36 skipped).
-- **Last commit:** `556bbce` (0028 design-baseline record, docs-only,
-  green ×3); code tranche `0f5fcc8` committed locally (23 files,
-  +2034/−142) but NOT pushed yet. **The 0029 seven-ruling pass, 0030
-  Inter pass, 0031 second batch and 0032 third batch are stacked as
-  working-tree edits awaiting ONE owner verdict on preview #5.** Batch
-  #3 includes the unified first-party search (phrase-first, all-word
-  highlight, full-page takeover), centred dialog + x close, clear-only
-  panel field, weight 800, `#D8E7DD` inline code, split panel controls,
-  scrollspy title, island contract fix, link-integrity crawl, and the
-  h2 `base_level` staging fix. Preview #5 SERVING on `0.0.0.0:8321`
-  (inspection fixture; headless Chrome verified search, dialog,
-  toggles, clear, scrollspy). Next: owner look → FOUR commits (0029,
-  0030, 0031, 0032) + push `dev` → CI green ×3 → M4-C4.
+  record `556bbce` green ×3; C3.5 baseline `b15446f` green ×3 (0029 +
+  0030 + 0031 + 0032; 80 passed / 36 skipped, ruff + mypy strict clean).
+- **Last commit:** `b15446f` — `feat(m4-c3.5): complete theme feedback
+  passes 0029-0032` (35 files, +3968/−275), pushed `dev`, all three CI
+  workflows green (lint-type-test, security, packaging). It is the exact
+  owner-approved preview #5 artifact: 0029 seven-ruling pass + 0030
+  vendored Inter + 0031 second batch + 0032 unified first-party search
+  (phrase-first, all-word highlight, full-page takeover), centred dialog
+  + x close, clear-only panel field, weight 800, `#D8E7DD` inline code,
+  split panel controls, scrollspy title, island contract fix,
+  link-integrity crawl, and the h2 `base_level` staging fix. **Standing
+  Rule 8 is approved and adopted in the docs/governance commit on top
+  of `b15446f`.** Next: 0034 fourth-feedback fixes → preview #6 →
+  verdict → commit/push + CI ×3 → M4-C4.
 - **Remote:** `git@github.com:M-s-Tech4TIME/scriptorium.git` (public).
   `dev` carries M3 complete + M4 in progress; `main` stays at release
   point (ff-only).

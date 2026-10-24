@@ -1,8 +1,20 @@
 # HANDOFF
 
-Last updated: 2026-10-24 / Ref: 0032 third batch implemented — preview #5 SERVING on 0.0.0.0:8321 → owner look → commits/push next
+Last updated: 2026-10-24 / Ref: b15446f baseline pushed (CI ×3) + Rule 8 adopted (0033); 0034 fixes next
 
 ## Was doing
+M4-C3.5 **baseline committed and pushed**: the owner-approved preview #5
+artifact is `b15446f` (`feat(m4-c3.5): complete theme feedback passes
+0029-0032`, 35 files, +3968/−275). All three CI workflows are green
+(lint-type-test, security, packaging). The owner then approved the
+artifact and requested three fourth-feedback fixes plus Standing Rule 8:
+panel placeholder only → "Search"; code-block language label (root cause:
+the lexer class is on the outer `highlight-*` wrapper, but the script
+matched the inner `highlight` block); pager Next must stay inside the
+article column, not cross the On-This-Page rail. Rule 8 is approved as
+written and adopted in the docs/governance commit; next is the 0034
+fix batch, preview #6, then commit/push + CI ×3.
+
 M4-C3.5 **0032 third feedback batch complete (staged on the unpushed
 0029 + 0030 + 0031 work)**: the search is one first-party mechanism on
 both surfaces — engine `searchindex.js` as candidate pre-filter only,
@@ -69,33 +81,27 @@ committed as `0f5fcc8` (23 files, +2034/−142, unpushed); the 0029 +
 0030 passes are the staged changeset on top.
 
 ## Next steps (in order)
-1. **Preview #5 SERVING on 0.0.0.0:8321 → owner look:** the rebuilt
-   inspection fixture carries all 0032 rulings — try the full sentence
-   `Inside the furnace the berserker` on the search page and in the
-   dialog (panel field or Ctrl+K), the clear-only X, the split
-   collapse/expand controls, weight-800 headings, `#D8E7DD` inline
-   code, and scrollspy top/deep/bottom. file:// works but degrades
-   dialog snippets to links (0032 disclosure). Serve command:
-   `python3 -m http.server 8321 --bind 0.0.0.0 -d .preview/site` from
-   the workspace root.
-2. **Commit + push:** on the owner's verdict, FOUR Conventional
-   commits (0029 seven-ruling pass; 0030 vendored Inter; 0031 second
-   batch; 0032 third batch + h2 fix) — author
-   `alsechemist
-   <239932722+alsechemist@users.noreply.github.com>` +
-   `Co-authored-by: OpenCode <opencode@local>` — push `dev` including
-   `0f5fcc8`, verify CI green ×3 (`gh run list --branch dev`),
-   fix-on-red if needed.
-3. **M4-C4** — packaging (`packaging/` creates the isolated build venv,
+1. **Commit Standing Rule 8** (0033, this docs/governance commit): decision
+   0033, `project-details.md` §0a, `AGENTS.md`, standards/agent-guide/
+   docs index, changelog, brain. No runtime behavior.
+2. **Implement 0034 fourth-feedback fixes:** panel placeholder only →
+   "Search"; code-block language label fix (outer `highlight-*` wrapper,
+   "Code" fallback); pager inside `.sd-reading-main` so Next stays in
+   the article column. Add Node/theme-build regression tests, run full
+   gates, rebuild **preview #6**, verify with headless Chrome, and get
+   the owner's verdict.
+3. **Commit 0034**, push `dev` (includes the Rule 8 commit), verify CI
+   green ×3 (`gh run list --branch dev`), fix-on-red if needed.
+4. **M4-C4** — packaging (`packaging/` creates the isolated build venv,
    `SC_BUILD_PYTHON` pointed there; worker unit `After=redis`;
    `config.env` gains `CELERY_BROKER_URL` + `SC_*` build keys), the
    0017 docutils-0.23 probe mechanics, M4-complete report + brain sync.
-4. **Junk-sweep before every gate:** re-read written files; grep the
+5. **Junk-sweep before every gate:** re-read written files; grep the
    standing junk markers before committing.
-5. Serving phase — resolve Q-SERVE-A…E first, then implement (theme
+6. Serving phase — resolve Q-SERVE-A…E first, then implement (theme
    brand-injection hooks + custom-CSS wiring land there, 0027;
    `[data-theme]` second scheme is its own later ruling, 0028).
-6. URL-durability phase after serving; Distribution-phase concepts
+7. URL-durability phase after serving; Distribution-phase concepts
    (Q-DIST-A…D) presented before their implementation (incl. the React
    shell format).
 

@@ -19,6 +19,10 @@ unapproved decision immediately with revert/approve options.
    CI enforces `-Werror` equivalents.
 7. **CI-green after every push (Rule 7):** after every push, check CI; if red, stop new work,
    fix properly on `dev`, re-push, re-verify green. Never stack work on red CI.
+8. **Regression integrity (Rule 8):** no collateral breakage. Map every affected surface before
+   changing; run the full gates + browser checks for UI; add a regression test for every fix and
+   new behavior; any unavoidable breaking change needs owner approval + decision record +
+   migration/rollback plan. Preserve all previously approved behavior.
 
 ## Where to start (every session)
 1. Read this file, then `docs/brain/README.md`.
@@ -38,5 +42,6 @@ unapproved decision immediately with revert/approve options.
   (lint-type-test, security, docs, brain, packaging).
 
 ## Definition of Done (every commit/push)
-Code meets Rule 2 + Rule 6 checks; `docs/` + `brain/` updated same commit; changelog entry;
-CI gates pass **and CI status verified green after push (Rule 7)**; every decision owner-approved + recorded.
+Code meets Rule 2 + Rule 6 + Rule 8 checks; `docs/` + `brain/` updated same commit; changelog entry;
+existing approved behavior preserved with regression evidence; CI gates pass **and CI status
+verified green after push (Rule 7)**; every decision owner-approved + recorded.

@@ -12,7 +12,7 @@ Before writing any feature code, read **Section 0a (Standing Rules)** in full, a
 
 ## 0a. Standing Rules (Non-Negotiable, Project-Wide)
 
-These five rules apply from the first commit to the last, across every phase, for every contributor (human or coding agent). They are not v1-only and not optional. If a task conflicts with a Standing Rule, the rule wins. **Standing Rule 4 (Owner Decision Authority) governs how every other rule is carried out.**
+These rules apply from the first commit to the last, across every phase, for every contributor (human or coding agent). They are not v1-only and not optional. If a task conflicts with a Standing Rule, the rule wins. **Standing Rule 4 (Owner Decision Authority) governs how every other rule is carried out.**
 
 ### Standing Rule 4: Owner Decision Authority (No Silent Decisions)
 
@@ -223,15 +223,33 @@ The technology stack (Section 9) is decided. The versions of every technology, l
 
 **5.6 Documentation.** Maintain `docs/technology/` with, for each technology: exact version, release date, support or end-of-life date, the reason it was chosen, the date the version was last verified, and where it is used. Include a compatibility matrix for the full set. Update it in the same commit as any version change (Rule 1.3).
 
-### How the Five Rules Work Together
+### Standing Rule 8: Regression Integrity (No Collateral Breakage)
+
+Every change must preserve the integrity of the whole project. A change is not complete if it adds or fixes one thing while breaking, weakening, or silently changing any other approved behavior, UI, component, element, feature, contract, test, document, or backend behavior.
+
+**8.1 Whole-project scope.** This applies to UI, backend, data, build/staging, packaging, security, accessibility, documentation, and tests. "It works on the changed page" is not sufficient.
+
+**8.2 Pre-change impact review.** Before implementing, identify every affected surface and the existing tests/contracts that protect it. If a change necessarily alters an approved behavior, stop and obtain owner approval under Rule 4; record it.
+
+**8.3 Mandatory verification.** Every change runs the full gates: ruff lint/format, `mypy --strict`, `pytest -W error`, Sphinx `-W`/build/artifact tests, and browser checks for UI changes. Every bug fix and new behavior gets a regression test. No skipped warnings or tests.
+
+**8.4 No silent regressions.** If a regression is found, stop new work, fix the root cause, add a test that fails without the fix, and report it. Do not paper over it or trade one approved behavior for another.
+
+**8.5 Definition of Done.** A commit/push is complete only when existing approved behavior is preserved, verification evidence is recorded, and docs/brain/changelog are updated in the same commit.
+
+**8.6 Breaking changes.** Any unavoidable breaking change requires explicit owner approval, a decision record, a migration/rollback plan, and a staged verification path. It is never implicit in a feature.
+
+### How the Standing Rules Work Together
 
 | Event | Required action |
 |---|---|
 | Any decision, however small | Stop, ask the owner with options and a recommendation, wait for approval (Rule 4) |
 | Session start or context reset | Follow the resume protocol in `docs/brain/README.md`; reconcile brain with `git log` (Rule 3) |
-| Any commit | Code meets Rule 2 checks; matching docs and brain updated in the same commit (Rules 1 and 3) |
-| Any push | Changelog entry added; docs and brain verified; CI security and quality gates pass |
+| Any commit | Code meets Rule 2 checks; existing approved behavior preserved; matching docs and brain updated in the same commit (Rules 1, 2, 3 and 8) |
+| Any bug fix or new feature | Pre-change impact review; full gates; regression test added; no collateral breakage (Rule 8) |
+| Any push | Changelog entry added; docs and brain verified; CI security and quality gates green after the push (Rules 7 and 8) |
 | Any design decision | Owner-approved decision record written; `DECISIONS-INDEX.md` updated |
+| Any unavoidable breaking change | Explicit owner approval, decision record, migration/rollback plan, staged verification (Rule 8.6) |
 | Any new technology or version change | Owner approval; verified latest-stable and compatible; `docs/technology/` updated (Rules 4 and 5) |
 | Distribution, packaging, or repository structure question | Governed by Section 8; owner decision required before implementation proceeds past initial setup |
 | Context nearly full | Park current work safely; write `HANDOFF.md` and `SESSION-LOG/` entry |
@@ -239,7 +257,7 @@ The technology stack (Section 9) is decided. The versions of every technology, l
 
 ### First Actions for Open Code (before feature work)
 
-1. Confirm to the owner that you have read and understood the five Standing Rules.
+1. Confirm to the owner that you have read and understood the Standing Rules.
 2. Research and present for decision: **Section 8 (Distribution, Packaging, and Repository Strategy)**. This is a foundational decision and must be resolved before implementation proceeds past initial setup.
 3. Research and present for approval: the versions of every technology in the stack (Rule 5), verified against official sources, with the compatibility matrix.
 4. Propose for approval: the `docs/` structure (including `docs/brain/` with all required files and templates), `AGENTS.md`, and onboarding files.
@@ -398,7 +416,7 @@ Each of these results in options presented to the owner, not in a unilateral cho
 
 Every deliverable below is presented to the owner for approval before it is treated as final (Rule 4).
 
-1. Confirmation that the five Standing Rules were read and understood.
+1. Confirmation that the Standing Rules were read and understood.
 2. Researched options, a recommendation, and a decision record for Section 8 (distribution, packaging, repository structure, and release hosting), resolved before implementation proceeds past initial setup.
 3. The researched, verified version set for the full stack, with a compatibility matrix (Rule 5).
 4. The foundation from Section 0a: `docs/` structure, `docs/brain/` with templates, `AGENTS.md`, onboarding docs, coding standards, and CI quality, security, docs, and brain gates.

@@ -1,6 +1,6 @@
 # Development — standards, testing, branching (Q18 + Rule 6)
 
-Last updated: 2026-10-16 / Ref: uncommitted
+Last updated: 2026-10-24 / Ref: decision 0033 (Standing Rule 8)
 
 - **Python:** `ruff` lint+format, `mypy --strict`, hints required, `pytest -W error`.
   Pyright rejected (mypy has SQLA/Alembic history).
@@ -13,4 +13,8 @@ Last updated: 2026-10-16 / Ref: uncommitted
   suppressions only via owner-approved allowlist + expiry + decision ref.
 - **Rule 7 (CI-green):** every push followed by a CI check; red CI stops new work until fixed
   and re-verified green on the same branch.
+- **Rule 8 (regression integrity):** map every affected surface before changing; run the full
+  gates plus browser checks for UI; add a regression test for every bug fix and new behavior;
+  no collateral breakage. Any unavoidable breaking change needs owner approval, a decision
+  record, and a migration/rollback plan.
 - **Security gates:** gitleaks, `pip-audit` + `npm audit`, semgrep/CodeQL blocking; no secrets in repo.
