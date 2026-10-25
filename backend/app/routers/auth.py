@@ -21,6 +21,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import limiter
 from app.auth import (
+    ACCESS_COOKIE_NAME,
+    ACCESS_MINUTES,
     REFRESH_DAYS,
     AuthError,
     _UNAUTHORIZED,
@@ -72,6 +74,23 @@ def _set_refresh_cookie(response: Response, token: str) -> None:
         httponly=True,
         samesite="lax",
         path="/",
+        secure=_cookie_secure(),
+    )
+
+
+def _set_access_cookie(response: Response, token: str) -> None:
+    """Short-lived read cookie for private `/a` navigations (0035 B3).
+
+    Path-scoped to `/a` so it is never sent to the JSON API (which keeps
+    bearer auth); HttpOnly + SameSite=Lax; Secure in production.
+    """
+    response.set_cookie(
+        key=ACCESS_COOKIE_NAME,
+        value=token,
+        max_age=ACCESS_MINUTES * 60,
+        httponly=True,
+        samesite="lax",
+        path="/a",
         secure=_cookie_secure(),
     )
 
@@ -135,6 +154,7 @@ async def login(
     )
     await session.commit()
     _set_refresh_cookie(response, refresh)
+    _set_access_cookie(response, access)
     return {"access_token": access, "token_type": "bearer"}
 
 
@@ -152,6 +172,7 @@ async def refresh(
     except AuthError as exc:
         raise _UNAUTHORIZED from exc
     _set_refresh_cookie(response, rotated)
+    _set_access_cookie(response, access)
     return {"access_token": access, "token_type": "bearer"}
 
 
@@ -169,3 +190,4 @@ async def logout(
         except (AuthError, RuntimeError):
             pass  # junk/expired cookie — clear it and treat as logged out
     response.delete_cookie(COOKIE_NAME, path="/")
+    response.delete_cookie(ACCESS_COOKIE_NAME, path="/a")

@@ -49,9 +49,19 @@ async def _execute_build(build_id: uuid.UUID) -> None:
                 athenaeum, books, site_credit = await load_site_snapshot(
                     session, build.athenaeum_id
                 )
-                plan = plan_site(athenaeum.title, books, site_credit=site_credit)
+                plan = plan_site(
+                    athenaeum.title,
+                    books,
+                    site_credit=site_credit,
+                    site_id=athenaeum.public_slug,
+                    custom_css=athenaeum.custom_css or None,
+                )
                 outcome = run_build(
-                    plan, build.id, build.athenaeum_id, build.build_number
+                    plan,
+                    build.id,
+                    build.athenaeum_id,
+                    build.build_number,
+                    site_id=athenaeum.public_slug,
                 )
                 log_path = outcome.log_path if outcome.log_path is not None else ""
                 artifact_path = outcome.artifact_path

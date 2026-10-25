@@ -1,10 +1,10 @@
 # TASKS
 
-Last updated: 2026-10-24 / 1add6c8 M4-C4 pushed, CI ×3; M4 implementation complete; serving decisions pending
+Last updated: 2026-10-25 / 0035 serving implemented; push/CI pending
 
 ## In progress (max 1–2)
-- Serving phase — blocked on owner rulings Q-SERVE-A…E (Rule 4); do not
-  implement until decided. Q-EDITOR-1 remains open/non-blocking.
+- Serving closeout: gates + browser checks done locally; commit/push
+  0035 and verify CI green ×3. Q-EDITOR-1 remains open/non-blocking.
 
 ## Todo (M4 next — phases)
 - [x] M4-C3.5 baseline: 0029 + 0030 + 0031 + 0032 committed/pushed as
@@ -20,9 +20,13 @@ Last updated: 2026-10-24 / 1add6c8 M4-C4 pushed, CI ×3; M4 implementation compl
       (`CELERY_BROKER_URL`, `SC_*`); 0017 docutils-0.23 probe
       mechanics; M4 report + brain.
 - [x] Commit + push M4-C4 → CI green ×3 (`1add6c8`).
-- [ ] Serving phase (resolve Q-SERVE-A…E first) → dedicated phase
-      (brand injection + custom-CSS hooks land here, 0027)
-- [ ] URL-durability phase after serving
+- [x] Serving phase (0035): A2 latest/stable pointers over immutable
+      numbered builds, B3 private-default visibility, C1 FastAPI serving,
+      D1 public slug + URL shape, E2 manifest/CSP + custom-CSS sandbox;
+      migration 0007, live/unit/theme/browser regressions.
+- [ ] Serving closeout: push + CI green ×3.
+- [ ] URL-durability phase (owner rulings first; aliases/redirects/public
+      rename policy)
 - [ ] Distribution phase (Q-DIST-A…D) + React shell format — concepts
       ratified in 0026, presented before implementation
 

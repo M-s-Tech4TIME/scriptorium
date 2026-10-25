@@ -1,5 +1,7 @@
 # Technology — argon2-cffi 25.1.0 + PyJWT 2.15.1 + redis-py 5.2.1 (+ httpx 0.28.1 dev)
 
+Last updated: 2026-10-25 / Ref: serving access cookie (0035 B3)
+
 - Versions (locked): argon2-cffi 25.1.0, PyJWT (`pyjwt`) 2.15.1; httpx 0.28.1 (dev/test).
 - Why: Argon2id (OWASP-recommended) for passwords; minimal proven JWT for
   short-lived access + rotating refresh (Q22); httpx 0.28.1 also drives
@@ -14,7 +16,10 @@
 
 - `POST /api/v1/auth/login` — email+password → `{"access_token", "token_type":
   "bearer"}` + `Set-Cookie: scriptorium_refresh` (HttpOnly, SameSite=Lax,
-  path=/, 7 d max-age, Secure when `SCRIPTORIUM_COOKIE_SECURE` truthy).
+  path=/, 7 d max-age, Secure when `SCRIPTORIUM_COOKIE_SECURE` truthy) and
+  `scriptorium_access` (the same 15-minute access token, HttpOnly,
+  SameSite=Lax, path=/a, Secure in production; 0035 B3). Refresh rotates
+  both; logout clears both.
   Unknown email burns an argon2 dummy verify (timing-uniform, no account
   enumeration); bad credentials → uniform `401 {"detail": "Invalid credentials."}`.
 - `POST /api/v1/auth/refresh` — rotates the cookie through the M2 family

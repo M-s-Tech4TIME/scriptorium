@@ -39,12 +39,12 @@ _PASSWORD = "correct-horse-battery-staple"
 _COOKIE = "scriptorium_refresh"
 
 
-def _cookie_from(resp: httpx.Response) -> str:
+def _cookie_from(resp: httpx.Response, name: str = _COOKIE) -> str:
     raw = resp.headers.get_list("set-cookie")
     for header in raw:
-        if header.startswith(f"{_COOKIE}="):
+        if header.startswith(f"{name}="):
             return header.split("=", 1)[1].split(";", 1)[0]
-    raise AssertionError(f"no {_COOKIE} cookie in response: {raw}")
+    raise AssertionError(f"no {name} cookie in response: {raw}")
 
 
 def _client() -> httpx.AsyncClient:
@@ -112,6 +112,16 @@ def test_login_mint_access_and_rotating_refresh_cookie() -> None:
             assert body["token_type"] == "bearer"
             assert body["access_token"].count(".") == 2
             first = _cookie_from(login)
+            access_cookie = _cookie_from(login, "scriptorium_access")
+            assert access_cookie.count(".") == 2
+            access_header = next(
+                header
+                for header in login.headers.get_list("set-cookie")
+                if header.startswith("scriptorium_access=")
+            )
+            assert "Path=/a" in access_header
+            assert "HttpOnly" in access_header
+            assert "SameSite=lax" in access_header
 
             rotated = await client.post(
                 "/api/v1/auth/refresh",
@@ -121,6 +131,7 @@ def test_login_mint_access_and_rotating_refresh_cookie() -> None:
             assert "access_token" in rotated.json()
             second = _cookie_from(rotated)
             assert second != first  # rotation means a fresh token value
+            assert _cookie_from(rotated, "scriptorium_access").count(".") == 2
         await app_teardown()
 
     _run(run())
@@ -173,6 +184,12 @@ def test_logout_revokes_family_and_clears_cookie() -> None:
                 "/api/v1/auth/logout", headers={"Cookie": f"{_COOKIE}={cookie}"}
             )
             assert out.status_code == 204
+            cleared = [
+                header
+                for header in out.headers.get_list("set-cookie")
+                if header.startswith("scriptorium_access=")
+            ]
+            assert cleared and "Path=/a" in cleared[0]
 
             dead = await client.post(
                 "/api/v1/auth/refresh", headers={"Cookie": f"{_COOKIE}={cookie}"}

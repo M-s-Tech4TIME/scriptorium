@@ -12,6 +12,7 @@ from datetime import datetime
 
 from sqlalchemy import (
     BigInteger,
+    Boolean,
     CheckConstraint,
     DateTime,
     ForeignKey,
@@ -113,10 +114,27 @@ class Athenaeum(Base):
         ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
     )
     slug: Mapped[str] = mapped_column(String(120), nullable=False)
+    # Serving phase (0035 D1): a global, immutable public URL name. The
+    # editor-facing `slug` stays per-owner (0021); this column is what
+    # `/a/{public_slug}/...` resolves. Generated once, never renamed.
+    public_slug: Mapped[str] = mapped_column(String(160), nullable=False)
     title: Mapped[str] = mapped_column(String(200), nullable=False)
+    is_public: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=text("false")
+    )
+    custom_css: Mapped[str] = mapped_column(
+        Text, nullable=False, server_default=text("''")
+    )
+    latest_build_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("builds.id", ondelete="SET NULL"), nullable=True
+    )
+    stable_build_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("builds.id", ondelete="SET NULL"), nullable=True
+    )
     created_at: Mapped[datetime] = _now()
     __table_args__ = (
         UniqueConstraint("owner_id", "slug", name="uq_athenaeums_owner_slug"),
+        UniqueConstraint("public_slug", name="uq_athenaeums_public_slug"),
     )
 
 
@@ -317,6 +335,14 @@ class Build(Base):
     )
     log_path: Mapped[str | None] = mapped_column(Text, nullable=True)
     artifact_path: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Serving phase (0035 A2): first publication history. A build that was
+    # ever published remains addressable by its immutable numbered URL.
+    published_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    published_by: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
     __table_args__ = (
         CheckConstraint(
             "status IN ('queued', 'running', 'ok', 'failed')", name="ck_builds_status"

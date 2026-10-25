@@ -1,8 +1,8 @@
 # CURRENT-STATE
 
-Last updated: 2026-10-24 / Ref: 1add6c8 M4-C4 pushed, CI ×3; M4 implementation complete; serving decisions pending
+Last updated: 2026-10-25 / Ref: serving phase 0035 implemented; gates/browser verified; push/CI pending
 
-- **Phase:** **M4-C3.5 complete: `b15446f` baseline, `cbe2b22` Rule 8, `2680738` 0034; M4-C4 complete: `1add6c8` — all pushed, CI green ×3. M4 build/theme implementation complete; serving phase awaits owner rulings Q-SERVE-A…E.**
+- **Phase:** **Serving phase (0035) implemented, gates and browser checks green; push/CI pending. M4-C3.5/M4-C4 remain pushed and green (`1add6c8`).** Owner approved A2/B3/C1/D1/E2: owner-published `latest`/`stable` pointers over immutable numbered builds, private-by-default per-Athenaeum visibility with owner/member access, FastAPI `/a/{public_slug}/...` serving, immutable global public slug, manifest-derived strict CSP, and bounded namespaced custom CSS. URL-durability aliases/redirects and distribution remain later phases.
   M4-C1 (`2aed3ef`): decision 0026
   (per-Athenaeum site P1, manual trigger P2, subprocess sandbox P3,
   keep-all versions P4; reconciliation: staging keyed by grimoire id
@@ -28,8 +28,8 @@ Last updated: 2026-10-24 / Ref: 1add6c8 M4-C4 pushed, CI ×3; M4 implementation 
   failed-log + migration roundtrip vs library-era rows.
   **CI-discovered staging rulings** in 0026 (absolute `</docname>`
   refs, generated top sections, MyST fenced toctree, downgrade mirror,
-  save-path exporter guarantee). Q-SERVE-A…E + Q-DIST-A…D parked.
-  Migrate head `0006buildsite`.
+  save-path exporter guarantee). Q-SERVE-A…E resolved by 0035; Q-DIST-A…D
+  remain parked. Migrate head `0007serving`.
   **C3.5 code (this tranche):** Scriptorium's own theme shipped in
   `backend/app/sphinx/theme/scriptorium/` (`theme.conf` `inherit=none`
   — 9.1 mandates the explicit key; layout/page/search/genindex
@@ -147,8 +147,11 @@ Last updated: 2026-10-24 / Ref: 1add6c8 M4-C4 pushed, CI ×3; M4 implementation 
   postinst artifacts/config seed/build-venv check, manual docutils-0.23
   probe (58 passed; pin stays 0.22.4), and the M4 report. Suite is
   87 passed / 36 skipped. Pushed as `1add6c8`, CI green ×3. M4
-  implementation is complete; serving phase (Q-SERVE-A…E) is blocked
-  on owner rulings, then URL durability → Distribution (Q-DIST-A…D).
+  implementation is complete. **Serving phase (0035) implemented
+  (2026-10-25):** schema/API for `public_slug`/`is_public`/custom CSS +
+  latest/stable pointers; FastAPI artifact routes; access cookie;
+  manifest/CSP; custom-CSS sandbox; live + unit + theme regressions.
+  Next: URL durability, then Distribution (Q-DIST-A…D).
 - **Owner decisions:** 0018 (grimoire rename, per-user categories, auth
   semantics) → **amended by 0020 (2026-10-21):** native hierarchy — categories
   per-Athenaeum (Q-M3-9=A), `grimoires.athenaeum_id` NOT NULL (Q-M3-10=A),
@@ -181,16 +184,31 @@ Last updated: 2026-10-24 / Ref: 1add6c8 M4-C4 pushed, CI ×3; M4 implementation 
   `.sd-reading-main`, plus the pre-paint collapsed panel fix so pager
   navigation never flashes the panel open. Preview #6 was approved;
   preview #7 is the browser-verified no-flash follow-up.
+  **0035 (2026-10-24, accepted; implemented 2026-10-25):** serving —
+  owner-published latest/stable pointers over immutable numbered builds
+  (A2), private-default per-Athenaeum visibility with owner/member
+  access (B3), FastAPI artifact serving (C1), immutable global public
+  slug + `/a/{public_slug}/{latest|stable|b/n}/` URLs (D1), strict
+  manifest-derived CSP + bounded namespaced custom CSS (E2). Migration
+  0007. URL-durability aliases/redirects + distribution deferred.
 - **Done (cumulative):** Q1–Q23 + Q-M2-1/2 + Q-M3-1…8 + Q-002=B(0019) +
   Q-M3-9…13=A(0020) + Q-M3-16a–e=A(0025) + Q-M4-P1…P4 + E1–E3(0026) +
   theme ruling(0027) + design baseline(0028) + preview-feedback
   rulings(0029) + typography(0030) + second feedback batch(0031) +
-  third feedback batch(0032) + Standing Rule 8(0033);
+  third feedback batch(0032) + Standing Rule 8(0033) +
+  fourth feedback(0034) + serving(0035);
   Rules 1–8. M0 locks; M1 green (2539391); M2 A–C green; M3 C1–C6 green
   ×3; M4 C1 `2aed3ef` + C2 `3a15b52` + C3 `1e1637e` green ×3; 0028
   record `556bbce` green ×3; C3.5 baseline `b15446f` green ×3 (0029 +
   0030 + 0031 + 0032; 80 passed / 36 skipped, ruff + mypy strict clean).
-- **Last commit:** `1add6c8` — `feat(m4-c4): package isolated build venv
+- **Serving work (uncommitted at sync):** 0035 schema/migration, serving
+  modules/routers, auth access cookie, build manifest/custom CSS, tests,
+  docs/brain. Local gates: full suite **147 passed / 1 deselected**
+  (PG16 local; PG18 version test excluded locally) + unit/theme suites;
+  ruff + format + `mypy --strict` clean; headless Chrome verified public
+  and private serving, CSP (no violations), custom CSS, search dialog,
+  placeholders, and panel persistence. Push/CI still pending.
+- **Last pushed:** `1add6c8` — `feat(m4-c4): package isolated build venv
   and docutils probe` (32 files, +645/−101), pushed `dev`; all three CI
   workflows green (lint-type-test, security, packaging). It sits on
   `2680738` (0034, 14 files, +410/−76), `cbe2b22` (Standing Rule 8, 12
@@ -214,9 +232,14 @@ Last updated: 2026-10-24 / Ref: 1add6c8 M4-C4 pushed, CI ×3; M4 implementation 
   markup does not nest — 0017 fail-loud matrix in
   `docs/technology/conversion.md`; RST writer rejects mark-run edge spaces,
   mark combinations, and heading level skips; MyST keeps them via HTML
-  paths. Live-DB tests migrate to the current head (`0006buildsite`).
+  paths. Live-DB tests migrate to the current head (`0007serving`).
   Search on the static artifact requires JavaScript; `file://` previews
   degrade to folio/heading links without snippets; candidate/group/row
   caps are 10/8/6; a build-time section index is the documented scale
   upgrade (deferred, 0032); `searchtools.js` remains vendored but
-  unloaded (0027 asset contract).
+  unloaded (0027 asset contract). Serving: public numbered builds are
+  immutable-cached, so making a site private cannot recall copies already
+  cached at those URLs (0035 disclosure); custom CSS has no at-rules
+  (including `@media`), custom JS, or remote assets; public slug is
+  immutable and not user-editable; URL-durability aliases/redirects and
+  distribution are not implemented.

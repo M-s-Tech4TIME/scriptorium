@@ -48,6 +48,12 @@ def _body(row: Build) -> dict[str, object]:
         ),
         "log_path": row.log_path,
         "artifact_path": row.artifact_path,
+        "published_at": (
+            row.published_at.isoformat()
+            if isinstance(row.published_at, datetime)
+            else None
+        ),
+        "published_by": str(row.published_by) if row.published_by else None,
     }
 
 

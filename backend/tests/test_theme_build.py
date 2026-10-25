@@ -15,6 +15,7 @@ no DB, no network. It pins the artifact physiology:
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import sys
@@ -148,7 +149,7 @@ def code_doc() -> dict[str, Any]:
     }
 
 
-def _plan() -> SitePlan:
+def _plan(*, site_id: str = "athos", custom_css: str | None = None) -> SitePlan:
     letters = StagedBook(
         slug="letters",
         title="Letters",
@@ -175,7 +176,13 @@ def _plan() -> SitePlan:
         ),
         category_label=None,
     )
-    return plan_site("Athos", [letters, inquiry], site_credit="Alsechemist")
+    return plan_site(
+        "Athos",
+        [letters, inquiry],
+        site_credit="Alsechemist",
+        site_id=site_id,
+        custom_css=custom_css,
+    )
 
 
 def test_materialize_stages_theme_style_and_engine_js(tmp_path: Path) -> None:
@@ -245,12 +252,20 @@ def test_run_build_theme_artifact(
     monkeypatch.setenv("SC_ARTIFACT_ROOT", str(tmp_path / "artifacts"))
     monkeypatch.setenv("SC_BUILD_ROOT", str(tmp_path / "builds"))
 
-    outcome = run_build(_plan(), uuid.uuid4(), uuid.uuid4(), 1)
+    outcome = run_build(_plan(), uuid.uuid4(), uuid.uuid4(), 1, site_id="athos")
     assert outcome.ok, (
         Path(outcome.log_path).read_text() if outcome.log_path else outcome
     )
 
-    artifact = Path(str(outcome.artifact_path)) / "html"
+    artifact_dir = Path(str(outcome.artifact_path))
+    manifest = json.loads((artifact_dir / "manifest.json").read_text())
+    assert manifest["format"] == "scriptorium-artifact@1"
+    assert manifest["site_id"] == "athos"
+    assert manifest["custom_css"] is None
+    assert len(manifest["csp"]["script_hashes"]) == 2
+    assert "index.html" in manifest["files"]
+
+    artifact = artifact_dir / "html"
     static = artifact / "_static"
 
     # own theme + engine-emitted assets; no parent CSS sneaks in
@@ -311,6 +326,8 @@ def test_run_build_theme_artifact(
     # index renders the shell: topbar, tree, sprite markers, our assets
     index = (artifact / "index.html").read_text()
     assert 'data-content_root="' in index
+    assert 'data-sd-athenaeum="athos"' in index
+    assert "style=" not in index  # E2: no inline style attributes
     assert 'class="sd-sidebar"' in index
     assert 'class="sd-cat-label">Correspondence<' in index  # ruled exception B
     assert 'href="#sd-i-book"' in index
@@ -448,3 +465,38 @@ def test_run_build_theme_artifact(
     builds_root = tmp_path / "builds"
     assert not any(builds_root.iterdir())
     assert (Path(str(outcome.artifact_path)) / "build.log").is_file()
+
+
+def test_run_build_custom_css_is_external_and_namespaced(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """E2: owner CSS is an external, namespaced file in the immutable build."""
+    monkeypatch.setenv("SC_ARTIFACT_ROOT", str(tmp_path / "artifacts"))
+    monkeypatch.setenv("SC_BUILD_ROOT", str(tmp_path / "builds"))
+    css = ":root { --sd-accent: #123456; }\nbody { color: #111; }\n"
+
+    outcome = run_build(
+        _plan(custom_css=css),
+        uuid.uuid4(),
+        uuid.uuid4(),
+        1,
+        site_id="athos",
+    )
+    assert outcome.ok, (
+        Path(outcome.log_path).read_text() if outcome.log_path else outcome
+    )
+
+    artifact = Path(str(outcome.artifact_path))
+    index = (artifact / "html" / "index.html").read_text()
+    assert "_static/custom.css" in index
+    assert "style=" not in index
+    custom = (artifact / "html" / "_static" / "custom.css").read_text()
+    assert "html[data-sd-athenaeum] {--sd-accent: #123456;}" in custom
+    assert "html[data-sd-athenaeum] body {color: #111;}" in custom
+    assert "url(" not in custom
+    manifest = json.loads((artifact / "manifest.json").read_text())
+    assert manifest["custom_css"]["path"] == "_static/custom.css"
+    assert (
+        manifest["custom_css"]["sha256"]
+        == hashlib.sha256(custom.encode("utf-8")).hexdigest()
+    )

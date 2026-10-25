@@ -1,6 +1,6 @@
 # Layout + naming (monorepo under scriptorium/, decision 0012)
 
-Last updated: 2026-10-24 / Ref: M4-C4 packaging layout
+Last updated: 2026-10-25 / Ref: serving phase (0035)
 
 Repo root contains only `scriptorium/` (+ `.git`). All work happens under `scriptorium/`.
 
@@ -8,7 +8,7 @@ Repo root contains only `scriptorium/` (+ `.git`). All work happens under `scrip
 project-scriptorium/
 └── scriptorium/
     ├── AGENTS.md  project-details.md  docker-compose.yml
-    ├── backend/ (FastAPI: app/{routers,schemas,models,convert,sphinx,worker}/ alembic/ tests/ pyproject.toml)
+    ├── backend/ (FastAPI: app/{routers,schemas,models,convert,sphinx,serving,worker}/ alembic/ tests/ pyproject.toml)
     ├── frontend/ (React+TS+TipTap: src/{editor,components,pages}/ package.json tsconfig.json)
     ├── packaging/ (nfpm.yaml; build-requirements.{in,lock}; config.env.example;
     │   systemd/scriptorium-{web,worker}.service; scripts/{build-venv,postinst,prerm})

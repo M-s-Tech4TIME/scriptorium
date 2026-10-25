@@ -1,7 +1,7 @@
 # Operations — install/upgrade (target, Q5/Q6)
 
-Last updated: 2026-10-24 / Ref: M4-C4 packaging (0026; signed M5 package
-pipeline still pending)
+Last updated: 2026-10-25 / Ref: serving phase (0035); M5 signed package
+pipeline still pending
 
 - **Package build:** run `packaging/scripts/build-venv.sh` before `nfpm
   package`; it creates `packaging/build-venv` from
@@ -27,6 +27,13 @@ pipeline still pending)
   setup` (DB check) and `sudo -u scriptorium scriptorium-admin migrate`
   (idempotent Alembic; refuses PG<18). An empty key fails loud at auth
   time rather than accepting a placeholder.
+- **Serve:** published sites are served by the web unit at
+  `/a/{public_slug}/`; no nginx alias is required for v1. Private sites
+  use the short-lived `/a` access cookie set by login/refresh; keep
+  `SCRIPTORIUM_COOKIE_SECURE=true` behind HTTPS. Public/private and
+  publication pointers are owner API actions (0035), not config keys.
+  Exported artifacts include `manifest.json`; a static host must apply the
+  documented E2 headers itself.
 - **Start:** `systemctl enable --now scriptorium-web scriptorium-worker`.
   Both units `Requires=redis.service` and start `After=redis.service`;
   `postinst` never migrates.

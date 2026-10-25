@@ -177,6 +177,7 @@ body {
 }
 .sd-skip:focus { top: var(--sd-s2); }
 
+.sd-sprite { display: none; }
 .sd-icon { width: 16px; height: 16px; flex: none; }
 
 /* ---------------------------------------------------------------- */

@@ -1,6 +1,27 @@
 # HANDOFF
 
-Last updated: 2026-10-24 / Ref: 1add6c8 M4-C4 pushed, CI ×3; M4 implementation complete; serving decisions pending
+Last updated: 2026-10-25 / Ref: serving phase 0035 implemented; gates/browser verified; push/CI pending
+
+## Current tranche (2026-10-25): serving phase 0035
+
+Implemented the owner-approved A2/B3/C1/D1/E2 serving phase. Schema
+migration `0007serving` adds `athenaeums.public_slug` (globally unique,
+immutable), `is_public` (private default), `custom_css`,
+`latest_build_id`/`stable_build_id`, and `builds.published_at`/
+`published_by`. New `app/serving/` modules: CSS sandbox, artifact
+manifest/CSP inventory, header contract, access rules, artifact path
+jail. New routers: `publications.py` (owner-only publish/unpublish/
+publication) and `site.py` (`/a/{public_slug}/`, latest/stable aliases,
+numbered `/b/{n}/`, path safety, headers). Login/refresh set a
+15-minute HttpOnly `scriptorium_access` cookie scoped to `/a`; logout
+clears it. Builds now write `manifest.json` beside `html/`, include
+`site_id`/custom CSS, and fail if inline styles/event handlers/`<style>`
+blocks are present. Theme has `data-sd-athenaeum` and `.sd-sprite`.
+Docs/decision 0035/changelog/brain synced. Local verification: full
+suite 147 passed / 1 deselected (PG16 local; PG18 test excluded),
+ruff/format/mypy clean; headless Chrome public/private serving, CSP,
+custom CSS, search dialog, placeholders, panel persistence. Push and CI
+×3 still pending.
 
 ## Was doing
 M4-C3.5 **baseline committed and pushed**: the owner-approved preview #5
@@ -93,16 +114,18 @@ sphinx.md + changelogs + brain synced. The entire C3.5 stack (0029–
 approval; M4-C4 is pushed as `1add6c8` with CI green ×3.
 
 ## Next steps (in order)
-1. **Serving phase — owner rulings Q-SERVE-A…E first.** Present the
-   options/trade-offs and wait (Rule 4); do not implement serving until
-   the owner decides. Brand-injection hooks + custom-CSS wiring land
-   there (0027; `[data-theme]` second scheme is its own later ruling,
-   0028).
-2. **Junk-sweep before every gate:** re-read written files; grep the
+1. **Finish serving closeout:** junk-sweep, full gates on PG18 in CI,
+   commit with decision 0035 + docs/changelog/brain, push `dev`, verify
+   all three workflows green ×3. Do not stack work on red CI.
+2. **URL-durability phase:** owner rulings before implementation
+   (aliases/redirects/public rename policy, relationship to immutable
+   `public_slug`/numbered URLs). The current public slug and numbered
+   build URLs are the stable base.
+3. **Distribution phase:** present Q-DIST-A…D (credentials, delivery
+   semantics, target roster, React shell) and wait; do not implement
+   before owner approval.
+4. **Junk-sweep before every gate:** re-read written files; grep the
    standing junk markers before committing.
-3. URL-durability phase after serving; Distribution-phase concepts
-   (Q-DIST-A…D) presented before their implementation (incl. the React
-   shell format).
 
 ## Gotchas (carried)
 - **Sphinx 9.1 theme:** `theme.conf` MUST carry `inherit = none`
@@ -119,7 +142,7 @@ approval; M4-C4 is pushed as `1add6c8` with CI green ×3.
   engine distribution the build used; in production `SC_BUILD_PYTHON`
   points at the isolated build venv and vendoring follows it
   (`_sphinx_static_dir` subprocess probe).
-- Migrate head `0006buildsite`; verify migration SQL against older
+- Migrate head `0007serving`; verify migration SQL against older
   definitions before push (C1 lesson). `ck_nodes_kind` is dropped before
   the kind UPDATE runs (values outside the CHECK are otherwise illegal).
   Downgrade re-adds `user_id` as a trailing column — harmless, but
@@ -165,3 +188,12 @@ approval; M4-C4 is pushed as `1add6c8` with CI green ×3.
   rows; `uq_builds_athenaeum_number` needs explicit max(build_number)+1
   per Athenaeum at trigger time (C3 will need `SELECT … FOR UPDATE`-style
   care, or serialize per library).
+- Serving: a build is publishable/servable only if `status='ok'` AND its
+  artifact has a valid `manifest.json`; the manifest is the CSP hash
+  source. The theme must never reintroduce inline `style=`/event
+  handlers/`<style>` blocks (build fails). `artifact_dir` checks both the
+  artifact path and resolved `html/` against `SC_ARTIFACT_ROOT`; keep
+  that jail when adding export/serving paths. Numbered URLs require
+  `published_at`; unpublish clears pointers only. Private serving uses
+  the `/a` access cookie; API routes keep bearer. Public numbered builds
+  are immutable-cached (privacy caveat in 0035).

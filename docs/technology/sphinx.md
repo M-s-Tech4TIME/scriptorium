@@ -1,5 +1,7 @@
 # Technology — Sphinx 9.1.0 + docutils 0.22.4 + MyST-Parser 5.1.0
 
+Last updated: 2026-10-25 / Ref: serving phase (0035)
+
 - Versions (locked): Sphinx 9.1.0 (2025-12-31), docutils 0.22.4 (0.23 gated —
   MyST 5.x upper-bounds docutils; manual probe before bump, decision 0003),
   MyST-Parser 5.1.0 (2026-05-13, needs Sphinx ≥8<10, markdown-it-py ~4.2).
@@ -153,6 +155,20 @@
   absent. `postinst` fails loud if the venv is missing; production sets
   `SC_BUILD_PYTHON=/opt/scriptorium/build-venv/bin/python`. No installs
   happen at build time.
+- **Serving integration (0035 E2):** sourcegen accepts the Athenaeum's
+  immutable `public_slug` and normalized `custom_css`. The generated
+  `conf.py` sets `html_context["site_id"]`, and when custom CSS exists it
+  writes `_static/custom.css`, sets `html_static_path=["_static"]` and
+  `html_css_files=["custom.css"]` — Sphinx emits a normal external
+  stylesheet link, never inline style. The layout marks
+  `<html data-sd-athenaeum="…">`; the inline SVG sprite is hidden with
+  `.sd-sprite { display:none; }` rather than a `style` attribute. After
+  a successful build, the runner writes `manifest.json` beside `html/`
+  (inventory + SHA-256, inline-script CSP hashes, custom-CSS hash); a
+  manifest violation fails the build. The serving router uses the
+  manifest for the strict CSP and refuses artifacts without it. Custom
+  CSS is build-bound: editing it requires a rebuild, and already-published
+  numbered artifacts never change.
 - **0017 docutils-0.23 probe:** `scripts/probe-docutils-023.sh` creates
   an isolated venv from the app lock, force-installs `docutils==0.23`
   with `--no-deps`, and runs the round-trip/sourcegen/real-Sphinx-build

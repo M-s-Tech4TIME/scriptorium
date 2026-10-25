@@ -1,6 +1,6 @@
 # DECISIONS-INDEX
 
-Last updated: 2026-10-21 / Ref: M4-C1 (0026)
+Last updated: 2026-10-25 / Ref: serving phase (0035)
 
 | ID | One-line | Status | Date | Approver |
 |---|---|---|---|---|
@@ -38,8 +38,9 @@ Last updated: 2026-10-21 / Ref: M4-C1 (0026)
 | 0032 | Theme third-feedback batch: one first-party search (on-demand sectioning, phrase-first, all-word highlight, full-page takeover), centred dialog + x close, clear-only panel field, weight 800, split panel controls, scrollspy title, island contract fix, link-integrity crawl, h2 `base_level` staging fix; amends 0027/0028/0031 | accepted | 2026-10-23 | owner |
 | 0033 | Standing Rule 8: Regression Integrity (No Collateral Breakage) — project-wide obligation to preserve all approved behavior, with pre-change impact review, full gates + browser checks, regression tests, and owner-approved breaking-change plans | accepted | 2026-10-24 | owner |
 | 0034 | Theme fourth-feedback batch: panel placeholder only, code-language label fix with `Code` fallback, pager inside `.sd-reading-main`, and pre-paint collapsed-panel state so pager navigation never flashes the panel open; Node/theme-build/browser regressions | accepted | 2026-10-24 | owner |
+| 0035 | Serving phase (A2/B3/C1/D1/E2): owner-published latest/stable pointers over immutable numbered builds, private-by-default per-Athenaeum visibility with owner/member access, FastAPI artifact serving, immutable global public slug, strict manifest-derived CSP, and bounded namespaced custom CSS; URL-durability aliases/distribution remain later phases | accepted | 2026-10-24 | owner |
 
-Full records: `docs/decisions/0001-*.md` … `0034-*.md`.
+Full records: `docs/decisions/0001-*.md` … `0035-*.md`.
 Pending: none.
 
-Last updated: 2026-10-24 / Ref: 0026 C4 implementation note; 0034 recorded
+Last updated: 2026-10-25 / Ref: 0035 serving phase recorded

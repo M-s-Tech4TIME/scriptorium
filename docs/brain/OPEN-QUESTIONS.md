@@ -1,6 +1,6 @@
 # OPEN-QUESTIONS
 
-Last updated: 2026-10-24 / Ref: 1add6c8 M4 complete; serving/distribution questions parked — Q-SERVE-A…E is the next owner gate
+Last updated: 2026-10-25 / Ref: serving phase 0035 implemented; Q-DIST-A…D remain parked
 
 | ID | Question | Blocks | Asked |
 |---|---|---|---|
@@ -9,11 +9,11 @@ Last updated: 2026-10-24 / Ref: 1add6c8 M4 complete; serving/distribution questi
 | Q-M3-16a–e | Duplication sub-decisions: RESOLVED by owner 2026-10-21 — caller-supplied slug w/ optional auto-suffix; owner-only roster; head-as-v1 (no history clone); any owned target library; copy-of-copy allowed. Decision 0025. | — | closed 2026-10-21 |
 | Q-C3.5-A | **Curated default theme base — RESOLVED by owner ruling 2026-10-21 (decision 0027):** the theme is Scriptorium's own, built from the ground up (no builtin/third-party inheritance); the Sphinx engine is fully inherited/utilized incl. vendored engine JS. **Design baseline landed 2026-10-22 (decision 0028):** the external design consult answered D1–D17; the owner approved the full token/icon/palette/copy-script sheet — C3.5 code is fully specified (no design decisions outstanding). | — | closed 2026-10-21 (record complete 2026-10-22) |
 | Q-EDITOR-1 | **Code-block language suggestion set in the editor** (from batch #2 platform facts, 2026-10-23): the theme shows user-defined language labels on code chrome; the EDITOR needs an accessible picker for it. Recommended (not yet approved): an accessible combobox (ARIA 1.2 pattern) seeded from the vendored Pygments lexer names, storing a display label + lexer alias separately (custom languages via the field falling back to plain text). Also covers: whether display-name inheritance auto-fills from the lexer or stays free-form. Owner verdict needed; blocks nothing in the theme (M4-C4/M5). | editor phase | 2026-10-23 |
-| Q-SERVE-A | What gets served — latest OK build only, or owner-selected published builds (stable/latest pointers)? | serving phase | 2026-10-21 |
-| Q-SERVE-B | Visibility model — public vs authenticated (private) docs; per-Athenaeum toggle? | serving phase | 2026-10-21 |
-| Q-SERVE-C | Serving mechanics — FastAPI static mount vs nginx alias; reading straight from the artifacts dir? | serving phase | 2026-10-21 |
-| Q-SERVE-D | URL scheme — path shape under Scriptorium's origin; interplay with the URL-durability phase (renames, aliases). | serving/world phase | 2026-10-21 |
-| Q-SERVE-E | Host security — recommended headers (CSP etc.) for served sites + a manifest shipped with exported artifacts; the custom-CSS sandbox contract (0026 mandate 2). | serving phase | 2026-10-21 |
+| Q-SERVE-A | **RESOLVED by owner (A2, decision 0035):** owner-selected published builds with `latest`/`stable` pointers over immutable numbered builds; unpublish clears pointers only. | — | closed 2026-10-24 |
+| Q-SERVE-B | **RESOLVED by owner (B3, decision 0035):** per-Athenaeum public toggle, private by default; owner/member reads allowed, outsiders uniform `404`. | — | closed 2026-10-24 |
+| Q-SERVE-C | **RESOLVED by owner (C1, decision 0035):** FastAPI serves artifacts directly; no nginx alias required for v1. | — | closed 2026-10-24 |
+| Q-SERVE-D | **RESOLVED by owner (D1, decision 0035):** immutable global `public_slug` + `/a/{slug}/`, `/latest/`, `/stable/`, `/b/{n}/`; URL-durability aliases/redirects remain a later phase. | — | closed 2026-10-24 |
+| Q-SERVE-E | **RESOLVED by owner (E2, decision 0035):** manifest-derived strict CSP, external-only styles, bounded namespaced custom CSS; manifest ships with exported artifacts. | — | closed 2026-10-24 |
 | Q-DIST-A | Credential vault design for push targets — encryption at rest, minimal scope, rotation. | distribution phase | 2026-10-21 |
 | Q-DIST-B | Delivery semantics — retries/backoff, per-target status log, "re-push latest" button rules. | distribution phase | 2026-10-21 |
 | Q-DIST-C | Target roster priority + mode (repo backup vs Pages hosting) — GitHub → GitLab → SFTP → FTP? | distribution phase | 2026-10-21 |
@@ -36,9 +36,10 @@ design baseline (tokens, icons, palette, copy script) landed 2026-10-22
 via decision 0028 and the owner's sheet approval; C3.5 code follows.
 See 0027 + 0028.
 
-**Serving/distribution questions Q-SERVE-A…E, Q-DIST-A…D remain OPEN —
-parked in their table rows above. M4 is complete; Q-SERVE-A…E is the
-next owner gate before serving implementation.**
+**Serving questions Q-SERVE-A…E are RESOLVED (owner A2/B3/C1/D1/E2,
+decision 0035) and implemented. Distribution questions Q-DIST-A…D remain
+OPEN and parked in their table rows above; they are the next owner gate
+after URL durability.**
 
 **Standing Rule 8 (approved 2026-10-24):** the owner approved the
 Regression Integrity rule as written; it is not an open question. The

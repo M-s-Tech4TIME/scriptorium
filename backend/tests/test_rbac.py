@@ -38,7 +38,12 @@ async def _scenario() -> None:
             )
             session.add_all([me, stranger])
             await session.flush()
-            lib = Athenaeum(owner_id=me.id, slug=f"secret-athen-{tag}", title="Secrets")
+            lib = Athenaeum(
+                owner_id=me.id,
+                slug=f"secret-athen-{tag}",
+                public_slug=f"secret-athen-{tag}",
+                title="Secrets",
+            )
             session.add(lib)
             await session.flush()
             grimoire = Grimoire(

@@ -33,6 +33,7 @@ import uuid
 from dataclasses import dataclass
 from pathlib import Path
 
+from app.serving.manifest import write_artifact_manifest
 from app.sphinx.sourcegen import SitePlan
 
 _BUILD_DIR = "_build"
@@ -215,6 +216,7 @@ def run_build(
     build_id: uuid.UUID,
     athenaeum_id: uuid.UUID,
     build_number: int,
+    site_id: str = "",
 ) -> BuildOutcome:
     """Materialize the plan, run the sandboxed build, move the artifact."""
     cfg = build_config()
@@ -273,6 +275,15 @@ def run_build(
     if ok:
         shutil.copytree(workspace / _BUILD_DIR / "html", artifact_dir / "html")
         (artifact_dir / "build.log").write_text(log, encoding="utf-8")
+        # E2: the manifest is part of the immutable artifact. It records
+        # the file inventory, inline-script hashes for strict CSP, and the
+        # custom-CSS hash. A manifest failure fails the build.
+        write_artifact_manifest(
+            artifact_dir,
+            athenaeum_id=athenaeum_id,
+            build_number=build_number,
+            site_id=site_id,
+        )
         # staging was ephemeral by design (0026): sources are DB-derived.
         shutil.rmtree(workspace, ignore_errors=True)
         return BuildOutcome(True, str(artifact_dir / "build.log"), str(artifact_dir))

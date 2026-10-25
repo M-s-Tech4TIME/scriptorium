@@ -21,7 +21,7 @@ from datetime import datetime, timedelta, timezone
 import jwt
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -34,6 +34,7 @@ _bearer = HTTPBearer(auto_error=False)
 
 ACCESS_MINUTES = 15
 REFRESH_DAYS = 7
+ACCESS_COOKIE_NAME = "scriptorium_access"
 
 
 class AuthError(Exception):
@@ -242,6 +243,32 @@ async def get_current_user_id(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail=str(exc)
         ) from exc
+
+
+async def get_optional_user_id(
+    request: Request,
+    credentials: HTTPAuthorizationCredentials | None = Depends(_bearer),
+) -> uuid.UUID | None:
+    """Best-effort reader identity for the public serving surface.
+
+    The browser cannot attach an Authorization header to a static document
+    navigation, so login/refresh also set a short-lived HttpOnly access
+    cookie scoped to ``/a``. API routes keep using the bearer dependency.
+    Invalid/expired/missing credentials simply mean "anonymous"; private
+    sites turn that into the uniform 404 in the serving router.
+    """
+    candidates: list[str] = []
+    if credentials is not None and credentials.scheme.lower() == "bearer":
+        candidates.append(credentials.credentials)
+    cookie = request.cookies.get(ACCESS_COOKIE_NAME)
+    if cookie:
+        candidates.append(cookie)
+    for token in candidates:
+        try:
+            return decode_token(token, get_secret(), "access")
+        except (AuthError, RuntimeError):
+            continue
+    return None
 
 
 async def require_membership(

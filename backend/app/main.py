@@ -11,6 +11,8 @@ from app.routers import categories as categories_router
 from app.routers import documents as documents_router
 from app.routers import grimoires as grimoires_router
 from app.routers import nodes as nodes_router
+from app.routers import publications as publications_router
+from app.routers import site as site_router
 
 APP_VERSION = "0.0.0"
 
@@ -24,6 +26,8 @@ def create_app() -> FastAPI:
     app.include_router(grimoires_router.router)
     app.include_router(nodes_router.router)
     app.include_router(documents_router.router)
+    app.include_router(publications_router.router)
+    app.include_router(site_router.router)
 
     @app.get("/api/v1/health")
     def health() -> dict[str, str]:

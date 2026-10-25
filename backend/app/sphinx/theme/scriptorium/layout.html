@@ -40,7 +40,7 @@
 {% endmacro %}
 
 <!DOCTYPE html>
-<html lang="{{ language }}" data-content_root="{{ content_root }}">
+<html lang="{{ language }}" data-content_root="{{ content_root }}" data-sd-athenaeum="{{ site_id|default('', true)|e }}">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -84,7 +84,7 @@
 {#- Paweł Kuna. Stroke normalized to 1.75 / round caps per the      -#}
 {#- design consult (0028 ①A). Inline <symbol> + <use>: zero network.-#}
 {#- ================================================================ -#}
-<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+<svg class="sd-sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
   <symbol id="sd-i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19a9 9 0 0 1 9 0a9 9 0 0 1 9 0" /><path d="M3 6a9 9 0 0 1 9 0a9 9 0 0 1 9 0" /><path d="M3 6l0 13" /><path d="M12 6l0 13" /><path d="M21 6l0 13" /></symbol>
   <symbol id="sd-i-file-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /><path d="M9 9l1 0" /><path d="M9 13l6 0" /><path d="M9 17l6 0" /></symbol>
   <symbol id="sd-i-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6l-6 6" /></symbol>

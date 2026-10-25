@@ -14,12 +14,19 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.audit import add_audit
 from app.auth import get_current_user_id
 from app.db import get_session
 from app.models import Athenaeum, Grimoire, GrimoireCategory
+from app.serving.css import (
+    MAX_CUSTOM_CSS_BYTES,
+    CustomCssError,
+    custom_css_sha256,
+    sanitize_custom_css,
+)
 
 router = APIRouter(prefix="/api/v1/athenaeums", tags=["athenaeums"])
 
@@ -34,6 +41,11 @@ class AthenaeumIn(BaseModel):
 class AthenaeumPatch(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=200)
     slug: str | None = Field(default=None, min_length=1, max_length=120)
+    is_public: bool | None = None
+
+
+class AthenaeumCustomCssIn(BaseModel):
+    css: str = Field(max_length=MAX_CUSTOM_CSS_BYTES)
 
 
 def _check_slug(slug: str) -> str:
@@ -43,6 +55,33 @@ def _check_slug(slug: str) -> str:
             detail="Slug must match [a-z0-9-]+.",
         )
     return slug
+
+
+async def _public_slug(session: AsyncSession, base: str) -> str:
+    """Choose a globally unique public URL name (0035 D1).
+
+    The editor slug stays per-owner (0021). If the slug is already a public
+    name elsewhere, suffix it; the public name is immutable after creation,
+    so editor-side renames do not break published links.
+    """
+    if (
+        await session.scalar(select(Athenaeum.id).where(Athenaeum.public_slug == base))
+        is None
+    ):
+        return base
+    for _ in range(8):
+        candidate = f"{base}-{uuid.uuid4().hex[:8]}"
+        if (
+            await session.scalar(
+                select(Athenaeum.id).where(Athenaeum.public_slug == candidate)
+            )
+            is None
+        ):
+            return candidate
+    raise HTTPException(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail="Could not allocate a public slug.",
+    )
 
 
 async def _own_athenaeum(
@@ -62,7 +101,15 @@ def _body(row: Athenaeum) -> dict[str, object]:
         "id": str(row.id),
         "owner_id": str(row.owner_id),
         "slug": row.slug,
+        "public_slug": row.public_slug,
         "title": row.title,
+        "is_public": row.is_public,
+        "latest_build_id": str(row.latest_build_id) if row.latest_build_id else None,
+        "stable_build_id": str(row.stable_build_id) if row.stable_build_id else None,
+        "custom_css_bytes": len(row.custom_css.encode("utf-8")),
+        "custom_css_sha256": (
+            custom_css_sha256(row.custom_css) if row.custom_css else None
+        ),
     }
 
 
@@ -109,10 +156,23 @@ async def create_athenaeum(
     row = Athenaeum(
         owner_id=user_id,
         slug=body.slug,
+        public_slug=await _public_slug(session, body.slug),
         title=body.title,
+        is_public=False,
+        custom_css="",
     )
     session.add(row)
-    await session.flush()
+    try:
+        await session.flush()
+    except IntegrityError as exc:
+        # The pre-check above handles the normal duplicate-slug path; this
+        # catches a concurrent creator winning either unique constraint
+        # (per-owner slug or global public_slug) between check and flush.
+        await session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Slug or public URL already exists; retry.",
+        ) from exc
     add_audit(
         session,
         actor=user_id,
@@ -141,7 +201,7 @@ async def patch_athenaeum(
 ) -> dict[str, object]:
     row = await _own_athenaeum(athenaeum_id, user_id, session)
     provided = body.model_fields_set
-    changes: dict[str, str] = {}
+    changes: dict[str, object] = {}
     if "title" in provided:
         if body.title is None:
             raise HTTPException(
@@ -172,6 +232,15 @@ async def patch_athenaeum(
                 )
             row.slug = body.slug
             changes["slug"] = body.slug
+    if "is_public" in provided:
+        if body.is_public is None:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="is_public must be true or false.",
+            )
+        if body.is_public != row.is_public:
+            row.is_public = body.is_public
+            changes["is_public"] = body.is_public
     add_audit(
         session,
         actor=user_id,
@@ -180,6 +249,72 @@ async def patch_athenaeum(
     )
     await session.commit()
     return _body(row)
+
+
+@router.get("/{athenaeum_id}/custom-css")
+async def get_custom_css(
+    athenaeum_id: uuid.UUID,
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, object]:
+    row = await _own_athenaeum(athenaeum_id, user_id, session)
+    return {
+        "css": row.custom_css,
+        "sha256": custom_css_sha256(row.custom_css) if row.custom_css else None,
+        "bytes": len(row.custom_css.encode("utf-8")),
+    }
+
+
+@router.put("/{athenaeum_id}/custom-css")
+async def put_custom_css(
+    athenaeum_id: uuid.UUID,
+    body: AthenaeumCustomCssIn,
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, object]:
+    row = await _own_athenaeum(athenaeum_id, user_id, session)
+    try:
+        normalized = sanitize_custom_css(body.css)
+    except CustomCssError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)
+        ) from exc
+    row.custom_css = normalized
+    digest = custom_css_sha256(normalized) if normalized else None
+    add_audit(
+        session,
+        actor=user_id,
+        action="athenaeum_custom_css_updated",
+        meta={
+            "athenaeum_id": str(row.id),
+            "sha256": digest,
+            "bytes": len(normalized.encode("utf-8")),
+        },
+    )
+    await session.commit()
+    return {
+        "css": normalized,
+        "sha256": digest,
+        "bytes": len(normalized.encode("utf-8")),
+    }
+
+
+@router.delete("/{athenaeum_id}/custom-css", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_custom_css(
+    athenaeum_id: uuid.UUID,
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    session: AsyncSession = Depends(get_session),
+) -> Response:
+    row = await _own_athenaeum(athenaeum_id, user_id, session)
+    row.custom_css = ""
+    add_audit(
+        session,
+        actor=user_id,
+        action="athenaeum_custom_css_updated",
+        meta={"athenaeum_id": str(row.id), "sha256": None, "bytes": 0},
+    )
+    await session.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.delete("/{athenaeum_id}", status_code=status.HTTP_204_NO_CONTENT)

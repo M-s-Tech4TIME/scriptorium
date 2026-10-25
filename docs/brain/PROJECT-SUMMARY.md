@@ -1,6 +1,6 @@
 # PROJECT-SUMMARY (brain map, not a copy)
 
-Last updated: 2026-10-24 / Ref: 1add6c8 M4-C4 pushed, CI ×3; M4 implementation complete
+Last updated: 2026-10-25 / Ref: serving phase 0035 implemented; push/CI pending
 
 - **What:** Scriptorium — self-hosted docs platform. Browser WYSIWYG (TipTap) → valid
   Sphinx source (RST default, MyST opt-in) → sandboxed background build → served HTML.
@@ -19,20 +19,25 @@ Last updated: 2026-10-24 / Ref: 1add6c8 M4-C4 pushed, CI ×3; M4 implementation 
 - **M4 status (as of this sync):** M3 C1–C6 complete, green ×3
   (0021–0025 landed). **M4-C1 + C2 + C3 + C3.5 complete:** 0026
   per-Athenaeum numbered builds, `sourcegen.py` deterministic staging,
-  sandbox runner/Celery/`builds` endpoints; migration head
-  `0006buildsite`. The theme is Scriptorium's own, from scratch
-  (0027–0034; engine inherited incl. vendored JS, first-party search,
-  Inter, feedback batches 0029–0034). **M4-C4 complete/pushed
-  (`1add6c8`, CI ×3):** isolated `/opt/scriptorium/build-venv` from a 27-pin
-  engine-only lock, config example/queue/build keys, both units
-  `Requires=redis`/`After=redis`, postinst artifacts/config seed/
-  build-venv check, manual docutils-0.23 probe (58 passed; pin stays
-  0.22.4), M4 report. Suite 87 passed / 36 skipped. Owner ruled the
-  artifact to be a portable static website + design mandates (security
-  parity; structure locked, skin open). Terminology: "grimoire"
-  everywhere (0018). Auth surface = login/refresh/logout only. Live
-  API tests drive the app via `httpx.ASGITransport`
-  (starlette.testclient import warns → Rule 6).
+  sandbox runner/Celery/`builds` endpoints. The theme is Scriptorium's
+  own, from scratch (0027–0034; engine inherited incl. vendored JS,
+  first-party search, Inter, feedback batches 0029–0034). **M4-C4
+  complete/pushed (`1add6c8`, CI ×3):** isolated
+  `/opt/scriptorium/build-venv` from a 27-pin engine-only lock, config
+  example/queue/build keys, both units `Requires=redis`/`After=redis`,
+  postinst artifacts/config seed/build-venv check, manual docutils-0.23
+  probe (58 passed; pin stays 0.22.4), M4 report. **Serving phase 0035
+  implemented (2026-10-25):** migration head `0007serving`;
+  owner-published `latest`/`stable` pointers over immutable numbered
+  builds; private-default per-Athenaeum visibility with owner/member
+  access; FastAPI `/a/{public_slug}/...`; manifest-derived strict CSP;
+  bounded namespaced external custom CSS; `/a` access cookie. Local
+  gates/browser checks green; push/CI pending. Owner ruled the artifact
+  to be a portable static website + design mandates (security parity;
+  structure locked, skin open). Terminology: "grimoire" everywhere
+  (0018). Auth surface = login/refresh/logout only; serving adds the
+  browser access cookie. Live API tests drive the app via
+  `httpx.ASGITransport` (starlette.testclient import warns → Rule 6).
 - **Config keys:** `SECRET_KEY` (JWT; empty fails loud), `DATABASE_URL`,
   `SCRIPTORIUM_COOKIE_SECURE` (prod sets Secure), `REDIS_URL` (limiter,
   fail-closed when missing), `CELERY_BROKER_URL` (worker), and the
