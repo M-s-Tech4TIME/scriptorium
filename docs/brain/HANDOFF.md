@@ -1,6 +1,6 @@
 # HANDOFF
 
-Last updated: 2026-10-25 / Ref: serving phase 0035 implemented; gates/browser verified; push/CI pending
+Last updated: 2026-10-25 / Ref: serving phase 0035 pushed (`6169696`), CI ×3 green
 
 ## Current tranche (2026-10-25): serving phase 0035
 
@@ -20,8 +20,8 @@ blocks are present. Theme has `data-sd-athenaeum` and `.sd-sprite`.
 Docs/decision 0035/changelog/brain synced. Local verification: full
 suite 147 passed / 1 deselected (PG16 local; PG18 test excluded),
 ruff/format/mypy clean; headless Chrome public/private serving, CSP,
-custom CSS, search dialog, placeholders, panel persistence. Push and CI
-×3 still pending.
+custom CSS, search dialog, placeholders, panel persistence. Pushed as
+`6169696`; all three CI workflows are green.
 
 ## Was doing
 M4-C3.5 **baseline committed and pushed**: the owner-approved preview #5
@@ -114,17 +114,14 @@ sphinx.md + changelogs + brain synced. The entire C3.5 stack (0029–
 approval; M4-C4 is pushed as `1add6c8` with CI green ×3.
 
 ## Next steps (in order)
-1. **Finish serving closeout:** junk-sweep, full gates on PG18 in CI,
-   commit with decision 0035 + docs/changelog/brain, push `dev`, verify
-   all three workflows green ×3. Do not stack work on red CI.
-2. **URL-durability phase:** owner rulings before implementation
+1. **URL-durability phase:** owner rulings before implementation
    (aliases/redirects/public rename policy, relationship to immutable
    `public_slug`/numbered URLs). The current public slug and numbered
    build URLs are the stable base.
-3. **Distribution phase:** present Q-DIST-A…D (credentials, delivery
+2. **Distribution phase:** present Q-DIST-A…D (credentials, delivery
    semantics, target roster, React shell) and wait; do not implement
    before owner approval.
-4. **Junk-sweep before every gate:** re-read written files; grep the
+3. **Junk-sweep before every gate:** re-read written files; grep the
    standing junk markers before committing.
 
 ## Gotchas (carried)

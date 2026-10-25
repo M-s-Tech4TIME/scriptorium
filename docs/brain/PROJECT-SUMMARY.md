@@ -1,6 +1,6 @@
 # PROJECT-SUMMARY (brain map, not a copy)
 
-Last updated: 2026-10-25 / Ref: serving phase 0035 implemented; push/CI pending
+Last updated: 2026-10-25 / Ref: serving phase 0035 pushed (`6169696`), CI ×3 green
 
 - **What:** Scriptorium — self-hosted docs platform. Browser WYSIWYG (TipTap) → valid
   Sphinx source (RST default, MyST opt-in) → sandboxed background build → served HTML.
@@ -31,8 +31,8 @@ Last updated: 2026-10-25 / Ref: serving phase 0035 implemented; push/CI pending
   owner-published `latest`/`stable` pointers over immutable numbered
   builds; private-default per-Athenaeum visibility with owner/member
   access; FastAPI `/a/{public_slug}/...`; manifest-derived strict CSP;
-  bounded namespaced external custom CSS; `/a` access cookie. Local
-  gates/browser checks green; push/CI pending. Owner ruled the artifact
+  bounded namespaced external custom CSS; `/a` access cookie. Pushed as
+  `6169696`; local gates/browser checks green and CI ×3 green. Owner ruled the artifact
   to be a portable static website + design mandates (security parity;
   structure locked, skin open). Terminology: "grimoire" everywhere
   (0018). Auth surface = login/refresh/logout only; serving adds the

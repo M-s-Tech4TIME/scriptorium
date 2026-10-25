@@ -1,12 +1,13 @@
 # TASKS
 
-Last updated: 2026-10-25 / 0035 serving implemented; push/CI pending
+Last updated: 2026-10-25 / 0035 serving pushed (`6169696`), CI ×3 green
 
 ## In progress (max 1–2)
-- Serving closeout: gates + browser checks done locally; commit/push
-  0035 and verify CI green ×3. Q-EDITOR-1 remains open/non-blocking.
+- URL-durability phase: present owner rulings (aliases/redirects/public
+  rename policy) before implementation. Q-EDITOR-1 remains
+  open/non-blocking.
 
-## Todo (M4 next — phases)
+## Todo (next phases)
 - [x] M4-C3.5 baseline: 0029 + 0030 + 0031 + 0032 committed/pushed as
       `b15446f`, CI green ×3 (lint-type-test, security, packaging).
 - [x] Commit Standing Rule 8 (0033) — approved wording, docs/governance.
@@ -24,7 +25,7 @@ Last updated: 2026-10-25 / 0035 serving implemented; push/CI pending
       numbered builds, B3 private-default visibility, C1 FastAPI serving,
       D1 public slug + URL shape, E2 manifest/CSP + custom-CSS sandbox;
       migration 0007, live/unit/theme/browser regressions.
-- [ ] Serving closeout: push + CI green ×3.
+- [x] Serving closeout: push `6169696` + CI green ×3.
 - [ ] URL-durability phase (owner rulings first; aliases/redirects/public
       rename policy)
 - [ ] Distribution phase (Q-DIST-A…D) + React shell format — concepts

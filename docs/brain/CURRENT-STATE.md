@@ -1,8 +1,8 @@
 # CURRENT-STATE
 
-Last updated: 2026-10-25 / Ref: serving phase 0035 implemented; gates/browser verified; push/CI pending
+Last updated: 2026-10-25 / Ref: serving phase 0035 pushed (`6169696`); CI ×3 green
 
-- **Phase:** **Serving phase (0035) implemented, gates and browser checks green; push/CI pending. M4-C3.5/M4-C4 remain pushed and green (`1add6c8`).** Owner approved A2/B3/C1/D1/E2: owner-published `latest`/`stable` pointers over immutable numbered builds, private-by-default per-Athenaeum visibility with owner/member access, FastAPI `/a/{public_slug}/...` serving, immutable global public slug, manifest-derived strict CSP, and bounded namespaced custom CSS. URL-durability aliases/redirects and distribution remain later phases.
+- **Phase:** **Serving phase (0035) pushed (`6169696`), gates/browser checks and CI ×3 green. M4-C3.5/M4-C4 remain pushed and green (`1add6c8`).** Owner approved A2/B3/C1/D1/E2: owner-published `latest`/`stable` pointers over immutable numbered builds, private-by-default per-Athenaeum visibility with owner/member access, FastAPI `/a/{public_slug}/...` serving, immutable global public slug, manifest-derived strict CSP, and bounded namespaced custom CSS. URL-durability aliases/redirects and distribution remain later phases.
   M4-C1 (`2aed3ef`): decision 0026
   (per-Athenaeum site P1, manual trigger P2, subprocess sandbox P3,
   keep-all versions P4; reconciliation: staging keyed by grimoire id
@@ -201,16 +201,18 @@ Last updated: 2026-10-25 / Ref: serving phase 0035 implemented; gates/browser ve
   ×3; M4 C1 `2aed3ef` + C2 `3a15b52` + C3 `1e1637e` green ×3; 0028
   record `556bbce` green ×3; C3.5 baseline `b15446f` green ×3 (0029 +
   0030 + 0031 + 0032; 80 passed / 36 skipped, ruff + mypy strict clean).
-- **Serving work (uncommitted at sync):** 0035 schema/migration, serving
-  modules/routers, auth access cookie, build manifest/custom CSS, tests,
-  docs/brain. Local gates: full suite **147 passed / 1 deselected**
+- **Serving work (pushed `6169696`, CI ×3):** 0035 schema/migration,
+  serving modules/routers, auth access cookie, build manifest/custom CSS,
+  tests, docs/brain. Local gates: full suite **147 passed / 1 deselected**
   (PG16 local; PG18 version test excluded locally) + unit/theme suites;
   ruff + format + `mypy --strict` clean; headless Chrome verified public
   and private serving, CSP (no violations), custom CSS, search dialog,
-  placeholders, and panel persistence. Push/CI still pending.
-- **Last pushed:** `1add6c8` — `feat(m4-c4): package isolated build venv
-  and docutils probe` (32 files, +645/−101), pushed `dev`; all three CI
-  workflows green (lint-type-test, security, packaging). It sits on
+  placeholders, and panel persistence. All three CI workflows green.
+- **Last pushed:** `6169696` — `feat(serving): publish and serve
+  immutable Sphinx artifacts` (46 files, +2914/−105), pushed `dev`; all
+  three CI workflows green (lint-type-test, security, packaging). It sits
+  on `1add6c8` — `feat(m4-c4): package isolated build venv
+  and docutils probe` (32 files, +645/−101), also green ×3. It sits on
   `2680738` (0034, 14 files, +410/−76), `cbe2b22` (Standing Rule 8, 12
   files, +238/−71), and the approved baseline `b15446f`
   (`feat(m4-c3.5): complete theme feedback passes 0029-0032`, 35 files,
@@ -226,8 +228,8 @@ Last updated: 2026-10-25 / Ref: serving phase 0035 implemented; gates/browser ve
   `base_level` staging fix. **0034 is pushed and CI green ×3; preview
   #7 is browser-verified. M4-C4 is pushed as `1add6c8`, CI green ×3.**
 - **Remote:** `git@github.com:M-s-Tech4TIME/scriptorium.git` (public).
-  `dev` carries M3 + M4 implementation complete; `main` stays at release
-  point (ff-only).
+  `dev` carries M3 + M4 implementation + serving phase; `main` stays at
+  release point (ff-only).
 - **Known/limitations (documented, not bugs):** docutils 0.22.4 inline
   markup does not nest — 0017 fail-loud matrix in
   `docs/technology/conversion.md`; RST writer rejects mark-run edge spaces,
