@@ -32,9 +32,10 @@ and distribution remain later phases.
   validator clean.
 - Headless Chrome followed an alias `308` to the canonical page and
   loaded its assets.
-- Closeout push + CI ×3 pending at session end.
+- Pushed as `be5af83`; all three CI workflows green (lint-type-test incl.
+  docs-brain, security, packaging).
 
 ## Next
 
-Closeout push/CI, then dedicated SEO phase plan (per-Athenaeum editorial
-controls) and distribution Q-DIST-A…D; sequencing not yet ruled.
+Dedicated SEO phase plan (per-Athenaeum editorial controls) and
+distribution Q-DIST-A…D; sequencing not yet ruled.

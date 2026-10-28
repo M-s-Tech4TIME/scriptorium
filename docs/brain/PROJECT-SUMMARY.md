@@ -1,6 +1,6 @@
 # PROJECT-SUMMARY (brain map, not a copy)
 
-Last updated: 2026-10-28 / Ref: URL-durability phase 0036 implemented (pending closeout push)
+Last updated: 2026-10-28 / Ref: URL-durability phase 0036 pushed (`be5af83`), CI ×3 green
 
 - **What:** Scriptorium — self-hosted docs platform. Browser WYSIWYG (TipTap) → valid
   Sphinx source (RST default, MyST opt-in) → sandboxed background build → served HTML.
@@ -36,9 +36,9 @@ Last updated: 2026-10-28 / Ref: URL-durability phase 0036 implemented (pending c
   **URL-durability phase 0036 implemented (2026-10-28):** migration head
   `0008urldurability`; `public_names` single namespace; owner-only
   public-name rename; permanent `308` aliases after auth; permanent
-  tombstones on delete; no rebuild; Option 1 URL shape retained.
-  Page-path aliases and the dedicated SEO phase remain later; distribution
-  awaits Q-DIST-A…D. Owner ruled the artifact
+  tombstones on delete; no rebuild; Option 1 URL shape retained. Pushed as
+  `be5af83`; CI ×3 green. Page-path aliases and the dedicated SEO phase
+  remain later; distribution awaits Q-DIST-A…D. Owner ruled the artifact
   to be a portable static website + design mandates (security parity;
   structure locked, skin open). Terminology: "grimoire" everywhere
   (0018). Auth surface = login/refresh/logout only; serving adds the

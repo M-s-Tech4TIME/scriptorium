@@ -1,10 +1,11 @@
 # TASKS
 
-Last updated: 2026-10-28 / 0036 URL durability implemented (pending closeout push)
+Last updated: 2026-10-28 / 0036 URL durability pushed (`be5af83`), CI ×3 green
 
 ## In progress (max 1–2)
-- Close out 0036: commit/push implementation + docs, verify CI ×3, update
-  brain with the closeout SHA. Q-EDITOR-1 remains open/non-blocking.
+- Dedicated SEO phase plan (owner-requested; per-Athenaeum editorial
+  controls; no implementation before plan + rulings). Q-EDITOR-1 remains
+  open/non-blocking.
 
 ## Todo (next phases)
 - [x] M4-C3.5 baseline: 0029 + 0030 + 0031 + 0032 committed/pushed as
@@ -28,7 +29,7 @@ Last updated: 2026-10-28 / 0036 URL durability implemented (pending closeout pus
 - [x] URL-durability phase (0036): owner-approved A1/B1/C1/D1/E1/F1;
       `public_names` registry/migration 0008, owner-only public-slug
       rename, permanent aliases/tombstones, 308 serving, audit, live/
-      migration tests, docs. Pending closeout push + CI ×3.
+      migration tests, docs. Pushed `be5af83`; CI ×3 green.
 - [ ] Dedicated SEO phase: owner requested a structured, detailed plan;
       every SEO feature/attribute must be per-Athenaeum editorial-panel
       controllable. Do not implement before plan + owner rulings.

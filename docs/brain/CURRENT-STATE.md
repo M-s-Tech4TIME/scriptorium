@@ -1,8 +1,9 @@
 # CURRENT-STATE
 
-Last updated: 2026-10-28 / Ref: URL-durability phase 0036 implemented (pending closeout push)
+Last updated: 2026-10-28 / Ref: URL-durability phase 0036 pushed (`be5af83`), CI ×3 green
 
-- **Phase:** **URL-durability phase (0036) implemented: owner-renamable
+- **Phase:** **URL-durability phase (0036) pushed (`be5af83`), CI ×3
+  green: owner-renamable
   public names, permanent aliases, tombstones, migration 0008, live
   regressions. Distribution and the dedicated SEO phase remain later.**
   Owner approved A1/B1/C1/D1/E1/F1 on 2026-10-28 and confirmed URL-scheme
@@ -247,10 +248,11 @@ Last updated: 2026-10-28 / Ref: URL-durability phase 0036 implemented (pending c
   ratelimit tests (PG18 version test excluded locally); ruff/format/mypy/
   compileall clean. Headless Chrome followed an alias `308` to the
   canonical page and loaded its assets.
-- **Last pushed:** `9dbd8a0` — docs closeout for serving (CI ×3 green).
-  URL-durability implementation (0036) is pending commit/push at the time
-  of this note; update this line with the closeout SHA after CI.
-  `6169696` — `feat(serving): publish and serve
+- **Last pushed:** `be5af83` — `feat(url): durable public names with
+  aliases and tombstones` (29 files, +1235/−168), pushed `dev`; all
+  three CI workflows green (lint-type-test incl. docs-brain, security,
+  packaging). It sits on `9dbd8a0` — docs closeout for serving (CI ×3
+  green). `6169696` — `feat(serving): publish and serve
   immutable Sphinx artifacts` (46 files, +2914/−105), pushed `dev`; all
   three CI workflows green (lint-type-test, security, packaging). It sits
   on `1add6c8` — `feat(m4-c4): package isolated build venv

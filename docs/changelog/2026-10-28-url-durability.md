@@ -51,8 +51,8 @@ Owner-approved A1/B1/C1/D1/E1/F1; URL-scheme Option 1 confirmed.
 - Local fresh PG16: 149 passed / 1 deselected (PG18 version test
   excluded locally; TCP Redis used for auth and ratelimit tests);
   ruff/format/mypy/compileall clean. Headless Chrome followed an alias
-  `308` to the canonical page and loaded its assets. CI PG18
-  verification pending closeout push.
+  `308` to the canonical page and loaded its assets. Pushed as
+  `be5af83`; all three CI workflows green.
 
 ## Docs
 

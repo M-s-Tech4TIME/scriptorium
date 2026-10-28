@@ -1,6 +1,6 @@
 # HANDOFF
 
-Last updated: 2026-10-28 / Ref: URL-durability phase 0036 implemented (pending closeout push)
+Last updated: 2026-10-28 / Ref: URL-durability phase 0036 pushed (`be5af83`), CI ×3 green
 
 ## Current tranche (2026-10-28): URL durability 0036
 
@@ -36,6 +36,7 @@ and kept URL-scheme Option 1 (`/a/{public_slug}/`, `/latest/`,
   canonical page and loaded its assets.
 - Docs: decision 0036, 0035/0021/0026 amendments, architecture/API/
   data-model/security/overview/codebase-map, changelog, brain.
+- Pushed as `be5af83`; all three CI workflows green.
 
 ## Was doing
 M4-C3.5 **baseline committed and pushed**: the owner-approved preview #5
@@ -128,19 +129,16 @@ sphinx.md + changelogs + brain synced. The entire C3.5 stack (0029–
 approval; M4-C4 is pushed as `1add6c8` with CI green ×3.
 
 ## Next steps (in order)
-1. **Close out URL durability:** commit/push the 0036 implementation +
-   docs, verify CI ×3, then update this handoff/CURRENT-STATE with the
-   closeout SHA.
-2. **Dedicated SEO phase:** owner requested a structured, detailed plan
+1. **Dedicated SEO phase:** owner requested a structured, detailed plan
    in its own phase; every SEO feature/attribute must be user-controllable
    per Athenaeum in the editorial panel. Do not implement before the
    plan and owner rulings. Canonical host/channel, robots/sitemap,
    structured data, and social metadata are still undecided.
-3. **Distribution phase:** present Q-DIST-A…D (credentials, delivery
+2. **Distribution phase:** present Q-DIST-A…D (credentials, delivery
    semantics, target roster, React shell) and wait; do not implement
    before owner approval. Sequencing (recommended URL durability → SEO →
    distribution) is not yet ruled.
-4. **Junk-sweep before every gate:** re-read written files; grep the
+3. **Junk-sweep before every gate:** re-read written files; grep the
    standing junk markers before committing.
 
 ## Gotchas (carried)
