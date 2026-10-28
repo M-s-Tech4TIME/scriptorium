@@ -30,10 +30,13 @@ always existed and is unaffected.
 - A rename is a pure column update: nothing else in the current schema is
   slug-derived, so renames never cascade or rewrite dependent data.
 
-## Broken-URL durability (deferred, explicitly)
+## Broken-URL durability (implemented by 0036)
 
 Public-URL durability after renames (alias/redirect ledger, immutable
-build identity, resolve-by-id) is deferred to its **dedicated later
-phase** with its own decision record. App-internal addressing is by UUID
-id and is immune to renames by construction; nothing in C4–C6 or M3
-depends on slug stability.
+build identity, resolve-by-id) was deferred to a **dedicated later
+phase** with its own decision record. That phase is 0036: site-level
+public names are owner-renamable, old names are permanent aliases, and
+deletion creates permanent tombstones. Page-level path aliases remain
+deferred (B1). App-internal addressing is by UUID id and is immune to
+renames by construction; nothing in C4–C6 or M3 depends on slug
+stability.

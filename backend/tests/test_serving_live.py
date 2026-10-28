@@ -22,6 +22,7 @@ from typing import Any, cast
 
 import httpx
 import pytest
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_sessionmaker,
@@ -30,7 +31,7 @@ from sqlalchemy.ext.asyncio import (
 
 from app.auth import create_token_pair
 from app.main import app
-from app.models import Build, Membership, User
+from app.models import AuditLog, Build, Membership, User
 from tests.conftest import LIVE_DB_URL, app_teardown, needs_db
 
 _SECRET = "m3-test-only-secret-not-a-real-credential"
@@ -527,6 +528,275 @@ def test_publication_visibility_serving_and_e2(tmp_path: Path) -> None:
             assert both.status_code == 200
             assert both.json()["latest"]["build_number"] == b2_number
             assert both.json()["stable"]["build_number"] == b2_number
+
+    _run(run())
+
+
+@needs_db
+def test_public_name_rename_aliases_and_tombstones(tmp_path: Path) -> None:
+    """Decision 0036: renames, permanent aliases, and tombstones.
+
+    The artifact is built once before the rename. Every old public name must
+    keep working as a 308 alias (after private authorization), preserve the
+    path/query, and resolve directly to the current name; deletion leaves a
+    permanent tombstone that no site can reclaim.
+    """
+    users = asyncio.run(_seed_users(3))
+    me, member, stranger = users
+
+    async def run() -> None:
+        for key, value in {
+            "SC_ARTIFACT_ROOT": str(tmp_path / "artifacts"),
+            "SC_BUILD_ROOT": str(tmp_path / "builds"),
+            "SC_BUILD_DISPATCH": "inline",
+        }.items():
+            os.environ[key] = value
+
+        async with _client() as client:
+            base = f"durable-{uuid.uuid4().hex[:8]}"
+            lib = await _mk_lib(client, me, base)
+            aid = str(lib["id"])
+            original = str(lib["public_slug"])
+            assert original.startswith(base)
+
+            gid, _node_id = await _mk_folio(client, me, aid)
+            b1 = await _build(client, me, aid)
+            number = int(b1["build_number"])
+            published = await client.post(
+                f"/api/v1/athenaeums/{aid}/publish",
+                json={"build_id": b1["id"], "channel": "stable"},
+                headers=_headers(me),
+            )
+            assert published.status_code == 200, published.text
+            book_dir = next(
+                p.name
+                for p in (Path(str(b1["artifact_path"])) / "html").iterdir()
+                if p.is_dir() and p.name.startswith("book-")
+            )
+
+            # Private alias: authorization happens before the redirect, so
+            # an outsider cannot use the old name to discover the site.
+            assert (await client.get(f"/a/{original}/")).status_code == 404
+            next_slug = f"{base}-next"
+            renamed = await client.patch(
+                f"/api/v1/athenaeums/{aid}/public-slug",
+                json={"public_slug": next_slug},
+                headers=_headers(me),
+            )
+            assert renamed.status_code == 200, renamed.text
+            assert renamed.json()["public_slug"] == next_slug
+
+            private_alias = await client.get(f"/a/{original}/", headers=_headers(me))
+            assert private_alias.status_code == 308
+            assert private_alias.headers["location"] == f"/a/{next_slug}/"
+            assert private_alias.headers["cache-control"] == "private, no-store"
+            assert private_alias.headers["vary"] == "Cookie"
+            assert private_alias.headers["x-robots-tag"] == "noindex, nofollow"
+
+            private_page = await client.get(
+                f"/a/{original}/stable/{book_dir}/folio-one.html?utm=1",
+                headers=_headers(me),
+            )
+            assert private_page.status_code == 308
+            assert private_page.headers["location"] == (
+                f"/a/{next_slug}/stable/{book_dir}/folio-one.html?utm=1"
+            )
+
+            await _add_member(member["id"], gid)
+            member_alias = await client.get(
+                f"/a/{original}/stable/", headers=_headers(member)
+            )
+            assert member_alias.status_code == 308
+            assert member_alias.headers["cache-control"] == "private, no-store"
+            assert (
+                await client.get(f"/a/{original}/stable/", headers=_headers(stranger))
+            ).status_code == 404
+
+            publication = await client.get(
+                f"/api/v1/athenaeums/{aid}/publication", headers=_headers(me)
+            )
+            assert publication.status_code == 200
+            assert [a["slug"] for a in publication.json()["public_aliases"]] == [
+                original
+            ]
+
+            # Public alias: 308, no-cache, path/query preserved, no noindex.
+            await client.patch(
+                f"/api/v1/athenaeums/{aid}",
+                json={"is_public": True},
+                headers=_headers(me),
+            )
+            public_alias = await client.get(
+                f"/a/{original}/stable/{book_dir}/folio-one.html?utm=1"
+            )
+            assert public_alias.status_code == 308
+            assert public_alias.headers["location"] == (
+                f"/a/{next_slug}/stable/{book_dir}/folio-one.html?utm=1"
+            )
+            assert public_alias.headers["cache-control"] == "no-cache"
+            assert "x-robots-tag" not in public_alias.headers
+
+            canonical_page = await client.get(
+                f"/a/{next_slug}/stable/{book_dir}/folio-one.html"
+            )
+            assert canonical_page.status_code == 200
+            assert "Chapter text" in canonical_page.text
+            assert canonical_page.headers["x-scriptorium-build"] == (
+                f"{next_slug}/{number}"
+            )
+            # The artifact was not rebuilt: its build-time identity is old.
+            assert f'data-sd-athenaeum="{original}"' in canonical_page.text
+
+            numbered_alias = await client.get(
+                f"/a/{original}/b/{number}/{book_dir}/folio-one.html?x=1"
+            )
+            assert numbered_alias.status_code == 308
+            assert numbered_alias.headers["location"] == (
+                f"/a/{next_slug}/b/{number}/{book_dir}/folio-one.html?x=1"
+            )
+            numbered = await client.get(
+                f"/a/{next_slug}/b/{number}/{book_dir}/folio-one.html"
+            )
+            assert numbered.status_code == 200
+            assert numbered.headers["x-scriptorium-build"] == f"{next_slug}/{number}"
+
+            asset_alias = await client.get(
+                f"/a/{original}/stable/_static/theme.css?v=1"
+            )
+            assert asset_alias.status_code == 308
+            assert asset_alias.headers["location"] == (
+                f"/a/{next_slug}/stable/_static/theme.css?v=1"
+            )
+
+            # Aliases flatten: A -> B -> C means A redirects directly to C.
+            third_slug = f"{base}-third"
+            assert (
+                await client.patch(
+                    f"/api/v1/athenaeums/{aid}/public-slug",
+                    json={"public_slug": third_slug},
+                    headers=_headers(me),
+                )
+            ).status_code == 200
+            first_alias = await client.get(f"/a/{original}/")
+            second_alias = await client.get(f"/a/{next_slug}/")
+            assert first_alias.status_code == 308
+            assert second_alias.status_code == 308
+            assert first_alias.headers["location"] == f"/a/{third_slug}/"
+            assert second_alias.headers["location"] == f"/a/{third_slug}/"
+
+            # Reverting to one of the site's own retired names is allowed.
+            reverted = await client.patch(
+                f"/api/v1/athenaeums/{aid}/public-slug",
+                json={"public_slug": original},
+                headers=_headers(me),
+            )
+            assert reverted.status_code == 200, reverted.text
+            assert reverted.json()["public_slug"] == original
+            assert (await client.get(f"/a/{next_slug}/")).headers[
+                "location"
+            ] == f"/a/{original}/"
+            publication = await client.get(
+                f"/api/v1/athenaeums/{aid}/publication", headers=_headers(me)
+            )
+            assert {a["slug"] for a in publication.json()["public_aliases"]} == {
+                next_slug,
+                third_slug,
+            }
+
+            # A same-name call is a no-op, not a new alias.
+            assert (
+                await client.patch(
+                    f"/api/v1/athenaeums/{aid}/public-slug",
+                    json={"public_slug": original},
+                    headers=_headers(me),
+                )
+            ).status_code == 200
+            publication = await client.get(
+                f"/api/v1/athenaeums/{aid}/publication", headers=_headers(me)
+            )
+            assert len(publication.json()["public_aliases"]) == 2
+
+            for bad in ("Bad!", "latest", "stable", "b", "_static", "api"):
+                response = await client.patch(
+                    f"/api/v1/athenaeums/{aid}/public-slug",
+                    json={"public_slug": bad},
+                    headers=_headers(me),
+                )
+                assert response.status_code == 422, (bad, response.text)
+
+            # Another site's current name is a clean conflict; owner scoping
+            # still hides a foreign Athenaeum behind 404.
+            other = await _mk_lib(client, stranger, f"other-{uuid.uuid4().hex[:8]}")
+            other_slug = str(other["public_slug"])
+            collision = await client.patch(
+                f"/api/v1/athenaeums/{aid}/public-slug",
+                json={"public_slug": other_slug},
+                headers=_headers(me),
+            )
+            assert collision.status_code == 409, collision.text
+            assert (
+                await client.patch(
+                    f"/api/v1/athenaeums/{other['id']}/public-slug",
+                    json={"public_slug": f"{base}-stolen"},
+                    headers=_headers(me),
+                )
+            ).status_code == 404
+
+            # Deletion tombstones every name (current and aliases) forever.
+            tomb = await _mk_lib(client, me, f"tomb-{uuid.uuid4().hex[:8]}")
+            tomb_a = str(tomb["public_slug"])
+            tomb_b = f"{tomb_a}-renamed"
+            assert (
+                await client.patch(
+                    f"/api/v1/athenaeums/{tomb['id']}/public-slug",
+                    json={"public_slug": tomb_b},
+                    headers=_headers(me),
+                )
+            ).status_code == 200
+            assert (
+                await client.delete(
+                    f"/api/v1/athenaeums/{tomb['id']}", headers=_headers(me)
+                )
+            ).status_code == 204
+            assert (await client.get(f"/a/{tomb_a}/")).status_code == 404
+            assert (await client.get(f"/a/{tomb_b}/")).status_code == 404
+            blocked = await client.patch(
+                f"/api/v1/athenaeums/{aid}/public-slug",
+                json={"public_slug": tomb_b},
+                headers=_headers(me),
+            )
+            assert blocked.status_code == 409, blocked.text
+
+            replacement = await _mk_lib(client, me, tomb_b)
+            assert replacement["public_slug"] != tomb_b
+
+            # Every successful rename wrote exactly one audit row.
+            engine = create_async_engine(LIVE_DB_URL)
+            maker = async_sessionmaker(
+                engine, expire_on_commit=False, class_=AsyncSession
+            )
+            try:
+                async with maker() as session:
+                    rows = await session.scalars(
+                        select(AuditLog)
+                        .where(AuditLog.action == "athenaeum_public_slug_changed")
+                        .order_by(AuditLog.id)
+                    )
+                    changes = [
+                        (
+                            row.meta.get("old_public_slug"),
+                            row.meta.get("public_slug"),
+                        )
+                        for row in rows
+                        if row.meta.get("athenaeum_id") == aid
+                    ]
+            finally:
+                await engine.dispose()
+            assert changes == [
+                (original, next_slug),
+                (next_slug, third_slug),
+                (third_slug, original),
+            ]
 
     _run(run())
 

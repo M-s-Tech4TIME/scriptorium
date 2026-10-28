@@ -1,6 +1,6 @@
 # Roadmap — phases + gates (Q23)
 
-Last updated: 2026-10-25 / Ref: serving phase 0035 implemented
+Last updated: 2026-10-28 / Ref: URL-durability phase 0036 implemented
 
 - **M0 Foundation:** docs/brain/AGENTS, pins/locks, CI skeleton, nfpm skeleton, dev compose. Gate: all green.
 - **M1 Core data + auth:** migrations, RBAC, audit. Gate: IDOR tests.
@@ -11,9 +11,12 @@ Last updated: 2026-10-25 / Ref: serving phase 0035 implemented
   build API, theme passes 0029–0034, packaging build venv + docutils probe.
   **Serving phase complete (0035, 2026-10-25):** owner-published
   latest/stable pointers over immutable numbered builds, private-default
-  per-Athenaeum visibility, FastAPI `/a/...` serving, immutable public
-  slug, manifest-derived strict CSP, and bounded custom CSS. URL-durability
-  aliases/redirects and distribution are the next phases.
+  per-Athenaeum visibility, FastAPI `/a/...` serving, manifest-derived
+  strict CSP, and bounded custom CSS. **URL-durability phase complete
+  (0036, 2026-10-28):** owner-renamable public names, permanent aliases/
+  tombstones, `308` redirects, no rebuild; Option 1 URL shape retained.
+  Dedicated SEO phase (per-Athenaeum editorial controls) and distribution
+  are the next phases; sequencing not yet ruled.
 - **M5 Package+harden:** signed .deb/.rpm, setup/migrate, admin guide, SBOM/provenance. Gate: clean install/upgrade/uninstall ×4 distros.
 - **Phase A:** versions/git-tags + picker (no v1 rewrite). **Phase B:** Yjs collab over JSON canonical.
 - Open design Q (Phase A UX over time) stays owner-decided; v1 stays Git-ready.

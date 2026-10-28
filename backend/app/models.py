@@ -114,9 +114,10 @@ class Athenaeum(Base):
         ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
     )
     slug: Mapped[str] = mapped_column(String(120), nullable=False)
-    # Serving phase (0035 D1): a global, immutable public URL name. The
-    # editor-facing `slug` stays per-owner (0021); this column is what
-    # `/a/{public_slug}/...` resolves. Generated once, never renamed.
+    # Serving phase (0035 D1), amended by 0036: the current global public
+    # URL name. The editor-facing `slug` stays per-owner (0021); this column
+    # is the canonical target of `/a/{public_slug}/...`. Owner renames move
+    # the canonical value and leave the old value as a `public_names` alias.
     public_slug: Mapped[str] = mapped_column(String(160), nullable=False)
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     is_public: Mapped[bool] = mapped_column(
@@ -135,6 +136,41 @@ class Athenaeum(Base):
     __table_args__ = (
         UniqueConstraint("owner_id", "slug", name="uq_athenaeums_owner_slug"),
         UniqueConstraint("public_slug", name="uq_athenaeums_public_slug"),
+    )
+
+
+class PublicName(Base):
+    """Public URL-name registry (0036 A1/C1) — canonical, aliases, tombstones.
+
+    ``slug`` is the single global namespace behind ``/a/{slug}/...``. A
+    current row has ``is_current=True`` and a live ``athenaeum_id``. A
+    rename retires the old row (still addressable as an alias); deleting
+    the Athenaeum sets ``athenaeum_id`` to NULL but keeps the row as a
+    permanent tombstone so an old public URL can never be taken over.
+    """
+
+    __tablename__ = "public_names"
+
+    slug: Mapped[str] = mapped_column(String(160), primary_key=True)
+    athenaeum_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("athenaeums.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    is_current: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=text("false")
+    )
+    created_at: Mapped[datetime] = _now()
+    retired_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    __table_args__ = (
+        Index(
+            "uq_public_names_current",
+            "athenaeum_id",
+            unique=True,
+            postgresql_where=text("is_current AND athenaeum_id IS NOT NULL"),
+        ),
     )
 
 

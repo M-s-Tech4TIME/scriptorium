@@ -1,6 +1,6 @@
 # Architecture (Q20–Q22, Section 10)
 
-Last updated: 2026-10-25 / Ref: serving phase (0035)
+Last updated: 2026-10-28 / Ref: URL-durability phase (0036)
 
 ```
 [Browser: React19 TipTap3] --REST /api/v1--> [FastAPI 0.143 web@gunicorn+uvicorn]
@@ -16,8 +16,9 @@ Last updated: 2026-10-25 / Ref: serving phase (0035)
                             /var/lib/scriptorium/artifacts/{athenaeum}/{n}/
                               html/ + build.log + manifest.json
                                                      |
-                              FastAPI /a/{public_slug}/... (0035)
+                              FastAPI /a/{public_slug}/... (0035/0036)
                               owner-published latest/stable + numbered builds
+                              permanent 308 aliases + tombstones
                               manifest-derived CSP + E2 security headers
 ```
 
@@ -29,8 +30,11 @@ Last updated: 2026-10-25 / Ref: serving phase (0035)
   per Athenaeum (private default); private reads allow owner/member and
   use a short-lived `/a` access cookie for browser navigation. FastAPI
   serves files with a manifest-derived CSP, external-only CSS, no inline
-  styles/handlers, and public/private cache policies. URL-durability
-  aliases/redirects and distribution remain later phases.
+  styles/handlers, and public/private cache policies. **URL durability
+  (0036):** the owner may rename the public name; old names are permanent
+  `308` aliases after the same access check, and deletion leaves permanent
+  tombstones. Page-level path aliases and distribution remain later
+  phases.
 - **Canonical:** TipTap JSON `tiptap@1`; export RST/MyST deterministic; DB tree `nodes` → `toctree`; `conf.py` generated (allowlisted extensions only).
 - **Module boundaries:** `convert/` (pure), `sphinx/` adapter (generation+theming), `worker/` (queue only),
   `routers/` (RBAC per request), `editor/` (schema v1). Third-party behind adapters (Rule 5.4).

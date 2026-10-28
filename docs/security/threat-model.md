@@ -1,6 +1,6 @@
 # Threat model (initial, Q22 / §10)
 
-Last updated: 2026-10-25 / Ref: serving phase (0035 E2/B3/C1/D1)
+Last updated: 2026-10-28 / Ref: URL-durability phase (0036 A1/D1/E1/F1)
 
 ## Primary risk: untrusted content → Sphinx code exec
 - Generated-only `conf.py`; extension allowlist (any addition = Rule 4 + record).
@@ -41,6 +41,19 @@ Last updated: 2026-10-25 / Ref: serving phase (0035 E2/B3/C1/D1)
   making a site private later cannot recall copies already cached at
   public numbered URLs (disclosed in 0035). Alias/private responses are
   not cacheable.
+- **Alias takeover / namespace confusion (0036):** `public_names` is one
+  global namespace keyed by slug; canonical names, aliases, and tombstones
+  all occupy it. Old names never become reusable, including after deletion.
+  Rename/create/delete serialize on a transaction-scoped advisory lock and
+  still rely on the slug PK/unique indexes as the hard guard; collisions
+  are `409`, never an implicit takeover. Private aliases authorize the
+  current site before redirecting, so an old name cannot leak a private
+  site's existence; tombstoned names are uniform `404`.
+- **Open redirect / cache poisoning:** alias `Location` values are relative
+  and built from the validated canonical slug; path suffix and query are
+  preserved, never echoed into a scheme/host. Alias redirects are `308`
+  with `no-cache` (public) or `private, no-store` + `Vary: Cookie` +
+  `X-Robots-Tag` (private).
 
 ## App risks → mitigations
 - XSS (built HTML + editor): output encoding, strict served-artifact CSP

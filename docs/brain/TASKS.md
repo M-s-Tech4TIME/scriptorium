@@ -1,11 +1,10 @@
 # TASKS
 
-Last updated: 2026-10-25 / 0035 serving pushed (`6169696`), CI ×3 green
+Last updated: 2026-10-28 / 0036 URL durability implemented (pending closeout push)
 
 ## In progress (max 1–2)
-- URL-durability phase: present owner rulings (aliases/redirects/public
-  rename policy) before implementation. Q-EDITOR-1 remains
-  open/non-blocking.
+- Close out 0036: commit/push implementation + docs, verify CI ×3, update
+  brain with the closeout SHA. Q-EDITOR-1 remains open/non-blocking.
 
 ## Todo (next phases)
 - [x] M4-C3.5 baseline: 0029 + 0030 + 0031 + 0032 committed/pushed as
@@ -26,10 +25,16 @@ Last updated: 2026-10-25 / 0035 serving pushed (`6169696`), CI ×3 green
       D1 public slug + URL shape, E2 manifest/CSP + custom-CSS sandbox;
       migration 0007, live/unit/theme/browser regressions.
 - [x] Serving closeout: push `6169696` + CI green ×3.
-- [ ] URL-durability phase (owner rulings first; aliases/redirects/public
-      rename policy)
+- [x] URL-durability phase (0036): owner-approved A1/B1/C1/D1/E1/F1;
+      `public_names` registry/migration 0008, owner-only public-slug
+      rename, permanent aliases/tombstones, 308 serving, audit, live/
+      migration tests, docs. Pending closeout push + CI ×3.
+- [ ] Dedicated SEO phase: owner requested a structured, detailed plan;
+      every SEO feature/attribute must be per-Athenaeum editorial-panel
+      controllable. Do not implement before plan + owner rulings.
 - [ ] Distribution phase (Q-DIST-A…D) + React shell format — concepts
-      ratified in 0026, presented before implementation
+      ratified in 0026, presented before implementation. Sequencing after
+      URL durability/SEO not yet ruled.
 
 - [x] M4-C3.5 code tranche: theme package + sourcegen + runner +
       loader (75/36 before feedback pass) + offline-but-real

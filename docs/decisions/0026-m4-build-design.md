@@ -71,7 +71,9 @@
   build on the same server as a convenience layer (same-origin control,
   publish toggles). Questions Q-SERVE-A…E are parked in OPEN-QUESTIONS.
 - **URL-durability phase** (after serving: aliases/redirects/immutable
-  build identity once serving stabilizes URL schemes).
+  build identity once serving stabilizes URL schemes). **Implemented by
+  0036** for site-level public names; page-level path aliases remain
+  deferred (B1).
 - **Distribution phase** (post-serving; concept approved, details later):
   push targets — GitHub/GitLab repos (scoped tokens; backup or Pages
   hosting, e.g. `gh-pages`), SFTP (paramiko) / FTP, future sinks;

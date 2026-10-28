@@ -16,5 +16,7 @@
 - `changelog/` — per-push entries.
 - `roadmap/` — phases, milestones, gates.
 
-## Status (2026-10-16)
-Foundation seeded (M0). Approved: Q1–Q23, Rules 1–8. See `brain/DECISIONS-INDEX.md`.
+## Status (2026-10-28)
+M0–M4 implementation and serving (0035) are complete; URL durability
+(0036) is implemented. Dedicated SEO and distribution phases remain.
+Approved: Q1–Q23, Rules 1–8. See `brain/DECISIONS-INDEX.md`.

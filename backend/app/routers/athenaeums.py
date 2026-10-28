@@ -10,17 +10,18 @@ from __future__ import annotations
 
 import re
 import uuid
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel, Field
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.audit import add_audit
 from app.auth import get_current_user_id
 from app.db import get_session
-from app.models import Athenaeum, Grimoire, GrimoireCategory
+from app.models import Athenaeum, Grimoire, GrimoireCategory, PublicName
 from app.serving.css import (
     MAX_CUSTOM_CSS_BYTES,
     CustomCssError,
@@ -31,6 +32,12 @@ from app.serving.css import (
 router = APIRouter(prefix="/api/v1/athenaeums", tags=["athenaeums"])
 
 _SLUG_RE = re.compile(r"[a-z0-9-]+")
+_RESERVED_PUBLIC_SLUGS = frozenset({"latest", "stable", "b", "_static", "api"})
+# One transaction-scoped namespace lock for create/rename/delete. The
+# registry's slug PK is the hard guard; the lock turns ordinary
+# concurrent checks into deterministic 409s instead of unique-violation
+# races across the two tables.
+_PUBLIC_NAMES_LOCK = int.from_bytes(b"SDNS", "big", signed=True)
 
 
 class AthenaeumIn(BaseModel):
@@ -48,6 +55,10 @@ class AthenaeumCustomCssIn(BaseModel):
     css: str = Field(max_length=MAX_CUSTOM_CSS_BYTES)
 
 
+class PublicSlugIn(BaseModel):
+    public_slug: str = Field(min_length=1, max_length=160)
+
+
 def _check_slug(slug: str) -> str:
     if not _SLUG_RE.fullmatch(slug):
         raise HTTPException(
@@ -57,26 +68,54 @@ def _check_slug(slug: str) -> str:
     return slug
 
 
-async def _public_slug(session: AsyncSession, base: str) -> str:
-    """Choose a globally unique public URL name (0035 D1).
+async def _lock_public_names(session: AsyncSession) -> None:
+    """Serialize public-name mutations on the single global namespace."""
+    await session.execute(select(func.pg_advisory_xact_lock(_PUBLIC_NAMES_LOCK)))
 
-    The editor slug stays per-owner (0021). If the slug is already a public
-    name elsewhere, suffix it; the public name is immutable after creation,
-    so editor-side renames do not break published links.
+
+async def _public_name_taken(session: AsyncSession, slug: str) -> bool:
+    """Check both the registry and the denormalized canonical column.
+
+    The registry is authoritative, but the column check keeps the
+    allocation safe for rows created outside the API (migration/test
+    fixtures) and during a partial deploy.
     """
-    if (
-        await session.scalar(select(Athenaeum.id).where(Athenaeum.public_slug == base))
-        is None
+    if await session.scalar(select(PublicName.slug).where(PublicName.slug == slug)):
+        return True
+    return (
+        await session.scalar(select(Athenaeum.id).where(Athenaeum.public_slug == slug))
+        is not None
+    )
+
+
+def _check_public_slug(slug: str) -> str:
+    if not _SLUG_RE.fullmatch(slug):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="Public slug must match [a-z0-9-]+.",
+        )
+    if slug in _RESERVED_PUBLIC_SLUGS:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="Public slug is reserved by a serving route.",
+        )
+    return slug
+
+
+async def _public_slug(session: AsyncSession, base: str) -> str:
+    """Choose a globally unique public URL name (0036 A1/F1).
+
+    The editor slug stays per-owner (0021). If the desired name is already
+    a current name, alias, tombstone, or reserved route word, suffix it
+    with 8 hex characters. The caller holds the public-name lock.
+    """
+    if base not in _RESERVED_PUBLIC_SLUGS and not await _public_name_taken(
+        session, base
     ):
         return base
     for _ in range(8):
         candidate = f"{base}-{uuid.uuid4().hex[:8]}"
-        if (
-            await session.scalar(
-                select(Athenaeum.id).where(Athenaeum.public_slug == candidate)
-            )
-            is None
-        ):
+        if not await _public_name_taken(session, candidate):
             return candidate
     raise HTTPException(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -153,6 +192,7 @@ async def create_athenaeum(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="Slug already exists."
         )
+    await _lock_public_names(session)
     row = Athenaeum(
         owner_id=user_id,
         slug=body.slug,
@@ -163,6 +203,14 @@ async def create_athenaeum(
     )
     session.add(row)
     try:
+        await session.flush()
+        session.add(
+            PublicName(
+                slug=row.public_slug,
+                athenaeum_id=row.id,
+                is_current=True,
+            )
+        )
         await session.flush()
     except IntegrityError as exc:
         # The pre-check above handles the normal duplicate-slug path; this
@@ -177,7 +225,11 @@ async def create_athenaeum(
         session,
         actor=user_id,
         action="athenaeum_created",
-        meta={"athenaeum_id": str(row.id), "slug": row.slug},
+        meta={
+            "athenaeum_id": str(row.id),
+            "slug": row.slug,
+            "public_slug": row.public_slug,
+        },
     )
     await session.commit()
     return _body(row)
@@ -246,6 +298,85 @@ async def patch_athenaeum(
         actor=user_id,
         action="athenaeum_patched",
         meta={"athenaeum_id": str(row.id), "changes": changes},
+    )
+    await session.commit()
+    return _body(row)
+
+
+@router.patch("/{athenaeum_id}/public-slug")
+async def rename_public_slug(
+    athenaeum_id: uuid.UUID,
+    body: PublicSlugIn,
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, object]:
+    """Owner-only public URL rename (0036 A1/C1/D1/F1).
+
+    The old name becomes a permanent alias; no artifact is rebuilt. Reusing
+    one of the site's own retired names is allowed (reversion), but another
+    site's current name, alias, or tombstone is a 409.
+    """
+    row = await _own_athenaeum(athenaeum_id, user_id, session)
+    new_slug = _check_public_slug(body.public_slug)
+    if new_slug == row.public_slug:
+        return _body(row)
+    await _lock_public_names(session)
+    target = await session.get(PublicName, new_slug)
+    if target is None:
+        other = await session.scalar(
+            select(Athenaeum.id).where(
+                Athenaeum.public_slug == new_slug,
+                Athenaeum.id != row.id,
+            )
+        )
+        if other is not None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Public URL already exists.",
+            )
+        target = PublicName(
+            slug=new_slug,
+            athenaeum_id=row.id,
+            is_current=False,
+        )
+        session.add(target)
+    elif target.athenaeum_id != row.id:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Public URL already exists.",
+        )
+    # Retire every current row first. Keeping the target non-current until
+    # the bulk update has flushed avoids the partial-unique-index race.
+    target.is_current = False
+    target.retired_at = None
+    await session.execute(
+        update(PublicName)
+        .where(
+            PublicName.athenaeum_id == row.id,
+            PublicName.slug != new_slug,
+        )
+        .values(is_current=False, retired_at=datetime.now(timezone.utc))
+    )
+    target.is_current = True
+    old_slug = row.public_slug
+    row.public_slug = new_slug
+    try:
+        await session.flush()
+    except IntegrityError as exc:
+        await session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Public URL already exists.",
+        ) from exc
+    add_audit(
+        session,
+        actor=user_id,
+        action="athenaeum_public_slug_changed",
+        meta={
+            "athenaeum_id": str(row.id),
+            "old_public_slug": old_slug,
+            "public_slug": new_slug,
+        },
     )
     await session.commit()
     return _body(row)
@@ -334,12 +465,22 @@ async def delete_athenaeum(
             status_code=status.HTTP_409_CONFLICT,
             detail="Athenaeum still holds grimoires; move or delete them first.",
         )
+    await _lock_public_names(session)
+    await session.execute(
+        update(PublicName)
+        .where(PublicName.athenaeum_id == athenaeum_id)
+        .values(is_current=False, retired_at=datetime.now(timezone.utc))
+    )
     await session.delete(row)
     add_audit(
         session,
         actor=user_id,
         action="athenaeum_deleted",
-        meta={"athenaeum_id": str(athenaeum_id), "slug": row.slug},
+        meta={
+            "athenaeum_id": str(athenaeum_id),
+            "slug": row.slug,
+            "public_slug": row.public_slug,
+        },
     )
     await session.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

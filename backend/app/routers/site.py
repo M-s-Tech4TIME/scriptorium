@@ -1,19 +1,22 @@
-"""Public site serving (decision 0035 C1/D1/B3).
+"""Public site serving (decisions 0035 C1/D1/B3, 0036 A1/D1).
 
-FastAPI owns the artifact routes: it resolves the Athenaeum's public slug,
-enforces private visibility, follows the latest/stable pointer or an
-immutable numbered build, and serves files from the artifact root with the
-E2 header contract. No nginx alias is required for v1; the same code path
-is the local/CI proof.
+FastAPI owns the artifact routes: it resolves the Athenaeum's current public
+name or a permanent alias, enforces private visibility, follows the
+latest/stable pointer or an immutable numbered build, and serves files from
+the artifact root with the E2 header contract. No nginx alias is required
+for v1; the same code path is the local/CI proof.
 
-URL shape (D1):
+URL shape (0035 D1, unchanged by 0036):
     /a/{public_slug}/                 -> latest (or stable) channel
     /a/{public_slug}/latest/...       -> latest pointer, no-cache
     /a/{public_slug}/stable/...       -> stable pointer, no-cache
     /a/{public_slug}/b/{number}/...   -> immutable numbered build
 
-Only builds that were successfully published at least once are addressable
-by number. Unpublished drafts are not exposed.
+A retired public name permanently 308-redirects to the current name after
+the same private-access check. Path suffix and query string are preserved;
+aliases flatten to the current canonical name. Only builds that were
+successfully published at least once are addressable by number. Unpublished
+drafts are not exposed.
 """
 
 from __future__ import annotations
@@ -27,7 +30,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth import get_optional_user_id
 from app.db import get_session
-from app.models import Athenaeum, Build
+from app.models import Athenaeum, Build, PublicName
 from app.serving.access import can_read_athenaeum
 from app.serving.artifacts import safe_file, servable_artifact
 from app.serving.security import artifact_headers
@@ -35,13 +38,32 @@ from app.serving.security import artifact_headers
 router = APIRouter(tags=["site"])
 
 
-async def _athenaeum(session: AsyncSession, public_slug: str) -> Athenaeum:
-    row = await session.scalar(
-        select(Athenaeum).where(Athenaeum.public_slug == public_slug)
-    )
-    if row is None:
+async def _resolve_public_name(
+    session: AsyncSession, public_slug: str
+) -> tuple[Athenaeum, bool]:
+    """Resolve a current name or permanent alias to the live Athenaeum.
+
+    A tombstone (``athenaeum_id IS NULL``) and an unknown name are the same
+    uniform 404. The boolean says the requested name is not the current
+    canonical name and therefore needs a permanent redirect after auth.
+    """
+    name = await session.get(PublicName, public_slug)
+    if name is None or name.athenaeum_id is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found.")
-    return row
+    athenaeum = await session.get(Athenaeum, name.athenaeum_id)
+    if athenaeum is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found.")
+    return athenaeum, athenaeum.public_slug != public_slug
+
+
+async def _authorized_target(
+    session: AsyncSession,
+    public_slug: str,
+    user_id: uuid.UUID | None,
+) -> tuple[Athenaeum, bool]:
+    athenaeum, alias = await _resolve_public_name(session, public_slug)
+    await _authorize(session, athenaeum, user_id)
+    return athenaeum, alias
 
 
 async def _authorize(
@@ -88,7 +110,11 @@ async def _numbered_build(
 
 
 def _redirect(
-    path: str, request: Request, *, private: bool = False
+    path: str,
+    request: Request,
+    *,
+    private: bool = False,
+    status_code: int = status.HTTP_307_TEMPORARY_REDIRECT,
 ) -> RedirectResponse:
     # Relative target: never echo an attacker-controlled Host header into
     # a Location. Query strings survive canonicalization.
@@ -99,8 +125,38 @@ def _redirect(
         headers["X-Robots-Tag"] = "noindex, nofollow"
     return RedirectResponse(
         url=target,
-        status_code=status.HTTP_307_TEMPORARY_REDIRECT,
+        status_code=status_code,
         headers=headers,
+    )
+
+
+def _alias_redirect(
+    request: Request, old_slug: str, athenaeum: Athenaeum
+) -> RedirectResponse:
+    """Permanent alias redirect, preserving the suffix and query string.
+
+    Use the raw ASGI path so percent-encoded suffixes are not normalized
+    into a different URL. The canonical slug is validated, and the target
+    stays relative, so a hostile Host header cannot become an open redirect.
+    """
+    raw_path = request.scope.get("raw_path")
+    path = request.url.path
+    if isinstance(raw_path, bytes):
+        try:
+            path = raw_path.decode("ascii")
+        except UnicodeDecodeError:
+            path = request.url.path
+    prefix = f"/a/{old_slug}"
+    suffix = path[len(prefix) :] if path.startswith(prefix) else ""
+    if not suffix:
+        suffix = "/"
+    elif not suffix.startswith("/"):
+        suffix = f"/{suffix}"
+    return _redirect(
+        f"/a/{athenaeum.public_slug}{suffix}",
+        request,
+        private=not athenaeum.is_public,
+        status_code=status.HTTP_308_PERMANENT_REDIRECT,
     )
 
 
@@ -152,8 +208,9 @@ async def _serve_channel(
     user_id: uuid.UUID | None,
     session: AsyncSession,
 ) -> FileResponse | RedirectResponse:
-    athenaeum = await _athenaeum(session, public_slug)
-    await _authorize(session, athenaeum, user_id)
+    athenaeum, alias = await _authorized_target(session, public_slug, user_id)
+    if alias:
+        return _alias_redirect(request, public_slug, athenaeum)
     build = await _channel_build(session, athenaeum, channel)
     if build is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found.")
@@ -168,12 +225,13 @@ async def site_root(
     user_id: uuid.UUID | None = Depends(get_optional_user_id),
     session: AsyncSession = Depends(get_session),
 ) -> RedirectResponse:
-    athenaeum = await _athenaeum(session, public_slug)
-    await _authorize(session, athenaeum, user_id)
+    athenaeum, alias = await _authorized_target(session, public_slug, user_id)
+    if alias:
+        return _alias_redirect(request, public_slug, athenaeum)
     for channel in ("latest", "stable"):
         if await _channel_build(session, athenaeum, channel) is not None:
             return _redirect(
-                f"/a/{public_slug}/{channel}/",
+                f"/a/{athenaeum.public_slug}/{channel}/",
                 request,
                 private=not athenaeum.is_public,
             )
@@ -189,12 +247,13 @@ async def site_channel_root(
     session: AsyncSession = Depends(get_session),
 ) -> RedirectResponse:
     channel = "latest" if request.url.path.endswith("/latest") else "stable"
-    athenaeum = await _athenaeum(session, public_slug)
-    await _authorize(session, athenaeum, user_id)
+    athenaeum, alias = await _authorized_target(session, public_slug, user_id)
+    if alias:
+        return _alias_redirect(request, public_slug, athenaeum)
     if await _channel_build(session, athenaeum, channel) is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found.")
     return _redirect(
-        f"/a/{public_slug}/{channel}/",
+        f"/a/{athenaeum.public_slug}/{channel}/",
         request,
         private=not athenaeum.is_public,
     )
@@ -241,8 +300,9 @@ async def site_build_root(
     user_id: uuid.UUID | None = Depends(get_optional_user_id),
     session: AsyncSession = Depends(get_session),
 ) -> RedirectResponse:
-    athenaeum = await _athenaeum(session, public_slug)
-    await _authorize(session, athenaeum, user_id)
+    athenaeum, alias = await _authorized_target(session, public_slug, user_id)
+    if alias:
+        return _alias_redirect(request, public_slug, athenaeum)
     try:
         number = int(build_number)
     except ValueError as exc:
@@ -252,7 +312,7 @@ async def site_build_root(
     if await _numbered_build(session, athenaeum, number) is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found.")
     return _redirect(
-        f"/a/{public_slug}/b/{number}/",
+        f"/a/{athenaeum.public_slug}/b/{number}/",
         request,
         private=not athenaeum.is_public,
     )
@@ -293,8 +353,9 @@ async def _serve_numbered(
     user_id: uuid.UUID | None,
     session: AsyncSession,
 ) -> FileResponse | RedirectResponse:
-    athenaeum = await _athenaeum(session, public_slug)
-    await _authorize(session, athenaeum, user_id)
+    athenaeum, alias = await _authorized_target(session, public_slug, user_id)
+    if alias:
+        return _alias_redirect(request, public_slug, athenaeum)
     try:
         number = int(build_number)
     except ValueError as exc:

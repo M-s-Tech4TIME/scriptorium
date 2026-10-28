@@ -1,6 +1,6 @@
 # OPEN-QUESTIONS
 
-Last updated: 2026-10-25 / Ref: serving phase 0035 implemented; Q-DIST-A…D remain parked
+Last updated: 2026-10-28 / Ref: URL durability 0036 implemented; SEO phase requested; Q-DIST-A…D remain parked
 
 | ID | Question | Blocks | Asked |
 |---|---|---|---|
@@ -12,7 +12,7 @@ Last updated: 2026-10-25 / Ref: serving phase 0035 implemented; Q-DIST-A…D rem
 | Q-SERVE-A | **RESOLVED by owner (A2, decision 0035):** owner-selected published builds with `latest`/`stable` pointers over immutable numbered builds; unpublish clears pointers only. | — | closed 2026-10-24 |
 | Q-SERVE-B | **RESOLVED by owner (B3, decision 0035):** per-Athenaeum public toggle, private by default; owner/member reads allowed, outsiders uniform `404`. | — | closed 2026-10-24 |
 | Q-SERVE-C | **RESOLVED by owner (C1, decision 0035):** FastAPI serves artifacts directly; no nginx alias required for v1. | — | closed 2026-10-24 |
-| Q-SERVE-D | **RESOLVED by owner (D1, decision 0035):** immutable global `public_slug` + `/a/{slug}/`, `/latest/`, `/stable/`, `/b/{n}/`; URL-durability aliases/redirects remain a later phase. | — | closed 2026-10-24 |
+| Q-SERVE-D | **RESOLVED by owner (D1, decision 0035):** global `public_slug` + `/a/{slug}/`, `/latest/`, `/stable/`, `/b/{n}/`. **Amended by 0036 (2026-10-28):** the owner may rename the public name; old names are permanent aliases; deletion tombstones; URL shape Option 1 retained. | — | closed 2026-10-24; amended 2026-10-28 |
 | Q-SERVE-E | **RESOLVED by owner (E2, decision 0035):** manifest-derived strict CSP, external-only styles, bounded namespaced custom CSS; manifest ships with exported artifacts. | — | closed 2026-10-24 |
 | Q-DIST-A | Credential vault design for push targets — encryption at rest, minimal scope, rotation. | distribution phase | 2026-10-21 |
 | Q-DIST-B | Delivery semantics — retries/backoff, per-target status log, "re-push latest" button rules. | distribution phase | 2026-10-21 |
@@ -37,9 +37,17 @@ via decision 0028 and the owner's sheet approval; C3.5 code follows.
 See 0027 + 0028.
 
 **Serving questions Q-SERVE-A…E are RESOLVED (owner A2/B3/C1/D1/E2,
-decision 0035) and implemented. Distribution questions Q-DIST-A…D remain
-OPEN and parked in their table rows above; they are the next owner gate
-after URL durability.**
+decision 0035) and implemented. URL durability was approved separately
+(A1/B1/C1/D1/E1/F1, decision 0036) and implemented. Distribution
+questions Q-DIST-A…D remain OPEN and parked in their table rows above.**
+
+**SEO phase (owner-requested 2026-10-28, not an open question yet):** the
+owner wants a dedicated, fully detailed SEO plan later; every SEO
+feature/attribute must be user-controllable per Athenaeum in the editorial
+panel. Canonical host/channel, robots/sitemap, structured data, and social
+metadata are undecided. Do not implement before the plan and owner
+rulings. Sequencing relative to distribution is not ruled; recommended
+URL durability → SEO → distribution.
 
 **Standing Rule 8 (approved 2026-10-24):** the owner approved the
 Regression Integrity rule as written; it is not an open question. The

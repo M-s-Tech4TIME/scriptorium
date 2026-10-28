@@ -17,12 +17,13 @@ from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.audit import add_audit
 from app.auth import get_current_user_id
 from app.db import get_session
-from app.models import Athenaeum, Build
+from app.models import Athenaeum, Build, PublicName
 from app.serving.access import own_athenaeum
 from app.serving.artifacts import servable_artifact
 
@@ -67,9 +68,28 @@ async def _publication_body(
 ) -> dict[str, object]:
     latest = await _pointer(session, athenaeum, athenaeum.latest_build_id)
     stable = await _pointer(session, athenaeum, athenaeum.stable_build_id)
+    aliases = await session.scalars(
+        select(PublicName)
+        .where(
+            PublicName.athenaeum_id == athenaeum.id,
+            PublicName.is_current.is_(False),
+        )
+        .order_by(PublicName.created_at, PublicName.slug)
+    )
     return {
         "athenaeum_id": str(athenaeum.id),
         "public_slug": athenaeum.public_slug,
+        "public_aliases": [
+            {
+                "slug": alias.slug,
+                "retired_at": (
+                    alias.retired_at.isoformat()
+                    if isinstance(alias.retired_at, datetime)
+                    else None
+                ),
+            }
+            for alias in aliases
+        ],
         "is_public": athenaeum.is_public,
         "latest": _build_body(latest, athenaeum) if latest else None,
         "stable": _build_body(stable, athenaeum) if stable else None,

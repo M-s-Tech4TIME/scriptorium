@@ -2,9 +2,12 @@
 
 - **Status:** accepted and implemented
 - **Decided:** 2026-10-24 (owner approved the serving forks A2/B3/C1/D1/E2)
-- **Scope:** serving published Sphinx artifacts over HTTP. URL-durability
-  aliases/redirects beyond the immutable public name, remote distribution,
-  and the React shell format remain later phases.
+- **Amended:** 2026-10-28 by 0036 — D1's immutable-public-name clause is
+  superseded by owner-renamable names with permanent aliases/tombstones.
+  The URL shape and all other rulings are unchanged.
+- **Scope:** serving published Sphinx artifacts over HTTP. Page-level URL
+  aliases, remote distribution, and the React shell format remain later
+  phases.
 
 ## Owner rulings
 
@@ -13,7 +16,7 @@
 | A2 — what is served | Owner-published, immutable numbered builds. Two publication pointers: `latest` and `stable`; publish to one or both. Unpublishing clears a pointer but never revokes numbered history, so rollback/stable links survive. |
 | B3 — visibility | Per-Athenaeum public toggle, **private by default**. Private sites allow the owner or any member of a grimoire in the Athenaeum; everyone else gets the uniform `404`. Public sites are open to anonymous readers. |
 | C1 — mechanics | FastAPI serves the artifact files directly. No nginx alias is required for v1; the same app-side route is the local/CI proof. |
-| D1 — URLs | `/a/{public_slug}/` (channel root), `/a/{public_slug}/latest/…`, `/a/{public_slug}/stable/…`, and immutable `/a/{public_slug}/b/{number}/…`. The public name is a globally unique, immutable slug separate from the per-owner editor slug. |
+| D1 — URLs | `/a/{public_slug}/` (channel root), `/a/{public_slug}/latest/…`, `/a/{public_slug}/stable/…`, and immutable `/a/{public_slug}/b/{number}/…`. The public name is a globally unique slug separate from the per-owner editor slug. **Amended by 0036:** the owner may rename it; old names become permanent aliases. |
 | E2 — host security + skin | Strict CSP built from the artifact manifest's inline-script hashes, `style-src 'self'` only, no inline styles/event handlers, and a bounded/namespaced custom-CSS input materialized as an external file at build time. |
 
 ## URL and publication semantics
@@ -21,12 +24,16 @@
 - **Public slug:** generated once from the editor slug. A globally free
   name keeps the slug; a collision gets an 8-hex suffix (migration backfill
   uses the full UUID). Renaming the editor slug never changes the public
-  URL. The public name is not user-editable in v1.
+  URL. **Amended by 0036:** the owner may rename the public name through
+  its own endpoint; old names remain permanent aliases and are never
+  reused after deletion.
 - **Channel roots:** `/a/{public_slug}/` redirects `307` to `latest` when
   that pointer has a servable build, otherwise to `stable`; with neither
   pointer it is `404`.
-- **Aliases:** `latest`/`stable` are pointer aliases and are served with
-  `Cache-Control: no-cache`. They resolve to an `ok`, manifest-backed build.
+- **Pointer aliases:** `latest`/`stable` are publication-pointer aliases and
+  are served with `Cache-Control: no-cache`. They resolve to an `ok`,
+  manifest-backed build. (Public-name aliases are added by 0036 and use
+  permanent `308` redirects.)
 - **Numbered builds:** `/b/{number}/` is addressable only after that build
   was published at least once (`builds.published_at` is set). It is served
   with a one-year immutable cache. Unpublishing does not revoke it.
@@ -122,15 +129,16 @@ append-only; downgrade mirrors the additions.
   a disclosure. Alias/private responses are not cacheable.
 - `public_slug` allocation is check-then-insert; a concurrent collision is
   rejected by the unique constraint and returns a clean `409` (not silently
-  duplicated, not a 500). The public name is immutable; there is no public
-  rename/alias flow in v1.
+  duplicated, not a 500). The public name was immutable in 0035; 0036 adds
+  owner renames, permanent aliases, and tombstones without changing the URL
+  shape.
 - Custom CSS cannot use at-rules, so media queries are unavailable in the
   custom layer; the shipped theme's own responsive rules are unaffected.
 - No custom JavaScript, template overrides, remote assets, or per-site
   brand settings beyond the CSS hook are accepted in this phase.
-- URL-durability aliases/redirects and distribution targets remain later
-  phases; the immutable public slug and numbered build URLs are the
-  stable base they will build on.
+- Page-level URL aliases and distribution targets remain later phases;
+  0036 supplies site-level public-name aliases. Numbered build URLs remain
+  the stable base those later phases build on.
 - The editorial app keeps its own CSP; E2 applies to the published/served
   artifact and the exported artifact.
 

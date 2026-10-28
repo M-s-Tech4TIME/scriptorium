@@ -1,27 +1,41 @@
 # HANDOFF
 
-Last updated: 2026-10-25 / Ref: serving phase 0035 pushed (`6169696`), CI ×3 green
+Last updated: 2026-10-28 / Ref: URL-durability phase 0036 implemented (pending closeout push)
 
-## Current tranche (2026-10-25): serving phase 0035
+## Current tranche (2026-10-28): URL durability 0036
 
-Implemented the owner-approved A2/B3/C1/D1/E2 serving phase. Schema
-migration `0007serving` adds `athenaeums.public_slug` (globally unique,
-immutable), `is_public` (private default), `custom_css`,
-`latest_build_id`/`stable_build_id`, and `builds.published_at`/
-`published_by`. New `app/serving/` modules: CSS sandbox, artifact
-manifest/CSP inventory, header contract, access rules, artifact path
-jail. New routers: `publications.py` (owner-only publish/unpublish/
-publication) and `site.py` (`/a/{public_slug}/`, latest/stable aliases,
-numbered `/b/{n}/`, path safety, headers). Login/refresh set a
-15-minute HttpOnly `scriptorium_access` cookie scoped to `/a`; logout
-clears it. Builds now write `manifest.json` beside `html/`, include
-`site_id`/custom CSS, and fail if inline styles/event handlers/`<style>`
-blocks are present. Theme has `data-sd-athenaeum` and `.sd-sprite`.
-Docs/decision 0035/changelog/brain synced. Local verification: full
-suite 147 passed / 1 deselected (PG16 local; PG18 test excluded),
-ruff/format/mypy clean; headless Chrome public/private serving, CSP,
-custom CSS, search dialog, placeholders, panel persistence. Pushed as
-`6169696`; all three CI workflows are green.
+Implemented the owner-approved A1/B1/C1/D1/E1/F1 URL-durability phase
+and kept URL-scheme Option 1 (`/a/{public_slug}/`, `/latest/`,
+`/stable/`, `/b/{n}/`; `/a/` retained; numbered builds public).
+
+- Migration `0008urldurability` creates `public_names` (`slug` PK,
+  nullable `athenaeum_id` FK `SET NULL`, `is_current`, timestamps,
+  partial unique current index) and backfills every existing
+  `athenaeums.public_slug` as current.
+- Owner-only `PATCH /api/v1/athenaeums/{id}/public-slug` validates
+  `[a-z0-9-]+`/160/reserved words (`422`), rejects another site's
+  current/alias/tombstone (`409`), allows reversion to the site's own
+  retired name, retires the old row as a permanent alias, updates the
+  canonical column atomically, audits `athenaeum_public_slug_changed`,
+  and never rebuilds artifacts.
+- Create/delete hooks populate/retire registry rows; deletion leaves
+  permanent tombstones. Names are never reused.
+- `site.py` resolves current names and aliases, authorizes the current
+  site first, then `308`s to the canonical name with suffix/query
+  preserved and aliases flattened. Public alias `no-cache`; private
+  alias `private, no-store`, `Vary: Cookie`, `X-Robots-Tag`.
+- `GET /athenaeums/{id}/publication` now exposes
+  `public_aliases: [{slug, retired_at}]`.
+- Tests: live rename/private-auth/owner/member/outsider/public headers/
+  root-channel-numbered-asset suffix/query/flatten/reversion/no-op/
+  reserved/invalid/foreign/collision/tombstone/non-reuse/audit;
+  migration backfill + round-trip. Local fresh PG16 suite
+  **149 passed / 1 deselected** with Redis for auth and Redis-backed
+  ratelimit tests (PG18 version test excluded locally); ruff/format/mypy/
+  compileall clean. Headless Chrome followed an alias `308` to the
+  canonical page and loaded its assets.
+- Docs: decision 0036, 0035/0021/0026 amendments, architecture/API/
+  data-model/security/overview/codebase-map, changelog, brain.
 
 ## Was doing
 M4-C3.5 **baseline committed and pushed**: the owner-approved preview #5
@@ -114,14 +128,19 @@ sphinx.md + changelogs + brain synced. The entire C3.5 stack (0029–
 approval; M4-C4 is pushed as `1add6c8` with CI green ×3.
 
 ## Next steps (in order)
-1. **URL-durability phase:** owner rulings before implementation
-   (aliases/redirects/public rename policy, relationship to immutable
-   `public_slug`/numbered URLs). The current public slug and numbered
-   build URLs are the stable base.
-2. **Distribution phase:** present Q-DIST-A…D (credentials, delivery
+1. **Close out URL durability:** commit/push the 0036 implementation +
+   docs, verify CI ×3, then update this handoff/CURRENT-STATE with the
+   closeout SHA.
+2. **Dedicated SEO phase:** owner requested a structured, detailed plan
+   in its own phase; every SEO feature/attribute must be user-controllable
+   per Athenaeum in the editorial panel. Do not implement before the
+   plan and owner rulings. Canonical host/channel, robots/sitemap,
+   structured data, and social metadata are still undecided.
+3. **Distribution phase:** present Q-DIST-A…D (credentials, delivery
    semantics, target roster, React shell) and wait; do not implement
-   before owner approval.
-3. **Junk-sweep before every gate:** re-read written files; grep the
+   before owner approval. Sequencing (recommended URL durability → SEO →
+   distribution) is not yet ruled.
+4. **Junk-sweep before every gate:** re-read written files; grep the
    standing junk markers before committing.
 
 ## Gotchas (carried)
@@ -139,7 +158,7 @@ approval; M4-C4 is pushed as `1add6c8` with CI green ×3.
   engine distribution the build used; in production `SC_BUILD_PYTHON`
   points at the isolated build venv and vendoring follows it
   (`_sphinx_static_dir` subprocess probe).
-- Migrate head `0007serving`; verify migration SQL against older
+- Migrate head `0008urldurability`; verify migration SQL against older
   definitions before push (C1 lesson). `ck_nodes_kind` is dropped before
   the kind UPDATE runs (values outside the CHECK are otherwise illegal).
   Downgrade re-adds `user_id` as a trailing column — harmless, but
@@ -194,3 +213,15 @@ approval; M4-C4 is pushed as `1add6c8` with CI green ×3.
   `published_at`; unpublish clears pointers only. Private serving uses
   the `/a` access cookie; API routes keep bearer. Public numbered builds
   are immutable-cached (privacy caveat in 0035).
+- **URL durability (0036):** `public_names` is the single global
+  namespace; canonical, alias, and tombstone rows all occupy it, so never
+  check only `athenaeums.public_slug`. Create/rename/delete take the
+  transaction-scoped `SDNS` advisory lock; the slug PK/partial unique
+  index is still the hard guard. Aliases authorize the **current**
+  Athenaeum before `308`; tombstones (`athenaeum_id NULL`) are `404`.
+  Reversion to the site's own retired alias is allowed; another site's
+  alias/tombstone is `409`. No rebuild on rename: old artifacts keep
+  build-time `site_id`/`data-sd-athenaeum`/manifest. Page-level path
+  aliases are deferred (B1), so `latest`/`stable` page paths can change
+  after editor renames; numbered builds keep old paths. SEO canonical/
+  robots/sitemap/structured/social policy is a separate later phase.

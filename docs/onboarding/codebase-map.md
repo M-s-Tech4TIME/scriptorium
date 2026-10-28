@@ -1,6 +1,6 @@
 # Codebase map — "Where is X? Where do I change Y?"
 
-Last updated: 2026-10-25 / Ref: serving phase 0035
+Last updated: 2026-10-28 / Ref: URL-durability phase 0036
 
 | Want | Edit |
 |---|---|
@@ -12,6 +12,7 @@ Last updated: 2026-10-25 / Ref: serving phase 0035
 | Published theme | `backend/app/sphinx/theme/scriptorium/` — Scriptorium own theme, engine inherited (0027) |
 | API endpoint | `backend/app/routers/` + schema in `backend/app/schemas/` + test |
 | Publications / serving | `backend/app/routers/publications.py`, `backend/app/routers/site.py`, `backend/app/serving/` (0035) |
+| Public-name registry / aliases / tombstones | `backend/app/models.py` (`PublicName`), `backend/app/routers/athenaeums.py`, migration `0008_url_durability.py` (0036) |
 | DB schema change | `backend/alembic/versions/` + `docs/technology/` + changelog, same commit |
 | Packaging/layout | `packaging/nfpm.yaml`, `packaging/systemd/*` (Q1–Q9, FHS) |
 | Decision | `docs/decisions/NNNN-*.md` + `brain/DECISIONS-INDEX.md` |

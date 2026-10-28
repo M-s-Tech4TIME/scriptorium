@@ -1,8 +1,8 @@
 # M4 report — build pipeline + theme (C1–C4)
 
 Status: **implementation complete and pushed 2026-10-24** (`1add6c8`, CI ×3) · Owner: alsechemist ·
-Decision: 0026 (build design), 0027–0034 (theme) · Next: serving phase
-(Q-SERVE-A…E), then URL durability and distribution.
+Decision: 0026 (build design), 0027–0034 (theme) · Serving (0035) and URL
+durability (0036) followed; next: dedicated SEO phase and distribution.
 
 ## What M4 delivers
 

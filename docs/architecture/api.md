@@ -1,6 +1,6 @@
 # API surface — auth, athenaeums, categories, grimoires, members, serving
 
-Last updated: 2026-10-25 / Ref: serving phase (0035)
+Last updated: 2026-10-28 / Ref: URL-durability phase (0036)
 
 ## Conventions
 
@@ -29,10 +29,11 @@ Last updated: 2026-10-25 / Ref: serving phase (0035)
 | Route | Access | Notes |
 |---|---|---|
 | GET `/athenaeums` | owner | own libraries, creation order; rows include `public_slug`, `is_public`, pointer ids, custom-CSS size/hash |
-| POST `/athenaeums` `{slug,title}` | authed | slug allowlist `[a-z0-9-]+` (`422`); dup **per owner** → `409`; `public_slug` generated globally uniquely (immutable); creation order stable |
+| POST `/athenaeums` `{slug,title}` | authed | slug allowlist `[a-z0-9-]+` (`422`); dup **per owner** → `409`; `public_slug` generated globally uniquely (current name; owner-renamable per 0036); creation order stable |
 | GET `/athenaeums/{id}` | owner | foreign/unknown id → `404` |
-| PATCH `/athenaeums/{id}` `{title?, slug?, is_public?}` | owner | **editor slug renamable (0021)**: per-owner uniqueness → `409`; `[a-z0-9-]+` (else `422`) or explicit `null` → `422`; `is_public` bool (private default); public slug never changes; audit meta records what changed |
-| DELETE `/athenaeums/{id}` | owner | **refused `409` while it holds grimoires** (Q-M3-11=A; no audit row on refusal); else cascades its categories, `204` |
+| PATCH `/athenaeums/{id}` `{title?, slug?, is_public?}` | owner | **editor slug renamable (0021)**: per-owner uniqueness → `409`; `[a-z0-9-]+` (else `422`) or explicit `null` → `422`; `is_public` bool (private default); public slug changes only via its dedicated endpoint; audit meta records what changed |
+| PATCH `/athenaeums/{id}/public-slug` `{public_slug}` | owner | **public-name rename (0036)**: `[a-z0-9-]+`, 1–160, not `latest`/`stable`/`b`/`_static`/`api` → else `422`; another site's current/alias/tombstone → `409`; own retired alias → reversion; old name becomes permanent alias; no rebuild; audit `athenaeum_public_slug_changed` |
+| DELETE `/athenaeums/{id}` | owner | **refused `409` while it holds grimoires** (Q-M3-11=A; no audit row on refusal); else cascades its categories and permanently tombstones every public name, `204` |
 | GET `/athenaeums/{id}/sidebar` | owner | one call for the sidebar (Q-M3-13=A): `{id,slug,title,categories:[{id,name,position,grimoires:[…]}],uncategorized:[…]}` |
 | GET `/athenaeums/{id}/custom-css` | owner | `{css,sha256,bytes}` — normalized stored input |
 | PUT `/athenaeums/{id}/custom-css` `{css}` | owner | E2 sandbox validation (`422` on refusal); stores normalized external-CSS input; audit `athenaeum_custom_css_updated`; requires a rebuild to publish |
@@ -119,7 +120,7 @@ Owner-only; foreign Athenaeum/build ids are uniform `404`.
 
 | Route | Notes |
 |---|---|
-| GET `/athenaeums/{id}/publication` | `{athenaeum_id,public_slug,is_public,latest,stable,latest_url,stable_url}`; each pointer is `{build_id,build_number,status,published_at,published_by,url}` or `null` |
+| GET `/athenaeums/{id}/publication` | `{athenaeum_id,public_slug,public_aliases,is_public,latest,stable,latest_url,stable_url}`; `public_aliases` is `[{slug,retired_at}]`; each pointer is `{build_id,build_number,status,published_at,published_by,url}` or `null` |
 | POST `/athenaeums/{id}/publish` `{build_id,channel?}` | `channel` = `latest`\|`stable`\|`both` (default `both`); build must be `ok` and manifest-backed (`409` otherwise); records first publication history; audit `build_published` |
 | DELETE `/athenaeums/{id}/publish?channel=…` | clears the selected pointer(s), `204`; audit `build_unpublished`; numbered builds stay addressable |
 
@@ -136,18 +137,22 @@ public for `is_public=true`; otherwise owner or any member (bearer or
 | GET `/a/{public_slug}/stable/…` | stable pointer alias; `Cache-Control: no-cache` |
 | GET `/a/{public_slug}/b/{number}/…` | immutable published build; one-year immutable cache |
 | GET `/a/{public_slug}` / `…/{latest\|stable}` / `…/b/{number}` | slash-less redirects to canonical roots |
+| GET `/a/{retired_slug}/…` | permanent alias: after the same access check, `308` to `/a/{current_slug}/…`; path suffix and query preserved; tombstones/unknown names `404` |
 
 Directories redirect to a trailing slash; missing files, traversal paths,
 unpublished numbered builds, and non-manifest-backed artifacts are `404`.
 Canonical redirects use a relative `Location` and preserve the query.
-Every file response carries the manifest-derived CSP and the E2 security
-headers; private file and redirect responses add `private, no-store`,
-`Vary: Cookie`, and `X-Robots-Tag: noindex, nofollow`.
+Alias redirects use a relative `Location`, preserve the suffix/query, and
+flatten to the current canonical name. Every file response carries the
+manifest-derived CSP and the E2 security headers; private file and redirect
+responses add `private, no-store`, `Vary: Cookie`, and
+`X-Robots-Tag: noindex, nofollow`; public alias redirects are `no-cache`.
 
 ## Audit actions (through this tranche)
 
 `category_created|patched|deleted`, `grimoire_created|patched|deleted|moved`,
 `member_added|role_changed|removed`, `athenaeum_created|patched|deleted`,
-`node_created|patched|moved|deleted`, `document_saved`, `grimoire_duplicated`,
-`build_published`, `build_unpublished`, `athenaeum_custom_css_updated`
+`athenaeum_public_slug_changed`, `node_created|patched|moved|deleted`,
+`document_saved`, `grimoire_duplicated`, `build_published`,
+`build_unpublished`, `athenaeum_custom_css_updated`
 (refused deletes/saves write no audit row — nothing happened).

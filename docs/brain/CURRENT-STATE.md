@@ -1,8 +1,24 @@
 # CURRENT-STATE
 
-Last updated: 2026-10-25 / Ref: serving phase 0035 pushed (`6169696`); CI ×3 green
+Last updated: 2026-10-28 / Ref: URL-durability phase 0036 implemented (pending closeout push)
 
-- **Phase:** **Serving phase (0035) pushed (`6169696`), gates/browser checks and CI ×3 green. M4-C3.5/M4-C4 remain pushed and green (`1add6c8`).** Owner approved A2/B3/C1/D1/E2: owner-published `latest`/`stable` pointers over immutable numbered builds, private-by-default per-Athenaeum visibility with owner/member access, FastAPI `/a/{public_slug}/...` serving, immutable global public slug, manifest-derived strict CSP, and bounded namespaced custom CSS. URL-durability aliases/redirects and distribution remain later phases.
+- **Phase:** **URL-durability phase (0036) implemented: owner-renamable
+  public names, permanent aliases, tombstones, migration 0008, live
+  regressions. Distribution and the dedicated SEO phase remain later.**
+  Owner approved A1/B1/C1/D1/E1/F1 on 2026-10-28 and confirmed URL-scheme
+  Option 1 (`/a/{public_slug}/`, `/latest/`, `/stable/`, `/b/{n}/`;
+  `/a/` retained; numbered builds public). Public names are owner-only
+  renamable via `PATCH /api/v1/athenaeums/{id}/public-slug`; old names
+  become permanent `308` aliases after the current site's access check;
+  deletion creates permanent tombstones; reversion to the same site's old
+  alias is allowed; reserved/invalid names `422`, other-site/tombstone
+  collisions `409`; no artifact rebuild. Migration `0008urldurability`
+  backfills every existing `athenaeums.public_slug` into `public_names`.
+  SEO is a separate later phase with per-Athenaeum editorial controls;
+  canonical host/channel, robots/sitemap, structured data, and social
+  metadata are not decided here. Distribution awaits Q-DIST-A…D.
+  Serving phase (0035) remains pushed (`6169696`), gates/browser checks
+  and CI ×3 green; M4-C3.5/M4-C4 remain pushed and green (`1add6c8`).
   M4-C1 (`2aed3ef`): decision 0026
   (per-Athenaeum site P1, manual trigger P2, subprocess sandbox P3,
   keep-all versions P4; reconciliation: staging keyed by grimoire id
@@ -29,7 +45,7 @@ Last updated: 2026-10-25 / Ref: serving phase 0035 pushed (`6169696`); CI ×3 gr
   **CI-discovered staging rulings** in 0026 (absolute `</docname>`
   refs, generated top sections, MyST fenced toctree, downgrade mirror,
   save-path exporter guarantee). Q-SERVE-A…E resolved by 0035; Q-DIST-A…D
-  remain parked. Migrate head `0007serving`.
+  remain parked. Migrate head `0008urldurability`.
   **C3.5 code (this tranche):** Scriptorium's own theme shipped in
   `backend/app/sphinx/theme/scriptorium/` (`theme.conf` `inherit=none`
   — 9.1 mandates the explicit key; layout/page/search/genindex
@@ -151,7 +167,10 @@ Last updated: 2026-10-25 / Ref: serving phase 0035 pushed (`6169696`); CI ×3 gr
   (2026-10-25):** schema/API for `public_slug`/`is_public`/custom CSS +
   latest/stable pointers; FastAPI artifact routes; access cookie;
   manifest/CSP; custom-CSS sandbox; live + unit + theme regressions.
-  Next: URL durability, then Distribution (Q-DIST-A…D).
+  **URL-durability phase (0036) implemented (2026-10-28):** owner
+  public-name renames, permanent aliases/tombstones, migration 0008,
+  auth-before-`308` serving, no rebuild. Next: dedicated SEO phase and
+  Distribution (Q-DIST-A…D); sequencing not ruled.
 - **Owner decisions:** 0018 (grimoire rename, per-user categories, auth
   semantics) → **amended by 0020 (2026-10-21):** native hierarchy — categories
   per-Athenaeum (Q-M3-9=A), `grimoires.athenaeum_id` NOT NULL (Q-M3-10=A),
@@ -187,16 +206,23 @@ Last updated: 2026-10-25 / Ref: serving phase 0035 pushed (`6169696`); CI ×3 gr
   **0035 (2026-10-24, accepted; implemented 2026-10-25):** serving —
   owner-published latest/stable pointers over immutable numbered builds
   (A2), private-default per-Athenaeum visibility with owner/member
-  access (B3), FastAPI artifact serving (C1), immutable global public
-  slug + `/a/{public_slug}/{latest|stable|b/n}/` URLs (D1), strict
+  access (B3), FastAPI artifact serving (C1), global public
+  slug + `/a/{public_slug}/{latest|stable|b/n}/` URLs (D1; now
+  owner-renamable per 0036), strict
   manifest-derived CSP + bounded namespaced custom CSS (E2). Migration
-  0007. URL-durability aliases/redirects + distribution deferred.
+  0007. URL-durability aliases/redirects were deferred at that point
+  (implemented by 0036); distribution remains deferred.
+  **0036 (2026-10-28, accepted; implemented):** URL durability A1/B1/C1/
+  D1/E1/F1 — owner-renamable public name, permanent aliases/tombstones,
+  single `public_names` namespace, `308` aliases after auth, path/query
+  preservation, no rebuild, Option 1 URL shape retained; page-path
+  aliases and SEO remain later phases.
 - **Done (cumulative):** Q1–Q23 + Q-M2-1/2 + Q-M3-1…8 + Q-002=B(0019) +
   Q-M3-9…13=A(0020) + Q-M3-16a–e=A(0025) + Q-M4-P1…P4 + E1–E3(0026) +
   theme ruling(0027) + design baseline(0028) + preview-feedback
   rulings(0029) + typography(0030) + second feedback batch(0031) +
   third feedback batch(0032) + Standing Rule 8(0033) +
-  fourth feedback(0034) + serving(0035);
+  fourth feedback(0034) + serving(0035) + URL durability(0036);
   Rules 1–8. M0 locks; M1 green (2539391); M2 A–C green; M3 C1–C6 green
   ×3; M4 C1 `2aed3ef` + C2 `3a15b52` + C3 `1e1637e` green ×3; 0028
   record `556bbce` green ×3; C3.5 baseline `b15446f` green ×3 (0029 +
@@ -208,7 +234,23 @@ Last updated: 2026-10-25 / Ref: serving phase 0035 pushed (`6169696`); CI ×3 gr
   ruff + format + `mypy --strict` clean; headless Chrome verified public
   and private serving, CSP (no violations), custom CSS, search dialog,
   placeholders, and panel persistence. All three CI workflows green.
-- **Last pushed:** `6169696` — `feat(serving): publish and serve
+- **URL-durability work (0036, this tranche):** `public_names` registry +
+  migration 0008 (backfill current names, partial unique current index,
+  FK `SET NULL` tombstones); owner-only public-slug rename endpoint with
+  validation/reserved words/409 collisions/reversion/audit; create/delete
+  registry hooks and namespace advisory lock; alias resolution in
+  `site.py` with auth-before-`308`, suffix/query preservation, flattening,
+  public `no-cache`/private no-store headers; publication response
+  `public_aliases`; live tests for rename/alias/tombstone/reversion/
+  collision/cache/audit and migration backfill. Local fresh PG16 suite
+  **149 passed / 1 deselected** with Redis for auth and Redis-backed
+  ratelimit tests (PG18 version test excluded locally); ruff/format/mypy/
+  compileall clean. Headless Chrome followed an alias `308` to the
+  canonical page and loaded its assets.
+- **Last pushed:** `9dbd8a0` — docs closeout for serving (CI ×3 green).
+  URL-durability implementation (0036) is pending commit/push at the time
+  of this note; update this line with the closeout SHA after CI.
+  `6169696` — `feat(serving): publish and serve
   immutable Sphinx artifacts` (46 files, +2914/−105), pushed `dev`; all
   three CI workflows green (lint-type-test, security, packaging). It sits
   on `1add6c8` — `feat(m4-c4): package isolated build venv
@@ -228,13 +270,13 @@ Last updated: 2026-10-25 / Ref: serving phase 0035 pushed (`6169696`); CI ×3 gr
   `base_level` staging fix. **0034 is pushed and CI green ×3; preview
   #7 is browser-verified. M4-C4 is pushed as `1add6c8`, CI green ×3.**
 - **Remote:** `git@github.com:M-s-Tech4TIME/scriptorium.git` (public).
-  `dev` carries M3 + M4 implementation + serving phase; `main` stays at
-  release point (ff-only).
+  `dev` carries M3 + M4 implementation + serving + URL durability;
+  `main` stays at release point (ff-only).
 - **Known/limitations (documented, not bugs):** docutils 0.22.4 inline
   markup does not nest — 0017 fail-loud matrix in
   `docs/technology/conversion.md`; RST writer rejects mark-run edge spaces,
   mark combinations, and heading level skips; MyST keeps them via HTML
-  paths. Live-DB tests migrate to the current head (`0007serving`).
+  paths. Live-DB tests migrate to the current head (`0008urldurability`).
   Search on the static artifact requires JavaScript; `file://` previews
   degrade to folio/heading links without snippets; candidate/group/row
   caps are 10/8/6; a build-time section index is the documented scale
@@ -242,6 +284,9 @@ Last updated: 2026-10-25 / Ref: serving phase 0035 pushed (`6169696`); CI ×3 gr
   unloaded (0027 asset contract). Serving: public numbered builds are
   immutable-cached, so making a site private cannot recall copies already
   cached at those URLs (0035 disclosure); custom CSS has no at-rules
-  (including `@media`), custom JS, or remote assets; public slug is
-  immutable and not user-editable; URL-durability aliases/redirects and
-  distribution are not implemented.
+  (including `@media`), custom JS, or remote assets; public names are
+  owner-renamable (0036), but page-level path aliases are deferred (B1),
+  so `latest`/`stable` page paths can change after an editor rename while
+  numbered builds keep their old paths. SEO canonical/sitemap/robots/
+  structured/social policy is a dedicated later phase with per-Athenaeum
+  editorial controls; distribution is not implemented.
