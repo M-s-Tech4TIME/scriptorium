@@ -44,7 +44,9 @@ media copying.
 
 ## Next
 
-1. Start the approved backup/restore phase (Editorial + Full; numbered
+1. Present the Q-BK-A…E rulings to the owner; implementation is blocked
+   until answered and recorded (decision 0039 expected).
+2. Start the approved backup/restore phase (Editorial + Full; numbered
    `/b/{n}/` URLs must survive restore).
-2. Then server move/first-run provisioning, page aliases, M5, and the SEO
+3. Then server move/first-run provisioning, page aliases, M5, and the SEO
    plan/rulings.

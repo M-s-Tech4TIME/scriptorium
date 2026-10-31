@@ -30,9 +30,12 @@ completed 159 tests with no skips, covering media/history and migration
   denied), so media/history/migration tests only run in CI. TypeScript
   ESLint remains blocked by typescript-eslint's TS `<6.1` peer range;
   `tsc --noEmit` is the type gate.
-- **Next:** start the approved backup/restore phase (Editorial + Full;
-  numbered `/b/{n}/` URLs must survive restore), followed by server move/
-  first-run provisioning, page aliases, M5, and the SEO plan.
+- **Next:** the backup/restore phase is **blocked on owner rulings
+  Q-BK-A…E** (mode contents/numbered-URL guarantee, container format,
+  delivery/retention, identity mapping, target + public-name policy).
+  Implementation starts only after the answers are recorded (0039);
+  then server move/first-run provisioning, page aliases, M5, and the
+  SEO plan.
 
 ## Previous tranche (2026-10-30): technical-stack upgrade 0037
 

@@ -8,7 +8,8 @@ Last updated: 2026-10-31 / editor/content completion 0038 pushed (`476dfff`), CI
       `GET /auth/me`; docs + tests. Pushed as `476dfff`; CI ×3 green
       (backend 159 passed, no skips, incl. live PG18 media/history and
       migration 0009).
-- [ ] Backup/restore phase: Editorial + Full modes; restored numbered
+- [ ] Backup/restore phase: **blocked on owner rulings Q-BK-A…E**
+      (OPEN-QUESTIONS). Editorial + Full modes; restored numbered
       `/b/{n}/` URLs must be preserved exactly; then server move/first-run
       provisioning.
 - [x] Stack-upgrade phase (0037): bundled Python 3.14.10 + Redis 8.10.2,

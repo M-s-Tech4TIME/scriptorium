@@ -1,6 +1,6 @@
 # OPEN-QUESTIONS
 
-Last updated: 2026-10-30 / Ref: stack upgrade 0037 implemented; SEO phase requested; Q-DIST-A…D remain parked
+Last updated: 2026-10-31 / Ref: editor/content 0038 pushed (`476dfff`), CI ×3 green; Q-BK-A…E asked for the backup/restore phase
 
 | ID | Question | Blocks | Asked |
 |---|---|---|---|
@@ -18,6 +18,11 @@ Last updated: 2026-10-30 / Ref: stack upgrade 0037 implemented; SEO phase reques
 | Q-DIST-B | Delivery semantics — retries/backoff, per-target status log, "re-push latest" button rules. | distribution phase | 2026-10-21 |
 | Q-DIST-C | Target roster priority + mode (repo backup vs Pages hosting) — GitHub → GitLab → SFTP → FTP? | distribution phase | 2026-10-21 |
 | Q-DIST-D | React shell format spec — `content.json`/`site.json` schema, routing/404 fallback, CSP posture. | distribution phase | 2026-10-21 |
+| Q-BK-A | **Backup mode contents:** does the Editorial-mode restore preserve numbered `/b/{n}` URLs (i.e. Editorial also carries build rows + served artifacts), or is numbered-URL durability a Full-only guarantee while Editorial restores content-only and rebuilds from content? Owner requirement on record: "a restored site must preserve numbered `/b/{n}` URLs exactly" (0038) — the split between the modes needs a ruling. | backup/restore phase | 2026-10-31 |
+| Q-BK-B | **Backup container format:** ZIP (zip64, deterministic entry order, `manifest.json`, per-entry SHA-256) vs `.tar.gz` (single-stream, POSIX-born). | backup/restore phase | 2026-10-31 |
+| Q-BK-C | **Delivery/retention mechanics:** on-demand export with **no server-side retention** — Editorial streamed synchronously; Full (media + artifact bytes) as an async Celery job serving an expiring tokenized download link — vs everything synchronous with a size cap. | backup/restore phase | 2026-10-31 |
+| Q-BK-D | **Identity mapping on restore:** the importing user owns everything; member/author identities from the backup that do not match the importer are nulled (needs `document_history.author`/`media_assets.created_by`-style nullable handling) vs restore fails loudly on any unmatched identity. Refresh tokens, memberships, and `audit_log` are proposed as never exported — confirm. | backup/restore phase | 2026-10-31 |
+| Q-BK-E | **Restore target & public names:** restore always creates a **fresh Athenaeum owned by the importing user**; the backup's current public name is re-claimed only if free or tombstoned by the same user; anything else (taken/foreign tombstone) → auto-suffixed name; aliases/tombstones rows carried in Full. Confirm vs "error if the original name is not free". | backup/restore phase | 2026-10-31 |
 
 Notes: Q-SERVE/Q-DIST wording was drafted by the assistant from the
 owner's rulings (placement + concepts ratified 2026-10-21, see decision
@@ -68,3 +73,10 @@ Tabler inline-sprite icons (CDN loader eliminated), custom Pygments
 style, first-party copy script, zero asset-injecting extensions v1,
 uniform `--sd-page-ink` callout body ink. A future second color scheme
 (`[data-theme]`) is its own later ruling, not an open question here.
+
+**Backup/restore (Q-BK-A…E, asked 2026-10-31):** the owner-approved
+requirements stand — Editorial **and** Full modes are required, and a
+restored site must preserve numbered `/b/{n}/` URLs exactly. The five
+rows above seek the rulings needed before any implementation; nothing
+is implemented until they are answered and recorded as a decision
+(0039 expected).
