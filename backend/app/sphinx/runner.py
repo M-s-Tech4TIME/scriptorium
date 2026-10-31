@@ -30,6 +30,7 @@ import shutil
 import subprocess
 import sys
 import uuid
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -153,7 +154,12 @@ def _sphinx_static_dir(build_python: Path) -> Path:
     return Path(probe.stdout.strip()) / "themes" / "basic" / "static"
 
 
-def _materialize(workspace: Path, plan: SitePlan, build_python: Path) -> None:
+def _materialize(
+    workspace: Path,
+    plan: SitePlan,
+    build_python: Path,
+    media: Mapping[str, Path] | None = None,
+) -> None:
     """Write the staged site, the theme, the style module, vendored JS.
 
     - theme → `workspace/theme/scriptorium` (conf's `html_theme_path`);
@@ -173,10 +179,22 @@ def _materialize(workspace: Path, plan: SitePlan, build_python: Path) -> None:
     """
     workspace.mkdir(parents=True, exist_ok=False)
     (workspace / ".home").mkdir()
+    (workspace / "_static").mkdir()
     for relpath, text in plan.files.items():
         path = workspace / relpath
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text, encoding="utf-8", newline="\n")
+
+    for relpath, source in (media or {}).items():
+        # The URL is generated from an asset UUID; refuse anything that
+        # could escape the staged static directory.
+        if not relpath.startswith("_static/media/") or ".." in Path(relpath).parts:
+            raise RunnerConfigError(f"unsafe media path: {relpath!r}")
+        if not source.is_file():
+            raise RunnerConfigError(f"media file missing: {source}")
+        target = workspace / relpath
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(source, target)
 
     theme_target = workspace / "theme" / "scriptorium"
     shutil.copytree(_THEME_DIR, theme_target)
@@ -219,6 +237,7 @@ def run_build(
     athenaeum_id: uuid.UUID,
     build_number: int,
     site_id: str = "",
+    media: Mapping[str, Path] | None = None,
 ) -> BuildOutcome:
     """Materialize the plan, run the sandboxed build, move the artifact."""
     cfg = build_config()
@@ -226,7 +245,7 @@ def run_build(
     artifact_dir = cfg.artifact_root / str(athenaeum_id) / str(build_number)
 
     shutil.rmtree(workspace, ignore_errors=True)
-    _materialize(workspace, plan, cfg.build_python)
+    _materialize(workspace, plan, cfg.build_python, media)
 
     cmd = [
         str(cfg.build_python),

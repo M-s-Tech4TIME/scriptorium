@@ -3,7 +3,7 @@
 # daemon-reload. Never touches the DB (Q6/0001).
 set -eu
 id -u scriptorium >/dev/null 2>&1 || useradd --system --home /var/lib/scriptorium --shell /usr/sbin/nologin scriptorium
-mkdir -p /opt/scriptorium /etc/scriptorium /var/lib/scriptorium/sources /var/lib/scriptorium/builds /var/lib/scriptorium/artifacts /var/lib/scriptorium/uploads /var/lib/scriptorium/redis /var/log/scriptorium /var/cache/scriptorium
+mkdir -p /opt/scriptorium /etc/scriptorium /var/lib/scriptorium/sources /var/lib/scriptorium/builds /var/lib/scriptorium/artifacts /var/lib/scriptorium/media /var/lib/scriptorium/uploads /var/lib/scriptorium/redis /var/log/scriptorium /var/cache/scriptorium
 if [ ! -f /etc/scriptorium/config.env ] && [ -f /usr/share/doc/scriptorium/config.env.example ]; then
   install -m 0600 -o root -g root /usr/share/doc/scriptorium/config.env.example /etc/scriptorium/config.env
 fi

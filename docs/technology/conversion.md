@@ -1,5 +1,7 @@
 # Conversion layer (M2, decision 0017)
 
+Last updated: 2026-10-31 / Ref: editor/content completion tranche
+
 TipTap JSON (`tiptap@1`) ↔ reStructuredText / MyST. Single canonical form for
 storage; the converters are the only place that knows both representations.
 
@@ -54,8 +56,11 @@ Shape notes (probe-verified, docutils 0.22.4 / myst-parser 5.1.0)
   document; a hand-written `# A` followed immediately by `## B` maps to the
   same title/subtitle convention. The importer restores both (level 1 and
   level 2). Skipped levels are not representable (see export).
-- Tables, images, footnotes, math and other out-of-scope constructs raise
-  `ConversionError` (Q-M2-1 = editor starter-kit set only).
+- Images import as TipTap `image` nodes with `src`/`alt`/`title`. The
+  document API accepts only local media URLs owned by the same grimoire
+  (`/_static/media/{uuid}.{ext}`); remote/data/inline images are rejected.
+- Tables, footnotes, math and other out-of-scope constructs raise
+  `ConversionError` (Q-M2-1 = editor starter-kit set plus images).
 
 ## Export
 
@@ -91,6 +96,14 @@ lookalikes, parenthesized enumerators).
   `<strong>/<em>` — all re-imported as marks by the importer.
 - heading level skips fail loud like RST (docutils builds the same
   hierarchy from the token stream).
+
+### Images
+
+- RST: `.. image:: <src>` with optional `:alt:`/`:title:`; the writer
+  requires a single URL without whitespace.
+- MyST: `![alt](src "title")`; `]` and `"` in alt/title are escaped.
+- Image sources must be canonical media URLs; uploads are sniffed and
+  validated at the API boundary, then copied into each build artifact.
 
 ## Guarantees
 

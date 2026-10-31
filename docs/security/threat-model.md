@@ -1,6 +1,6 @@
 # Threat model (initial, Q22 / §10)
 
-Last updated: 2026-10-30 / Ref: stack-upgrade phase (0037)
+Last updated: 2026-10-31 / Ref: editor/content completion tranche
 
 ## Primary risk: untrusted content → Sphinx code exec
 - Generated-only `conf.py`; extension allowlist (any addition = Rule 4 + record).
@@ -60,7 +60,18 @@ Last updated: 2026-10-30 / Ref: stack-upgrade phase (0037)
 ## App risks → mitigations
 - XSS (built HTML + editor): output encoding, strict served-artifact CSP
   (0035 E2), editor CSP unchanged, SVG sanitize, upload allowlist + size
-  caps.
+  caps. V1 media accepts PNG/JPEG/GIF/WebP/AVIF only; the type is decided
+  from magic bytes (never `Content-Type` or the filename), SVG is refused,
+  and remote/data image sources are rejected at document save.
+- **Media IDOR / storage abuse:** every upload, list, and content read
+  re-checks grimoire membership; a media row is owned by exactly one
+  grimoire and document saves reject cross-grimoire references. Bytes live
+  outside the web root under `SC_MEDIA_ROOT` with generated paths; uploads
+  stream with a 10 MiB cap, write atomically, and roll back the file when
+  the DB insert fails. Content responses are `nosniff` and private-cached.
+- **Build-time media integrity:** referenced assets are resolved from DB
+  rows (not user paths), the runner refuses non-`_static/media/` or
+  traversal paths, and missing files fail the build loudly.
 - Path traversal: slug allowlist `[a-z0-9-]+`, jail to project dir, no `..`.
 - IDOR/tenancy: membership check on every project request + tests (M1 gate).
 - Auth: Argon2id, lockout, short JWT + rotating refresh (HttpOnly/Secure/SameSite), audit log.

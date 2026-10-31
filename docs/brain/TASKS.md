@@ -1,8 +1,15 @@
 # TASKS
 
-Last updated: 2026-10-30 / 0037 stack upgrade pushed (`9d645e3`), CI ×3 green
+Last updated: 2026-10-31 / editor/content completion 0038 staged; push + CI verification next
 
 ## In progress (max 1–2)
+- [x] Editor/content completion (0038): V1 React app, TipTap surface,
+      tree/history/import, image/GIF media, build media copying,
+      `GET /auth/me`; docs + tests. Staged 2026-10-31 — commit/push and
+      verify CI (live PG18 media/history + migration 0009) next.
+- [ ] Backup/restore phase: Editorial + Full modes; restored numbered
+      `/b/{n}/` URLs must be preserved exactly; then server move/first-run
+      provisioning.
 - [x] Stack-upgrade phase (0037): bundled Python 3.14.10 + Redis 8.10.2,
   Node 26.13.0 LTS, Sphinx 9.2.0, current backend/frontend pins, CI/audit
   gates, support matrix. Pushed as `9d645e3`; CI ×3 green.

@@ -164,7 +164,22 @@ def _block_str(node: Node, indent: str) -> str:
         )
     if kind == "horizontalRule":
         return indent + "---"
+    if kind == "image":
+        return _image(node, indent)
     raise ConversionError(f"Unsupported block node {kind!r} for MyST export.")
+
+
+def _image(node: Node, indent: str) -> str:
+    attrs = node.get("attrs") or {}
+    src = str(attrs.get("src") or "").strip()
+    if not src:
+        raise ConversionError("Image node has no src.")
+    if "\n" in src or "\r" in src or " " in src:
+        raise ConversionError("Image src must be a single URL without spaces.")
+    alt = " ".join(str(attrs.get("alt") or "").split()).replace("]", "\\]")
+    title = " ".join(str(attrs.get("title") or "").split()).replace('"', '\\"')
+    suffix = f' "{title}"' if title else ""
+    return f"{indent}![{alt}]({src}{suffix})"
 
 
 def _heading(node: Node, indent: str) -> str:

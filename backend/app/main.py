@@ -10,6 +10,7 @@ from app.routers import builds as builds_router
 from app.routers import categories as categories_router
 from app.routers import documents as documents_router
 from app.routers import grimoires as grimoires_router
+from app.routers import media as media_router
 from app.routers import nodes as nodes_router
 from app.routers import publications as publications_router
 from app.routers import site as site_router
@@ -24,6 +25,7 @@ def create_app() -> FastAPI:
     app.include_router(builds_router.router)
     app.include_router(categories_router.router)
     app.include_router(grimoires_router.router)
+    app.include_router(media_router.router)
     app.include_router(nodes_router.router)
     app.include_router(documents_router.router)
     app.include_router(publications_router.router)

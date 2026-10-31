@@ -29,6 +29,7 @@ from app.auth import (
     AuthError,
     create_token_pair,
     decode_refresh,
+    get_current_user_id,
     get_secret,
     revoke_family,
     rotate_refresh,
@@ -175,6 +176,17 @@ async def refresh(
     _set_refresh_cookie(response, rotated)
     _set_access_cookie(response, access)
     return {"access_token": access, "token_type": "bearer"}
+
+
+@router.get("/me")
+async def me(
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> dict[str, str]:
+    user = await session.get(User, user_id)
+    if user is None:  # token for a deleted user
+        raise _UNAUTHORIZED
+    return {"id": str(user.id), "email": user.email, "display": user.display}
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)

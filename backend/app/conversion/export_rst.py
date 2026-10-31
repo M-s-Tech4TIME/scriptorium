@@ -193,7 +193,30 @@ def _block_str(node: Node, indent: str, roles: set[str]) -> str:
         return _blocks_str(content, indent + "    ", roles)
     if kind == "horizontalRule":
         return indent + "----"
+    if kind == "image":
+        return _image(node, indent)
     raise ConversionError(f"Unsupported block node {kind!r} for RST export.")
+
+
+def _image(node: Node, indent: str) -> str:
+    attrs = node.get("attrs") or {}
+    src = str(attrs.get("src") or "").strip()
+    if not src:
+        raise ConversionError("Image node has no src.")
+    if "\n" in src or "\r" in src or " " in src:
+        raise ConversionError("Image src must be a single URL without spaces.")
+
+    def clean(value: object) -> str:
+        return " ".join(str(value or "").split())
+
+    lines = [indent + f".. image:: {src}"]
+    alt = clean(attrs.get("alt"))
+    if alt:
+        lines.append(indent + f"   :alt: {alt}")
+    title = clean(attrs.get("title"))
+    if title:
+        lines.append(indent + f"   :title: {title}")
+    return "\n".join(lines)
 
 
 def _heading(node: Node, indent: str, roles: set[str]) -> list[str]:

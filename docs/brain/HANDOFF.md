@@ -1,6 +1,40 @@
 # HANDOFF
 
-Last updated: 2026-10-30 / Ref: stack-upgrade phase 0037 pushed (`9d645e3`), CI ×3 green
+Last updated: 2026-10-31 / Ref: editor/content completion (0038) staged; push + CI verification next
+
+## Current tranche (2026-10-31): editor/content completion 0038
+
+Implemented but **not yet pushed**; live-DB media/history tests and
+migration `0009media` still need CI verification.
+
+- **Backend:** `GET /auth/me`; history detail + restore endpoints
+  (`document_restored` audit, new version appended, media re-validated);
+  `media_assets` (migration `0009media`), raw-body upload with magic-byte
+  sniffing + 10 MiB streaming cap + atomic write, member-scoped list and
+  authenticated content read; document saves reject external/foreign image
+  refs; builds copy referenced media into `_static/media`; RST/MyST image
+  round-trip.
+- **Frontend:** first real app — Vite/React shell, memory-only token +
+  refresh-cookie bootstrap, login/dashboard/Athenaeum/editor pages, lazy
+  route chunks, TipTap surface, tree CRUD, history restore, source
+  preview, single-file import, conflict reload/overwrite, unsaved-change
+  warning, canonical media URL ↔ blob mapping.
+- **Gates:** backend `114 passed, 44 skipped` locally, ruff/format/mypy
+  clean. Frontend typecheck, lint, format check, 16 Vitest tests, build,
+  and high-severity audit gate pass. CI frontend job now runs typecheck,
+  test, and build.
+- **Docs:** decision 0038, changelog, API/data-model/conversion/frontend/
+  overview/security/roadmap, brain.
+- **Known limits:** live PG18/Redis unavailable locally (Docker socket
+  denied), so media/history/migration tests only run in CI. TypeScript
+  ESLint remains blocked by typescript-eslint's TS `<6.1` peer range;
+  `tsc --noEmit` is the type gate.
+- **Next:** commit/push, verify all three CI workflows green, then start
+  the approved backup/restore phase (Editorial + Full; numbered `/b/{n}/`
+  URLs must survive restore), followed by server move/first-run
+  provisioning, page aliases, M5, and the SEO plan.
+
+## Previous tranche (2026-10-30): technical-stack upgrade 0037
 
 ## Current tranche (2026-10-30): technical-stack upgrade 0037
 

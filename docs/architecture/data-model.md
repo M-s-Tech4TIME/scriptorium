@@ -1,6 +1,6 @@
 # Data model — native library hierarchy, generic ordered tree (0021 / 0020 / 0018 / Q21)
 
-Last updated: 2026-10-28 / Ref: URL-durability phase (0036)
+Last updated: 2026-10-31 / Ref: editor/content completion tranche
 
 The canonical, ground-up structure is the Athenaeum hierarchy (decision
 0020): every user owns one or more **Athenaeums** (libraries — one complete
@@ -23,7 +23,8 @@ users ──owns──> athenaeums ──contains──> grimoire_categories (se
 - `memberships(user_id FK, grimoire_id FK, role owner|editor|viewer, PK(user_id,grimoire_id))` — sharing stays **grimoire-level only** (0020 Q-M3-12=A); no Athenaeum-level sharing yet (future decision first).
 - `nodes(id UUID PK, grimoire_id FK, parent_id FK NULL=root, kind chapter|folio, title, slug, position INT, UNIQUE(grimoire_id,parent_id,slug))` — drives TOC + `toctree`; reorder = atomic sibling-position ops (Q-M3-4=A). `kind` is **`chapter|folio`** since 0022 (was 0010's `category|page`; migration 0005).
 - `documents(id UUID PK, node_id FK UNIQUE, tiptap_json JSONB, source_text TEXT (server-derived cache of the canonical JSON, Q-M3-3=A), source_format, version INT, updated_by FK, updated_at)` — JSON canonical.
-- `document_history(id UUID PK, document_id FK, version INT, tiptap_json JSONB, source_text TEXT, author FK, at)` — append-only; `PUT` with `expected_version` mismatches → 409 (Q-M3-2=A).
+- `document_history(id UUID PK, document_id FK, version INT, tiptap_json JSONB, source_text TEXT, author FK, at)` — append-only; `PUT` with `expected_version` mismatches → 409 (Q-M3-2=A). Restore appends a new version copied from history; it never rewrites old rows.
+- `media_assets(id UUID PK, grimoire_id FK grimoires CASCADE, filename, content_type, size_bytes, sha256, storage_path, created_by FK users NULL SET NULL, created_at)` — V1 image/GIF assets (migration 0009). The row is the authorization/metadata source; bytes live under `SC_MEDIA_ROOT` at `storage_path` (`{id[:2]}/{id}.{ext}`). `content_type` is one of PNG/JPEG/GIF/WebP/AVIF and is sniffed from magic bytes, never trusted from the upload header. Canonical document image URLs are `/_static/media/{id}.{ext}`; the build copies referenced files into the artifact. SVG, remote URLs, and non-image uploads are rejected.
 - `builds(id UUID PK, grimoire_id FK NULL *(pre-0026 rows)*, athenaeum_id FK NULL, build_number, status queued|running|ok|failed, triggered_by FK, started, finished, log_path, artifact_path, published_at, published_by FK NULL)` — **one site per Athenaeum (0026):** a build compiles the entire library; `build_number` is a per-Athenaeum monotonic counter (`uq_builds_athenaeum_number`); exactly one key is ever set (`ck_builds_site`). Pre-M4 rows stay grimoire-keyed. Artifacts live at `/var/lib/scriptorium/artifacts/{athenaeum_id}/{build_number}/` (portable static site). `published_at`/`published_by` record first publication history (0035 A2); a published build stays addressable by number after unpublish.
 - `audit_log(id BIGSERIAL PK, actor FK, action, grimoire_id FK NULL, at, meta JSONB)` — Athenaeum mutations stage rows with `grimoire_id NULL` (`athenaeum_created|patched|deleted`, `athenaeum_public_slug_changed`, `grimoire_moved`).
 - `refresh_tokens(id UUID PK, user_id FK CASCADE, family UUID, jti UUID UNIQUE, parent_jti UUID NULL, expires_at, created_at, revoked_at NULL, revoked_reason NULL CHECK rotated|reuse|logout|expired)` — family-based refresh reuse detection (0017). Never stores token material.
@@ -33,8 +34,8 @@ Migrations are append-only history: 0001 initial, 0002 refresh tokens,
 (backfills one **"Default"** Athenaeum per user and re-points all existing
 categories/grimoires into it), 0005 folio/chapter `kind` vocabulary (0022), 0006 build key era +
 per-Athenaeum build numbers (0026), 0007 serving fields/public slug/pointers
-(0035), 0008 public-name registry/aliases/tombstones (0036). Old migrations
-are never edited.
+(0035), 0008 public-name registry/aliases/tombstones (0036), 0009 media
+assets (V1 images/GIF). Old migrations are never edited.
 
 Last updated: 2026-10-28 / Ref: URL-durability phase 0036
 

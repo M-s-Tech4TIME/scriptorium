@@ -244,6 +244,15 @@ class _Importer:
             ]
         if isinstance(child, nodes.paragraph):
             return [self._paragraph(child)]
+        if isinstance(child, nodes.image):
+            attrs: dict[str, Any] = {"src": str(child.get("uri") or "")}
+            alt = str(child.get("alt") or "")
+            title = str(child.get("title") or "")
+            if alt:
+                attrs["alt"] = alt
+            if title:
+                attrs["title"] = title
+            return [new_node("image", attrs=attrs)]
         if isinstance(child, nodes.literal_block):
             return [self._code_block(child)]
         if isinstance(child, (nodes.bullet_list, nodes.enumerated_list)):

@@ -9,7 +9,7 @@
     "rootDir": "./src",
     "types": ["node", "vite/client"],
     "noEmit": true,
-    "skipLibCheck": false
+    "skipLibCheck": true
   },
   "include": ["./src"]
 }

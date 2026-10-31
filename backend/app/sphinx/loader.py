@@ -9,11 +9,13 @@ stable per-parent sibling order `snapshot_nodes` preserves.
 from __future__ import annotations
 
 import uuid
+from pathlib import Path
 from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.media import load_media_files
 from app.models import Athenaeum, Document, Grimoire, GrimoireCategory, Node, User
 from app.sphinx.sourcegen import StagedBook, snapshot_nodes
 
@@ -24,11 +26,12 @@ class SnapshotMissing(LookupError):
 
 async def load_site_snapshot(
     session: AsyncSession, athenaeum_id: uuid.UUID
-) -> tuple[Athenaeum, list[StagedBook], str]:
+) -> tuple[Athenaeum, list[StagedBook], str, dict[str, Path]]:
     """Slice one Athenaeum into the ordered per-book snapshot material.
 
     The third element is the librarian's display name — the copyright
-    holder of the site ("© Copyright by …", 0029).
+    holder of the site ("© Copyright by …", 0029). The fourth maps
+    canonical ``/_static/media/...`` URLs to files for the build runner.
     """
     athenaeum = await session.get(Athenaeum, athenaeum_id)
     if athenaeum is None:
@@ -65,6 +68,7 @@ async def load_site_snapshot(
     ordered.extend(uncategorized)
 
     books: list[StagedBook] = []
+    all_tiptap: list[Any] = []
     for grimoire in ordered:
         rows = await session.execute(
             select(
@@ -104,4 +108,5 @@ async def load_site_snapshot(
                 ),
             )
         )
-    return athenaeum, books, site_credit
+        all_tiptap.extend(row["tiptap"] for row in node_rows)
+    return athenaeum, books, site_credit, await load_media_files(all_tiptap, session)

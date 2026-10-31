@@ -1,6 +1,6 @@
 # Frontend support matrix and dependency policy
 
-Last updated: 2026-10-30 / Ref: stack-upgrade phase (0037)
+Last updated: 2026-10-31 / Ref: editor/content completion tranche
 
 ## Runtime and toolchain
 
@@ -36,6 +36,34 @@ Last updated: 2026-10-30 / Ref: stack-upgrade phase (0037)
 | date-fns | 4.4.0 | Dates |
 | nanoid | 6.0.2 | IDs |
 | clsx | 2.1.1 | Class composition |
+
+## Application shell (V1)
+
+- `src/main.tsx` — `createBrowserRouter`; authenticated routes are lazy
+  chunks so the TipTap editor does not load on the login/dashboard path.
+- `src/auth/AuthProvider.tsx` — access token lives in memory only; boot
+  refreshes via the HttpOnly cookie, then calls `GET /auth/me`.
+- `src/api/client.ts` — typed API wrapper, single-flight refresh on `401`,
+  `ApiError` with FastAPI `detail` extraction, authenticated media blob
+  fetch.
+- `src/pages/` — login, dashboard, Athenaeum (grimoires + builds +
+  publication settings), grimoire editor.
+- `src/editor/EditorSurface.tsx` — TipTap 3 starter-kit + image extension;
+  toolbar covers headings, marks, lists, quote, code, rule, link, image,
+  undo/redo. `Ctrl/Cmd+S` saves.
+- `src/editor/TreePanel.tsx` — tree CRUD; `src/editor/HistoryPanel.tsx` —
+  history detail + restore; `src/editor/media.ts` — canonical media URL ↔
+  blob URL mapping so the editor never sends blob URLs to the API.
+- `src/pages/GrimoirePage.tsx` — document load/save with
+  `expected_version`, 409 conflict reload/overwrite, single-file
+  RST/MyST import, source preview, unsaved-change guard, history restore.
+
+## Gates
+
+`npm run lint`, `npm run format:check`, `npm run typecheck`,
+`npm test`, `npm run build`, and `npm audit --audit-level=high` all run in
+CI. Vitest covers slug/date helpers, media URL mapping/cleanup, and API
+auth refresh/error handling.
 
 ## Browser support
 

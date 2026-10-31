@@ -327,3 +327,80 @@ def test_document_import_from_source_and_errors() -> None:
             assert await _audit_action("document_saved") >= 2
 
     _run(run())
+
+
+@needs_db
+def test_document_history_detail_and_restore() -> None:
+    users = asyncio.run(_seed_users(2))
+    me, outsider = users
+
+    async def run() -> None:
+        async with _client() as client:
+            aid = await _mk_lib(client, me, "history")
+            g = await _mk_grimoire(client, me, aid, "history-book", "History book")
+            gid = str(g["id"])
+            folio = await _mk_folio(client, me, gid, "history-folio")
+            base = f"/api/v1/grimoires/{gid}/nodes/{folio['id']}/document"
+
+            first = await client.put(
+                base,
+                json={"tiptap_json": _DOC, "expected_version": 0},
+                headers=_headers(me),
+            )
+            assert first.status_code == 200
+            second_doc = {
+                "type": "doc",
+                "content": [
+                    {
+                        "type": "paragraph",
+                        "content": [{"type": "text", "text": "Second draft"}],
+                    }
+                ],
+            }
+            second = await client.put(
+                base,
+                json={"tiptap_json": second_doc, "expected_version": 1},
+                headers=_headers(me),
+            )
+            assert second.status_code == 200
+
+            detail = await client.get(f"{base}/history/1", headers=_headers(me))
+            assert detail.status_code == 200
+            assert detail.json()["version"] == 1
+            assert detail.json()["tiptap_json"] == _DOC
+
+            missing = await client.get(f"{base}/history/99", headers=_headers(me))
+            assert missing.status_code == 404
+
+            stale = await client.post(
+                f"{base}/history/1/restore",
+                json={"expected_version": 1},
+                headers=_headers(me),
+            )
+            assert stale.status_code == 409
+
+            restored = await client.post(
+                f"{base}/history/1/restore",
+                json={"expected_version": 2},
+                headers=_headers(me),
+            )
+            assert restored.status_code == 200
+            assert restored.json()["version"] == 3
+            assert restored.json()["tiptap_json"] == _DOC
+
+            outsider_get = await client.get(
+                f"{base}/history/1", headers=_headers(outsider)
+            )
+            assert outsider_get.status_code == 404
+            outsider_restore = await client.post(
+                f"{base}/history/1/restore",
+                json={"expected_version": 3},
+                headers=_headers(outsider),
+            )
+            assert outsider_restore.status_code == 404
+
+            history = await client.get(f"{base}/history", headers=_headers(me))
+            assert [row["version"] for row in history.json()["versions"]] == [1, 2, 3]
+            assert await _audit_action("document_restored") >= 1
+
+    _run(run())

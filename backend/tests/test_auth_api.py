@@ -209,3 +209,29 @@ def test_refresh_without_cookie_is_401() -> None:
         await app_teardown()  # no-op — no request opened a connection
 
     _run(run())
+
+
+@needs_db
+def test_me_returns_authenticated_identity() -> None:
+    email = asyncio.run(_seed_user())
+
+    async def run() -> None:
+        async with _client() as client:
+            login = await client.post(
+                "/api/v1/auth/login", json={"email": email, "password": _PASSWORD}
+            )
+            token = login.json()["access_token"]
+            me = await client.get(
+                "/api/v1/auth/me",
+                headers={"Authorization": f"Bearer {token}"},
+            )
+            assert me.status_code == 200
+            assert me.json()["email"] == email
+            assert me.json()["display"] == "Auth API"
+            assert uuid.UUID(me.json()["id"])
+
+            bare = await client.get("/api/v1/auth/me")
+            assert bare.status_code == 401
+        await app_teardown()
+
+    _run(run())

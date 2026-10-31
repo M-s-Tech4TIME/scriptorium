@@ -1,6 +1,23 @@
 # CURRENT-STATE
 
-Last updated: 2026-10-30 / Ref: stack-upgrade phase 0037 pushed (`9d645e3`), CI ×3 green
+Last updated: 2026-10-31 / Ref: editor/content completion (0038) staged; push + CI verification next
+
+- **Editor/content completion (0038, 2026-10-31, staged):** the V1 React
+  app is implemented (`frontend/src/`), with memory-only access token +
+  refresh-cookie bootstrap, lazy routes, dashboard/Athenaeum/editor pages,
+  TipTap surface, tree CRUD, history detail/restore, source preview,
+  single-file RST/MyST import, 409 conflict reload/overwrite, unsaved
+  warning, and canonical media URL ↔ blob mapping. Backend adds
+  `GET /auth/me`, history detail/restore, `media_assets` + migration
+  `0009media`, image/GIF upload (magic bytes, 10 MiB, atomic write),
+  authenticated content reads, document media validation, and build-time
+  media copying. RST/MyST image round-trip. Backend `114 passed,
+  44 skipped` locally; frontend typecheck/lint/format/16 tests/build/
+  audit pass. CI frontend job now includes typecheck, test, build.
+  Live PG18/Redis media/history/migration verification is pending CI.
+  Backup/restore (Editorial + Full, numbered URLs preserved), server move/
+  first-run provisioning, page aliases, M5, and SEO remain later.
+- **Stack-upgrade phase (0037) implemented/pushed (`9d645e3`):**
 
 - **Stack-upgrade phase (0037) implemented (2026-10-30):** Python 3.14.10
   bundled via PBS `20261026`; app and engine-only venvs built from pinned

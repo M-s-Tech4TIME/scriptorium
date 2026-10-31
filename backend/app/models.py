@@ -337,6 +337,40 @@ class DocumentHistory(Base):
     )
 
 
+class MediaAsset(Base):
+    """One uploaded image/GIF owned by a grimoire (V1 media scope).
+
+    Files live under the configured media root at ``storage_path``; the
+    database row is the authorization + metadata source. Canonical TipTap
+    image nodes point at ``/_static/media/{id}.{ext}`` so the same URL
+    works in the editor preview (through the API) and in every published
+    build (copied into the artifact's ``_static`` directory).
+    """
+
+    __tablename__ = "media_assets"
+
+    id: Mapped[uuid.UUID] = _uuid_pk()
+    grimoire_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("grimoires.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    filename: Mapped[str] = mapped_column(String(255), nullable=False)
+    content_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    size_bytes: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+    storage_path: Mapped[str] = mapped_column(String(500), nullable=False)
+    created_by: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    created_at: Mapped[datetime] = _now()
+    __table_args__ = (
+        CheckConstraint(
+            "content_type IN "
+            "('image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/avif')",
+            name="ck_media_assets_type",
+        ),
+    )
+
+
 class Build(Base):
     """One numbered production of documentation (0026).
 

@@ -225,6 +225,38 @@ def test_materialize_stages_theme_style_and_engine_js(tmp_path: Path) -> None:
         assert (static / name).read_bytes() == (engine_static / name).read_bytes()
 
 
+def test_materialize_copies_media_and_rejects_unsafe_paths(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "dot.png"
+    source.write_bytes(b"\x89PNG\r\n\x1a\n")
+    ws = tmp_path / "ws"
+    _materialize(
+        ws,
+        _plan(),
+        Path(sys.executable),
+        {"_static/media/asset.png": source},
+    )
+    assert (ws / "_static" / "media" / "asset.png").read_bytes() == (
+        source.read_bytes()
+    )
+
+    with pytest.raises(RunnerConfigError, match="unsafe media path"):
+        _materialize(
+            tmp_path / "unsafe",
+            _plan(),
+            Path(sys.executable),
+            {"../escape.png": source},
+        )
+    with pytest.raises(RunnerConfigError, match="media file missing"):
+        _materialize(
+            tmp_path / "missing",
+            _plan(),
+            Path(sys.executable),
+            {"_static/media/asset.png": tmp_path / "nope.png"},
+        )
+
+
 def test_materialize_engine_missing_fail_loud(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

@@ -1,16 +1,16 @@
 # Architecture (Q20–Q22, Section 10)
 
-Last updated: 2026-10-28 / Ref: URL-durability phase (0036)
+Last updated: 2026-10-31 / Ref: editor/content completion tranche
 
 ```
-[Browser: React19 TipTap3] --REST /api/v1--> [FastAPI 0.143 web@gunicorn+uvicorn]
+[Browser: React 19.3 + TipTap 3.32] --REST /api/v1--> [FastAPI 0.162 web@gunicorn+uvicorn]
         |                                          | SQLA 2.1
         |                                          v
         +---- poll build status  +--> [PG18]  [Redis] <-- [Celery 5.6 worker]
                                                      |
                                               snapshot sources
                                                      v
-                                   [isolated Sphinx venv 9.1/5.1] (net-off,
+                                   [isolated Sphinx venv 9.2/MyST 5.1] (net-off,
                                    NoNewPrivileges, PrivateTmp, limits)
                                                      v
                             /var/lib/scriptorium/artifacts/{athenaeum}/{n}/
@@ -35,7 +35,7 @@ Last updated: 2026-10-28 / Ref: URL-durability phase (0036)
   `308` aliases after the same access check, and deletion leaves permanent
   tombstones. Page-level path aliases and distribution remain later
   phases.
-- **Canonical:** TipTap JSON `tiptap@1`; export RST/MyST deterministic; DB tree `nodes` → `toctree`; `conf.py` generated (allowlisted extensions only).
+- **Canonical:** TipTap JSON `tiptap@1`; export RST/MyST deterministic; DB tree `nodes` → `toctree`; `conf.py` generated (allowlisted extensions only). V1 media is images/GIF only: uploads are sniffed, stored under `SC_MEDIA_ROOT`, referenced as `/_static/media/{uuid}.{ext}`, validated against the owning grimoire on save, and copied into each build artifact. Video/audio/attachments and bulk import are later.
 - **Module boundaries:** `convert/` (pure), `sphinx/` adapter (generation+theming), `worker/` (queue only),
   `routers/` (RBAC per request), `editor/` (schema v1). Third-party behind adapters (Rule 5.4).
 - **Future-proof:** tree + `document_history` version-keyed → Phase A adds `versions` without rewrite;

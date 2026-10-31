@@ -1,6 +1,6 @@
-# API surface — auth, athenaeums, categories, grimoires, members, serving
+# API surface — auth, athenaeums, categories, grimoires, documents, media, serving
 
-Last updated: 2026-10-28 / Ref: URL-durability phase (0036)
+Last updated: 2026-10-31 / Ref: editor/content completion tranche
 
 ## Conventions
 
@@ -23,6 +23,7 @@ Last updated: 2026-10-28 / Ref: URL-durability phase (0036)
 | POST `/auth/login` | public | `429` limiter (0019), `503` fail-closed; body `{email,password}` → `{access_token,token_type}` + refresh cookie |
 | POST `/auth/refresh` | cookie | rotates cookie; reuse → 401 + family burn |
 | POST `/auth/logout` | cookie | revokes family (`reason=logout`), clears cookie, `204` |
+| GET `/auth/me` | bearer | `{id,email,display}` for the authenticated user; missing/deleted user → `401` |
 
 ## Athenaeums (`routers/athenaeums.py`, 0020) — the library layer
 
@@ -95,11 +96,31 @@ server-derived (Q-M3-3=A). Optimistic concurrency per Q-M3-2=A.
 |---|---|---|
 | GET `/grimoires/{gid}/nodes/{nid}/document` | any member | `404` until the first save |
 | PUT `…/document` `{tiptap_json \| source_text, expected_version}` | editor/owner (`403` viewer) | exactly one content field; `expected_version` required (`0` = create assertion); mismatch → `409` with expected/current, nothing written; import mode runs the M2 importer, `ConversionError` → `422`; every save: version+1, history append, source re-derived from canonical TipTap via the grimoire's `source_format`; audit `document_saved` |
-| GET `…/document/history` | any member | metadata list `{version, author, at}` — blobs omitted (0024); restore is a later phase |
+| GET `…/document/history` | any member | metadata list `{version, author, at}` — blobs omitted (0024) |
+| GET `…/document/history/{version}` | any member | one history row `{document_id,version,tiptap_json,source_text,author,at}`; unknown version → `404` |
+| POST `…/document/history/{version}/restore` `{expected_version}` | editor/owner (`403` viewer) | appends a **new** version copied from history (history stays immutable); stale `expected_version` → `409`; re-validates media refs → `422`; audit `document_restored` |
 
 Size caps at the trust boundary (Rule 2): `source_text` ≤ 1,000,000
 chars, serialized `tiptap_json` ≤ 2,000,000 chars → `422`. Cross-grimoire
-node addressing → uniform `404` (IDOR).
+node addressing → uniform `404` (IDOR). Image nodes must reference an
+uploaded asset owned by the same grimoire (`/_static/media/{uuid}.{ext}`);
+external/inline sources and foreign assets → `422`.
+
+## Media (`routers/media.py`, V1 images/GIF)
+
+Uploads use a raw request body (not multipart). The server sniffs magic
+bytes; the declared content type and filename extension are not trusted.
+
+| Route | Access | Notes |
+|---|---|---|
+| POST `/grimoires/{gid}/media?filename=…` | editor/owner (`403` viewer) | raw bytes; PNG/JPEG/GIF/WebP/AVIF only (`415` otherwise); 10 MiB cap (`413`); empty `422`; returns the asset row incl. canonical `url` and authenticated `content_url` |
+| GET `/grimoires/{gid}/media` | any member | assets for the grimoire, newest first |
+| GET `/media/{asset_id}/content` | any member of the owning grimoire | bytes with sniffed `Content-Type`, `X-Content-Type-Options: nosniff`, private 5-minute cache + SHA-256 `ETag`; outsider/unknown → `404` |
+
+Canonical content stores `/_static/media/{asset_id}.{ext}` image sources.
+The editor resolves those URLs through the authenticated content endpoint
+as blob URLs; builds copy referenced files into the artifact. SVG,
+remote URLs, data URIs, video, audio, and attachments are out of V1 scope.
 
 ## Members (`routers/grimoires.py`)
 
@@ -153,6 +174,6 @@ responses add `private, no-store`, `Vary: Cookie`, and
 `category_created|patched|deleted`, `grimoire_created|patched|deleted|moved`,
 `member_added|role_changed|removed`, `athenaeum_created|patched|deleted`,
 `athenaeum_public_slug_changed`, `node_created|patched|moved|deleted`,
-`document_saved`, `grimoire_duplicated`, `build_published`,
+`document_saved`, `document_restored`, `grimoire_duplicated`, `build_published`,
 `build_unpublished`, `athenaeum_custom_css_updated`
 (refused deletes/saves write no audit row — nothing happened).

@@ -1,6 +1,6 @@
 # Operations — install/upgrade (target, Q5/Q6)
 
-Last updated: 2026-10-30 / Ref: stack-upgrade phase (0037); M5 signed
+Last updated: 2026-10-31 / Ref: editor/content completion (0038); M5 signed
 package pipeline still pending
 
 - **Package build:** run `packaging/scripts/fetch-python.sh`,
@@ -15,7 +15,8 @@ package pipeline still pending
   installed package never runs pip or reaches the network.
 - **Install** `.deb`/`.rpm` (needs PG18): `postinst` creates the
   `scriptorium` user and dirs (`/opt`, `/etc/scriptorium` 0600,
-  `/var/lib|log|cache/scriptorium`, including `artifacts/` and `redis/`),
+  `/var/lib|log|cache/scriptorium`, including `artifacts/`, `media/`, and
+  `redis/`),
   seeds `/etc/scriptorium/config.env` and `/etc/scriptorium/redis.conf`
   from the packaged examples only when they do not exist, checks the
   bundled runtimes, and runs `daemon-reload`. It never touches the DB.
@@ -23,7 +24,8 @@ package pipeline still pending
   `DATABASE_URL`, `SECRET_KEY`, `SCRIPTORIUM_COOKIE_SECURE`,
   `REDIS_URL` (limiter), `CELERY_BROKER_URL` (worker),
   `SC_BUILD_DISPATCH=celery`, `SC_BUILD_PYTHON`, `SC_ARTIFACT_ROOT`,
-  `SC_BUILD_ROOT`, and the `SC_SPHINX_*` limits. The packaged examples
+  `SC_BUILD_ROOT`, `SC_MEDIA_ROOT` (default `/var/lib/scriptorium/media`),
+  and the `SC_SPHINX_*` limits. The packaged examples
   are at `/usr/share/doc/scriptorium/`.
 - **Initialise:** generate `SECRET_KEY` first
   (`/opt/scriptorium/runtime/python-3.14/bin/python3.14 -c 'import secrets;

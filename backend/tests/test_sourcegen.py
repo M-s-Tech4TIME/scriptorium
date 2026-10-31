@@ -151,7 +151,7 @@ def test_rst_only_conf_has_no_myst() -> None:
     assert "pygments_style = 'scriptorium_style.ScriptoriumStyle'" in conf
     # 0029: "Last updated on …" is conf-driven (build-date semantics)
     assert 'html_last_updated_fmt = "%B %d, %Y"' in conf
-    assert "html_static_path = []" in conf
+    assert 'html_static_path = ["_static"]' in conf
     # the sidebar tree is always materialized once pages exist
     assert "html_context = {'sidebar_categories': [{" in conf
     # 0029 context: decoration island + the credit holder

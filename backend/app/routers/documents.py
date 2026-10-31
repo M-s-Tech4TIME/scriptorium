@@ -27,6 +27,7 @@ from app.conversion.export_rst import export_rst
 from app.conversion.import_doc import ConversionError, import_document
 from app.conversion.tiptap import canon_doc
 from app.db import get_session
+from app.media import MediaRefError, validate_media_refs
 from app.models import Document, DocumentHistory, Grimoire, Node
 
 router = APIRouter(
@@ -40,6 +41,10 @@ _MAX_TIPTAP = 2_000_000
 class DocumentPut(BaseModel):
     tiptap_json: dict[str, Any] | None = None
     source_text: str | None = Field(default=None, max_length=_MAX_SOURCE)
+    expected_version: int = Field(ge=0)
+
+
+class RestoreIn(BaseModel):
     expected_version: int = Field(ge=0)
 
 
@@ -169,6 +174,13 @@ async def put_document(
     exporter = export_rst if fmt == "rst" else export_myst
     derived_source = exporter(canonical)
 
+    try:
+        await validate_media_refs(canonical, grimoire_id, session)
+    except MediaRefError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)
+        ) from exc
+
     new_version = current_version + 1
     if document is None:
         document = Document(
@@ -237,3 +249,121 @@ async def get_history(
         for row in rows
     ]
     return {"document_id": str(document.id), "versions": versions}
+
+
+async def _history_row(
+    document_id: uuid.UUID, version: int, session: AsyncSession
+) -> DocumentHistory:
+    row = (
+        await session.scalars(
+            select(DocumentHistory).where(
+                DocumentHistory.document_id == document_id,
+                DocumentHistory.version == version,
+            )
+        )
+    ).first()
+    if row is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="History version not found.",
+        )
+    return row
+
+
+@router.get("/document/history/{version}")
+async def get_history_version(
+    grimoire_id: uuid.UUID,
+    node_id: uuid.UUID,
+    version: int,
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> dict[str, object]:
+    await _member_node(grimoire_id, node_id, user_id, session, need_editor=False)
+    document = (
+        await session.scalars(select(Document).where(Document.node_id == node_id))
+    ).first()
+    if document is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No document yet — save one first.",
+        )
+    row = await _history_row(document.id, version, session)
+    return {
+        "document_id": str(document.id),
+        "version": row.version,
+        "tiptap_json": row.tiptap_json,
+        "source_text": row.source_text,
+        "author": str(row.author) if row.author else None,
+        "at": row.at.isoformat(),
+    }
+
+
+@router.post("/document/history/{version}/restore")
+async def restore_history_version(
+    grimoire_id: uuid.UUID,
+    node_id: uuid.UUID,
+    version: int,
+    body: RestoreIn,
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> dict[str, object]:
+    """Append a new version copied from history — history stays immutable."""
+    await _member_node(grimoire_id, node_id, user_id, session, need_editor=True)
+    document = (
+        await session.scalars(select(Document).where(Document.node_id == node_id))
+    ).first()
+    if document is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No document yet — save one first.",
+        )
+    if body.expected_version != document.version:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=(
+                f"Version conflict: expected {body.expected_version}, "
+                f"current {document.version}."
+            ),
+        )
+    row = await _history_row(document.id, version, session)
+
+    grimoire = await session.get(Grimoire, grimoire_id)
+    assert grimoire is not None  # membership resolved, so the row exists
+    canonical = canon_doc(row.tiptap_json)
+    exporter = export_rst if grimoire.source_format == "rst" else export_myst
+    derived_source = exporter(canonical)
+    try:
+        await validate_media_refs(canonical, grimoire_id, session)
+    except MediaRefError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)
+        ) from exc
+
+    new_version = document.version + 1
+    document.tiptap_json = canonical
+    document.source_text = derived_source
+    document.source_format = grimoire.source_format
+    document.version = new_version
+    document.updated_by = user_id
+    session.add(
+        DocumentHistory(
+            document_id=document.id,
+            version=new_version,
+            tiptap_json=canonical,
+            source_text=derived_source,
+            author=user_id,
+        )
+    )
+    add_audit(
+        session,
+        actor=user_id,
+        action="document_restored",
+        grimoire_id=grimoire_id,
+        meta={
+            "node_id": str(node_id),
+            "from_version": version,
+            "version": new_version,
+        },
+    )
+    await session.commit()
+    return _doc_body(document, node_id)
