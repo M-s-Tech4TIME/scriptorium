@@ -1,12 +1,13 @@
 # TASKS
 
-Last updated: 2026-10-31 / editor/content completion 0038 staged; push + CI verification next
+Last updated: 2026-10-31 / editor/content completion 0038 pushed (`476dfff`), CI ×3 green
 
 ## In progress (max 1–2)
 - [x] Editor/content completion (0038): V1 React app, TipTap surface,
       tree/history/import, image/GIF media, build media copying,
-      `GET /auth/me`; docs + tests. Staged 2026-10-31 — commit/push and
-      verify CI (live PG18 media/history + migration 0009) next.
+      `GET /auth/me`; docs + tests. Pushed as `476dfff`; CI ×3 green
+      (backend 159 passed, no skips, incl. live PG18 media/history and
+      migration 0009).
 - [ ] Backup/restore phase: Editorial + Full modes; restored numbered
       `/b/{n}/` URLs must be preserved exactly; then server move/first-run
       provisioning.

@@ -1,11 +1,12 @@
 # HANDOFF
 
-Last updated: 2026-10-31 / Ref: editor/content completion (0038) staged; push + CI verification next
+Last updated: 2026-10-31 / Ref: editor/content completion (0038) pushed (`476dfff`), CI ×3 green
 
 ## Current tranche (2026-10-31): editor/content completion 0038
 
-Implemented but **not yet pushed**; live-DB media/history tests and
-migration `0009media` still need CI verification.
+Implemented and **pushed (`476dfff`)**; CI ×3 green. The live-PG18 run
+completed 159 tests with no skips, covering media/history and migration
+`0009media`.
 
 - **Backend:** `GET /auth/me`; history detail + restore endpoints
   (`document_restored` audit, new version appended, media re-validated);
@@ -19,24 +20,21 @@ migration `0009media` still need CI verification.
   route chunks, TipTap surface, tree CRUD, history restore, source
   preview, single-file import, conflict reload/overwrite, unsaved-change
   warning, canonical media URL ↔ blob mapping.
-- **Gates:** backend `114 passed, 44 skipped` locally, ruff/format/mypy
-  clean. Frontend typecheck, lint, format check, 16 Vitest tests, build,
-  and high-severity audit gate pass. CI frontend job now runs typecheck,
-  test, and build.
+- **Gates:** backend `115 passed, 44 skipped` locally, ruff/format/mypy
+  clean; CI backend `159 passed` with no skips. Frontend typecheck, lint,
+  format check, 16 Vitest tests, build, and high-severity audit gate pass.
+  CI frontend job now runs typecheck, test, and build.
 - **Docs:** decision 0038, changelog, API/data-model/conversion/frontend/
   overview/security/roadmap, brain.
 - **Known limits:** live PG18/Redis unavailable locally (Docker socket
   denied), so media/history/migration tests only run in CI. TypeScript
   ESLint remains blocked by typescript-eslint's TS `<6.1` peer range;
   `tsc --noEmit` is the type gate.
-- **Next:** commit/push, verify all three CI workflows green, then start
-  the approved backup/restore phase (Editorial + Full; numbered `/b/{n}/`
-  URLs must survive restore), followed by server move/first-run
-  provisioning, page aliases, M5, and the SEO plan.
+- **Next:** start the approved backup/restore phase (Editorial + Full;
+  numbered `/b/{n}/` URLs must survive restore), followed by server move/
+  first-run provisioning, page aliases, M5, and the SEO plan.
 
 ## Previous tranche (2026-10-30): technical-stack upgrade 0037
-
-## Current tranche (2026-10-30): technical-stack upgrade 0037
 
 Owner-approved upgrade is implemented and pushed; no product behavior,
 schema, URL, or SEO change.

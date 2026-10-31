@@ -36,17 +36,15 @@ media copying.
 
 ## Gates
 
-- Backend: `114 passed, 44 skipped`; ruff, format, mypy clean.
+- Backend: `115 passed, 44 skipped` locally; ruff, format, mypy clean.
 - Frontend: typecheck, lint, format check, 16 tests, build, high-severity
   audit pass.
-- Live PG18/Redis tests and migration `0009media` remain to be verified in
-  CI.
+- Pushed as `476dfff`. CI ×3 green; backend `159 passed` with no skips
+  (live PG18 media/history and migration `0009media`).
 
 ## Next
 
-1. Commit and push this tranche; verify lint-type-test, security, and
-   packaging workflows.
-2. Start the approved backup/restore phase (Editorial + Full; numbered
+1. Start the approved backup/restore phase (Editorial + Full; numbered
    `/b/{n}/` URLs must survive restore).
-3. Then server move/first-run provisioning, page aliases, M5, and the SEO
+2. Then server move/first-run provisioning, page aliases, M5, and the SEO
    plan/rulings.

@@ -1,6 +1,6 @@
 # PROJECT-SUMMARY (brain map, not a copy)
 
-Last updated: 2026-10-31 / Ref: editor/content completion 0038 staged
+Last updated: 2026-10-31 / Ref: editor/content completion 0038 pushed (`476dfff`), CI ×3 green
 
 - **What:** Scriptorium — self-hosted docs platform. Browser WYSIWYG (TipTap) → valid
   Sphinx source (RST default, MyST opt-in) → sandboxed background build → served HTML.
@@ -44,10 +44,11 @@ Last updated: 2026-10-31 / Ref: editor/content completion 0038 staged
   (2026-10-30):** bundled Python 3.14.10, Node 26.13.0 LTS, Redis 8.10.2
   bundled with `scriptorium-redis.service`, Sphinx 9.2.0, current backend/
   frontend pins, app/build venv relocation, CI/audit gates, support matrix.
-  **Editor/content completion 0038 staged (2026-10-31):** V1 React app,
-  TipTap editor, tree/history/import, image/GIF media (`media_assets`,
-  migration 0009), build media copying, `GET /auth/me`; frontend
-  typecheck/test/build gates added to CI. Live-DB verification pending.
+  **Editor/content completion 0038 pushed (`476dfff`, 2026-10-31):** V1
+  React app, TipTap editor, tree/history/import, image/GIF media
+  (`media_assets`, migration 0009), build media copying, `GET /auth/me`;
+  frontend typecheck/test/build gates added to CI. CI ×3 green; backend
+  ran 159 tests with no skips (live PG18 media/history/migration).
   Page-path aliases, backup/restore, server move/first-run provisioning,
   M5, and the dedicated SEO phase remain later; distribution awaits
   Q-DIST-A…D. Owner ruled the artifact

@@ -52,12 +52,12 @@ import. Backup/restore, page aliases, M5, and SEO remain later phases.
 
 ## Tests and gates
 
-- Backend: `114 passed, 44 skipped` locally; ruff, format, mypy clean.
-  Live-DB media/history tests run in CI against PG18.
+- Backend: `115 passed, 44 skipped` locally; ruff, format, mypy clean.
+  CI ran `159 passed` with no skips against live PG18/Redis, including
+  media/history endpoints and migration `0009media`.
 - Frontend: typecheck, lint, format check, 16 Vitest tests, production
   build, and high-severity audit gate pass.
-- Migration `0009media` must be verified in CI before this tranche is
-  declared green.
+- Pushed as `476dfff`; lint-type-test, security, and packaging all green.
 
 ## Docs
 
