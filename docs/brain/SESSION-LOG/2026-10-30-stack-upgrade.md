@@ -21,4 +21,6 @@
   `scriptorium-admin --help` verified. Runtime and venvs ship without
   pip/bytecode.
 - Known scoped exception: typescript-eslint 8.72.1 excludes TS 7; tsc is
-  the type gate. Push/CI confirmation pending.
+  the type gate.
+- Pushed as `9d645e3`; lint-type-test, packaging, and security workflows
+  all green.

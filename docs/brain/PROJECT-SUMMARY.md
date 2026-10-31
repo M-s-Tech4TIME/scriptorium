@@ -1,6 +1,6 @@
 # PROJECT-SUMMARY (brain map, not a copy)
 
-Last updated: 2026-10-30 / Ref: stack-upgrade phase 0037 implemented (local gates green; push pending)
+Last updated: 2026-10-30 / Ref: stack-upgrade phase 0037 pushed (`9d645e3`), CI ×3 green
 
 - **What:** Scriptorium — self-hosted docs platform. Browser WYSIWYG (TipTap) → valid
   Sphinx source (RST default, MyST opt-in) → sandboxed background build → served HTML.

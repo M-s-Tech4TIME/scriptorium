@@ -1,10 +1,10 @@
 # HANDOFF
 
-Last updated: 2026-10-30 / Ref: stack-upgrade phase 0037 implemented (local gates green; push pending)
+Last updated: 2026-10-30 / Ref: stack-upgrade phase 0037 pushed (`9d645e3`), CI ×3 green
 
 ## Current tranche (2026-10-30): technical-stack upgrade 0037
 
-Owner-approved upgrade is implemented locally; no product behavior,
+Owner-approved upgrade is implemented and pushed; no product behavior,
 schema, URL, or SEO change.
 
 - **Python 3.14.10 bundled** via python-build-standalone release
@@ -41,9 +41,10 @@ schema, URL, or SEO change.
   bundled runtimes; extraction verified Python 3.14.10, app imports,
   build-engine imports, Redis 8.10.2, and `scriptorium-admin --help`.
   The runtime and both venvs ship without pip/bytecode.
-- **Still pending:** commit/push and CI confirmation; M5 signed package
-  pipeline (lintian/rpmlint, SBOM/provenance, clean-install matrix); SEO
-  phase; distribution.
+- **Closeout:** pushed as `9d645e3`; lint-type-test, packaging, and
+  security workflows all green.
+- **Still pending:** M5 signed package pipeline (lintian/rpmlint,
+  SBOM/provenance, clean-install matrix); SEO phase; distribution.
 
 ## Previous tranche (2026-10-28): URL durability 0036
 

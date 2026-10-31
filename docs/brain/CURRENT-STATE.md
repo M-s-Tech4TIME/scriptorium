@@ -1,6 +1,6 @@
 # CURRENT-STATE
 
-Last updated: 2026-10-30 / Ref: stack-upgrade phase 0037 implemented (local gates green; push pending)
+Last updated: 2026-10-30 / Ref: stack-upgrade phase 0037 pushed (`9d645e3`), CI ×3 green
 
 - **Stack-upgrade phase (0037) implemented (2026-10-30):** Python 3.14.10
   bundled via PBS `20261026`; app and engine-only venvs built from pinned
@@ -15,7 +15,7 @@ Last updated: 2026-10-30 / Ref: stack-upgrade phase 0037 implemented (local gate
   type gate). Decision 0037 + support matrix + CI/audit gates added.
   nfpm 2.48.0 built a 117 MB `.deb`; extracted runtimes/imports and
   `scriptorium-admin --help` verified; runtime and venvs ship without
-  pip/bytecode.
+  pip/bytecode. Pushed as `9d645e3`; CI ×3 green.
 - **Phase:** **URL-durability phase (0036) pushed (`be5af83`), CI ×3
   green: owner-renamable
   public names, permanent aliases, tombstones, migration 0008, live
