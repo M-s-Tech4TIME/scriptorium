@@ -11,7 +11,7 @@ Node with a tiny DOM stub and a deterministic stopword set/stemmer, so a
 regression fails the backend suite without a browser.
 
 Skipped only when Node is absent from the machine. GitHub's ubuntu
-runners ship Node 24; the frozen stack lists Node 24 LTS.
+runners ship Node 26; the frozen stack lists Node 26 LTS.
 """
 
 from __future__ import annotations

@@ -1,8 +1,51 @@
 # HANDOFF
 
-Last updated: 2026-10-28 / Ref: URL-durability phase 0036 pushed (`be5af83`), CI ×3 green
+Last updated: 2026-10-30 / Ref: stack-upgrade phase 0037 implemented (local gates green; push pending)
 
-## Current tranche (2026-10-28): URL durability 0036
+## Current tranche (2026-10-30): technical-stack upgrade 0037
+
+Owner-approved upgrade is implemented locally; no product behavior,
+schema, URL, or SEO change.
+
+- **Python 3.14.10 bundled** via python-build-standalone release
+  `20261026` (x86_64 + aarch64 SHA-256 pins). `fetch-python.sh` extracts
+  the runtime; `build-app-venv.sh` builds the runtime-only app venv from
+  `backend/requirements.prod.lock`; `build-venv.sh` builds the engine-only
+  venv from `packaging/build-requirements.lock`; `relocate-venv.sh`
+  rewrites shebangs/pyvenv.cfg to the installed paths. The target host
+  never runs pip.
+- **Redis 8.10.2 bundled** via `build-redis.sh` (source SHA-256 pinned,
+  core `redis-server` + `redis-cli`). New `scriptorium-redis.service`
+  (`Type=notify`, `scriptorium` user, localhost, AOF); web/worker units
+  require it. `nfpm.yaml` packages both runtimes + app/build venvs and
+  drops distro `python3.12`/`redis` dependencies. `postinst` seeds
+  `/etc/scriptorium/redis.conf` and verifies every runtime.
+- **Backend pins:** FastAPI 0.162.0, Starlette 1.10.0, Pydantic 2.14.1,
+  Uvicorn 0.54.0, Gunicorn 26.2.0, SQLAlchemy 2.1.6, Alembic 1.20.1,
+  asyncpg 0.32.0, Celery 5.6.3, redis-py 6.4.0, Sphinx 9.2.0, MyST 5.1.0;
+  docutils remains 0.22.4. Ruff 0.17.3 findings were fixed (FastAPI
+  dependencies converted to `Annotated[...]`; no blanket B008 ignore).
+- **Frontend pins:** Node 26.13.0 LTS / npm 11.20.0, React 19.3.1,
+  TypeScript 7.0.2, TipTap 3.32.1, React Router 8.5.1, TanStack Query
+  5.105.0, RHF 7.91.0, Zod 4.6.7, Radix latest, Vite 8.3.5, Vitest
+  5.0.5, ESLint 10.13.0, Prettier 3.9.10, Playwright 1.64.1, Testing
+  Library 16.3.3, axe-core 4.14.0. Support matrix:
+  `docs/technology/frontend.md`.
+- **Gates:** backend `114 passed, 40 skipped`; ruff/format/mypy clean;
+  `pip-audit` clean; frontend `npm ci` + lint + format check + audit
+  clean (0 vulnerabilities). docutils-0.23 probe: 59 passed with Sphinx
+  9.2.0; pin stays. Known scoped exception: typescript-eslint 8.72.1
+  excludes TS 7, so ESLint covers JS/config only and `tsc --noEmit` is
+  the type gate.
+- **Package validation:** nfpm 2.48.0 built a 117 MB `.deb` from the
+  bundled runtimes; extraction verified Python 3.14.10, app imports,
+  build-engine imports, Redis 8.10.2, and `scriptorium-admin --help`.
+  The runtime and both venvs ship without pip/bytecode.
+- **Still pending:** commit/push and CI confirmation; M5 signed package
+  pipeline (lintian/rpmlint, SBOM/provenance, clean-install matrix); SEO
+  phase; distribution.
+
+## Previous tranche (2026-10-28): URL durability 0036
 
 Implemented the owner-approved A1/B1/C1/D1/E1/F1 URL-durability phase
 and kept URL-scheme Option 1 (`/a/{public_slug}/`, `/latest/`,
@@ -142,7 +185,7 @@ approval; M4-C4 is pushed as `1add6c8` with CI green ×3.
    standing junk markers before committing.
 
 ## Gotchas (carried)
-- **Sphinx 9.1 theme:** `theme.conf` MUST carry `inherit = none`
+- **Sphinx 9.2 theme:** `theme.conf` MUST carry `inherit = none`
   explicitly (absence → `ThemeError`); with a parentless theme the
   builder only reaches YOUR staged theme statics — engine basic-theme
   statics are unreachable, so `.jinja` static templates must be

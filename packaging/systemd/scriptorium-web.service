@@ -1,7 +1,7 @@
 [Unit]
 Description=Scriptorium web (FastAPI gunicorn+uvicorn)
-Requires=redis.service
-After=network.target postgresql.service redis.service
+Requires=scriptorium-redis.service
+After=network.target postgresql.service scriptorium-redis.service
 [Service]
 User=scriptorium
 Group=scriptorium

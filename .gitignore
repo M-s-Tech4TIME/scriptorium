@@ -4,3 +4,6 @@ node_modules/
 __pycache__/
 *.pyc
 packaging/build-venv/
+packaging/app-venv/
+packaging/python-runtime/
+packaging/redis-runtime/

@@ -41,12 +41,13 @@ write.
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any, Mapping, Sequence
+from typing import Any
 
-from app.conversion.import_doc import ConversionError
 from app.conversion.export_myst import export_myst
 from app.conversion.export_rst import export_rst
+from app.conversion.import_doc import ConversionError
 from app.serving.css import CustomCssError, sanitize_custom_css
 
 THEME_BASE = "scriptorium"
@@ -76,7 +77,7 @@ class SnapshotNode:
     slug: str
     title: str
     tiptap: dict[str, Any] | None = None
-    children: tuple["SnapshotNode", ...] = ()
+    children: tuple[SnapshotNode, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -332,7 +333,7 @@ def _emit_page(
 
 
 def _sidebar_rows(
-    pairs: Sequence[tuple["StagedBook", dict[str, Any]]],
+    pairs: Sequence[tuple[StagedBook, dict[str, Any]]],
 ) -> list[dict[str, Any]]:
     """Group the per-book sidebar rows under their category labels.
 

@@ -1,35 +1,56 @@
 name: packaging
 on: [push, pull_request]
 jobs:
-  nfpm-lint:
-    runs-on: ubuntu-latest
+  contract:
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Packaging contract
         run: |
           set -eu
           test -f packaging/nfpm.yaml
           test -f packaging/build-requirements.lock
+          test -f backend/requirements.prod.lock
           test -f packaging/config.env.example
+          test -f packaging/redis.conf.example
+          test -f packaging/scripts/fetch-python.sh
+          test -f packaging/scripts/build-app-venv.sh
           test -f packaging/scripts/build-venv.sh
+          test -f packaging/scripts/build-redis.sh
+          test -f packaging/scripts/relocate-venv.sh
           test -f packaging/scripts/postinst.sh
+          test -f packaging/systemd/scriptorium-redis.service
           test -f packaging/systemd/scriptorium-web.service
           test -f packaging/systemd/scriptorium-worker.service
           test -f scripts/probe-docutils-023.sh
           test -f .github/workflows/docutils-probe.yml
-          sh -n packaging/scripts/build-venv.sh
-          sh -n packaging/scripts/postinst.sh
-          sh -n packaging/scripts/prerm.sh
+          for script in packaging/scripts/*.sh; do sh -n "$script"; done
           bash -n scripts/probe-docutils-023.sh
-          grep -q '^Requires=redis.service$' packaging/systemd/scriptorium-web.service
-          grep -q '^Requires=redis.service$' packaging/systemd/scriptorium-worker.service
-          grep -q '^After=.*redis.service' packaging/systemd/scriptorium-web.service
-          grep -q '^After=.*redis.service' packaging/systemd/scriptorium-worker.service
+          grep -q '^Requires=scriptorium-redis.service$' packaging/systemd/scriptorium-web.service
+          grep -q '^Requires=scriptorium-redis.service$' packaging/systemd/scriptorium-worker.service
+          grep -q '^After=.*scriptorium-redis.service' packaging/systemd/scriptorium-web.service
+          grep -q '^After=.*scriptorium-redis.service' packaging/systemd/scriptorium-worker.service
+          grep -q '^Type=notify$' packaging/systemd/scriptorium-redis.service
+          grep -q '^ExecStart=/opt/scriptorium/redis/bin/redis-server' packaging/systemd/scriptorium-redis.service
           grep -q '^CELERY_BROKER_URL=' packaging/config.env.example
           grep -q '^SC_BUILD_PYTHON=/opt/scriptorium/build-venv/bin/python$' packaging/config.env.example
-          grep -q '/opt/scriptorium/build-venv' packaging/nfpm.yaml
+          grep -q 'PYTHON_VERSION=3.14.10' packaging/scripts/fetch-python.sh
+          grep -q 'REDIS_VERSION=8.10.2' packaging/scripts/build-redis.sh
+          grep -q 'python-runtime' packaging/nfpm.yaml
+          grep -q 'app-venv' packaging/nfpm.yaml
+          grep -q 'build-venv' packaging/nfpm.yaml
+          grep -q 'redis-runtime' packaging/nfpm.yaml
+          grep -q 'image: redis:8.10.2' docker-compose.yml
           if grep -Eq '^(fastapi|sqlalchemy|celery|asyncpg|alembic)==' packaging/build-requirements.lock; then
             echo "build venv lock contains an app dependency" >&2
+            exit 1
+          fi
+          if grep -Eq '^(pytest|ruff|mypy|pip-audit|httpx|types-pygments)==' backend/requirements.prod.lock; then
+            echo "production app lock contains a dev-only dependency" >&2
+            exit 1
+          fi
+          if grep -q 'python3.12' packaging/nfpm.yaml packaging/scripts/*.sh; then
+            echo "stale Python 3.12 reference in packaging" >&2
             exit 1
           fi
           echo "packaging contract OK"

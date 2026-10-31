@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import re
 import uuid
-from typing import Literal
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel, Field
@@ -129,8 +129,8 @@ async def _own_athenaeum(
 
 @router.get("")
 async def list_grimoires(
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> list[dict[str, object]]:
     rows = await session.execute(
         select(Grimoire, Membership.role)
@@ -144,8 +144,8 @@ async def list_grimoires(
 @router.post("", status_code=status.HTTP_201_CREATED)
 async def create_grimoire(
     body: GrimoireIn,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> dict[str, object]:
     await _own_athenaeum(body.athenaeum_id, user_id, session)
     _check_slug(body.slug)
@@ -199,8 +199,8 @@ async def _role_grimoire(
 @router.get("/{grimoire_id}")
 async def get_grimoire(
     grimoire_id: uuid.UUID,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> dict[str, object]:
     grimoire, role = await _role_grimoire(
         grimoire_id, user_id, session, need_owner=False
@@ -212,8 +212,8 @@ async def get_grimoire(
 async def patch_grimoire(
     grimoire_id: uuid.UUID,
     body: GrimoirePatch,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> dict[str, object]:
     grimoire, role = await _role_grimoire(
         grimoire_id, user_id, session, need_owner=True
@@ -274,8 +274,8 @@ async def patch_grimoire(
 @router.delete("/{grimoire_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_grimoire(
     grimoire_id: uuid.UUID,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> Response:
     grimoire, _ = await _role_grimoire(grimoire_id, user_id, session, need_owner=True)
     node_count = await session.scalar(
@@ -339,8 +339,8 @@ def _parent_first(nodes: list[Node]) -> list[Node]:
 async def duplicate_grimoire(
     grimoire_id: uuid.UUID,
     body: DuplicateIn,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> dict[str, object]:
     """Deep copy (0025): grimoire + tree + head documents; fresh roster, v1."""
     grimoire, _ = await _role_grimoire(grimoire_id, user_id, session, need_owner=True)
@@ -464,8 +464,8 @@ async def duplicate_grimoire(
 @router.get("/{grimoire_id}/members")
 async def list_members(
     grimoire_id: uuid.UUID,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> list[dict[str, object]]:
     await require_membership(grimoire_id, user_id, session)
     rows = await session.execute(
@@ -484,8 +484,8 @@ async def list_members(
 async def add_member(
     grimoire_id: uuid.UUID,
     body: MemberIn,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> dict[str, object]:
     await _role_grimoire(grimoire_id, user_id, session, need_owner=True)
     target = await session.scalar(select(User).where(User.email == body.email.lower()))
@@ -530,8 +530,8 @@ async def patch_member(
     grimoire_id: uuid.UUID,
     member_id: uuid.UUID,
     body: MemberPatch,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> dict[str, object]:
     await _role_grimoire(grimoire_id, user_id, session, need_owner=True)
     role_row = await session.scalar(
@@ -569,8 +569,8 @@ async def patch_member(
 async def remove_member(
     grimoire_id: uuid.UUID,
     member_id: uuid.UUID,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> Response:
     role = await require_membership(grimoire_id, user_id, session)
     if role != "owner" and member_id != user_id:

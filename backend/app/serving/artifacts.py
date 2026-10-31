@@ -27,7 +27,7 @@ def artifact_dir(build: Build) -> Path | None:
     try:
         path = Path(build.artifact_path).resolve()
         html = (path / "html").resolve()
-    except (OSError, RuntimeError):
+    except OSError, RuntimeError:
         return None
     if not path.is_relative_to(root):
         return None
@@ -64,7 +64,7 @@ def safe_file(html_root: Path, url_path: str) -> Path | None:
             candidate = (candidate / "index.html").resolve()
             if not candidate.is_relative_to(root):
                 return None
-    except (OSError, RuntimeError):
+    except OSError, RuntimeError:
         return None
     if not candidate.is_file():
         return None

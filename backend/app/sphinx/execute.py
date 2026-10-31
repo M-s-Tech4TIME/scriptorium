@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import asyncio
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
@@ -40,7 +40,7 @@ async def _execute_build(build_id: uuid.UUID) -> None:
                 return  # only queued work executes here (E3 discipline)
 
             build.status = "running"
-            build.started = datetime.now(timezone.utc)
+            build.started = datetime.now(UTC)
             await session.commit()
 
             log_path: str
@@ -66,7 +66,8 @@ async def _execute_build(build_id: uuid.UUID) -> None:
                 log_path = outcome.log_path if outcome.log_path is not None else ""
                 artifact_path = outcome.artifact_path
                 build.status = "ok" if outcome.ok else "failed"
-            except Exception as exc:  # staging/plan/runner failures → build failed
+            except Exception as exc:  # noqa: BLE001 - build boundary marks any failure
+                # staging/plan/runner failures → build failed
                 build.status = "failed"
                 log_text = (
                     "Scriptorium build log (0026) — staging failed\n"
@@ -78,7 +79,7 @@ async def _execute_build(build_id: uuid.UUID) -> None:
                 crash.write_text(log_text, encoding="utf-8")
                 log_path = str(crash)
 
-            build.finished = datetime.now(timezone.utc)
+            build.finished = datetime.now(UTC)
             build.log_path = log_path
             build.artifact_path = artifact_path
             await session.commit()

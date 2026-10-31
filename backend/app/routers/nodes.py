@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import re
 import uuid
-from typing import Literal
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel, Field
@@ -121,8 +121,8 @@ def _sibling_filters(
 @router.get("/tree")
 async def get_tree(
     grimoire_id: uuid.UUID,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> dict[str, object]:
     await require_membership(grimoire_id, user_id, session)
     nodes = (
@@ -151,8 +151,8 @@ async def get_tree(
 async def create_node(
     grimoire_id: uuid.UUID,
     body: NodeIn,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> dict[str, object]:
     await _require_owner(grimoire_id, user_id, session)
     _check_slug(body.slug)
@@ -201,8 +201,8 @@ async def patch_node(
     grimoire_id: uuid.UUID,
     node_id: uuid.UUID,
     body: NodePatch,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> dict[str, object]:
     await _require_owner(grimoire_id, user_id, session)
     node = await _node_in_grimoire(grimoire_id, node_id, session)
@@ -312,8 +312,8 @@ async def patch_node(
 async def delete_node(
     grimoire_id: uuid.UUID,
     node_id: uuid.UUID,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> Response:
     await _require_owner(grimoire_id, user_id, session)
     node = await _node_in_grimoire(grimoire_id, node_id, session)

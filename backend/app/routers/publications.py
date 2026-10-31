@@ -12,8 +12,8 @@ Routes are owner-only; foreign Athenaeums are the uniform 404.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
-from typing import Literal
+from datetime import UTC, datetime
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel
@@ -101,8 +101,8 @@ async def _publication_body(
 @router.get("/{athenaeum_id}/publication")
 async def get_publication(
     athenaeum_id: uuid.UUID,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> dict[str, object]:
     athenaeum = await own_athenaeum(session, athenaeum_id, user_id)
     return await _publication_body(session, athenaeum)
@@ -112,8 +112,8 @@ async def get_publication(
 async def publish_build(
     athenaeum_id: uuid.UUID,
     body: PublishIn,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> dict[str, object]:
     athenaeum = await own_athenaeum(session, athenaeum_id, user_id)
     build = await session.get(Build, body.build_id)
@@ -129,7 +129,7 @@ async def publish_build(
 
     channels = ["latest", "stable"] if body.channel == "both" else [body.channel]
     if build.published_at is None:
-        build.published_at = datetime.now(timezone.utc)
+        build.published_at = datetime.now(UTC)
         build.published_by = user_id
     if "latest" in channels:
         athenaeum.latest_build_id = build.id
@@ -153,9 +153,9 @@ async def publish_build(
 @router.delete("/{athenaeum_id}/publish", status_code=status.HTTP_204_NO_CONTENT)
 async def unpublish_build(
     athenaeum_id: uuid.UUID,
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
     channel: Channel = "both",
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
 ) -> Response:
     athenaeum = await own_athenaeum(session, athenaeum_id, user_id)
     channels = ["latest", "stable"] if channel == "both" else [channel]

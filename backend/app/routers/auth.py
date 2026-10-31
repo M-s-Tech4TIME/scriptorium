@@ -12,7 +12,8 @@ from __future__ import annotations
 
 import os
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from pydantic import BaseModel
@@ -21,11 +22,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import limiter
 from app.auth import (
+    _UNAUTHORIZED,
     ACCESS_COOKIE_NAME,
     ACCESS_MINUTES,
     REFRESH_DAYS,
     AuthError,
-    _UNAUTHORIZED,
     create_token_pair,
     decode_refresh,
     get_secret,
@@ -100,7 +101,7 @@ async def login(
     body: LoginIn,
     request: Request,
     response: Response,
-    session: AsyncSession = Depends(get_session),
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> dict[str, str]:
     secret = get_secret()
     email = body.email.strip().lower()
@@ -149,7 +150,7 @@ async def login(
             family=fam,
             jti=jti,
             parent_jti=None,
-            expires_at=datetime.now(timezone.utc) + timedelta(days=REFRESH_DAYS),
+            expires_at=datetime.now(UTC) + timedelta(days=REFRESH_DAYS),
         )
     )
     await session.commit()
@@ -162,7 +163,7 @@ async def login(
 async def refresh(
     request: Request,
     response: Response,
-    session: AsyncSession = Depends(get_session),
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> dict[str, str]:
     token = request.cookies.get(COOKIE_NAME)
     if not token:
@@ -180,14 +181,14 @@ async def refresh(
 async def logout(
     request: Request,
     response: Response,
-    session: AsyncSession = Depends(get_session),
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> None:
     token = request.cookies.get(COOKIE_NAME)
     if token:
         try:
             _, family, _ = decode_refresh(token, get_secret())
             await revoke_family(session, family, "logout")
-        except (AuthError, RuntimeError):
+        except AuthError, RuntimeError:
             pass  # junk/expired cookie — clear it and treat as logged out
     response.delete_cookie(COOKIE_NAME, path="/")
     response.delete_cookie(ACCESS_COOKIE_NAME, path="/a")

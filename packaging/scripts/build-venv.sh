@@ -8,7 +8,7 @@ set -eu
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 DEST=${1:-"$ROOT/build-venv"}
-PYTHON=${PYTHON:-python3.12}
+PYTHON=${PYTHON:-"$ROOT/python-runtime/bin/python3.14"}
 
 case "$DEST" in
   "" | "/")
@@ -17,8 +17,13 @@ case "$DEST" in
     ;;
 esac
 
-"$PYTHON" -m venv --clear "$DEST"
-"$DEST/bin/python" -m pip install --no-cache-dir --no-deps \
+if [ ! -x "$PYTHON" ]; then
+  echo "missing bundled Python runtime: $PYTHON (run fetch-python.sh first)" >&2
+  exit 2
+fi
+
+"$PYTHON" -m venv --copies --clear "$DEST"
+"$DEST/bin/python" -m pip install --no-cache-dir --no-compile --no-deps \
   -r "$ROOT/build-requirements.lock"
 
 # Hermeticity proof: the pinned engine trio is present, app deps are not.
@@ -31,7 +36,7 @@ import myst_parser
 import sphinx
 
 expected = {
-    "sphinx": "9.1.0",
+    "sphinx": "9.2.0",
     "docutils": "0.22.4",
     "myst-parser": "5.1.0",
 }
@@ -47,3 +52,14 @@ for forbidden in ("fastapi", "sqlalchemy", "celery", "asyncpg", "alembic"):
         raise SystemExit(f"build venv is not isolated: {forbidden} is installed")
 print(f"build venv ready: {sys.executable}")
 PY
+
+# The installed venv is a runtime, not a package manager. Drop pip and
+# bytecode to keep the package small; target hosts never install packages.
+rm -rf "$DEST"/lib/python3.14/site-packages/pip \
+  "$DEST"/lib/python3.14/site-packages/pip-*.dist-info
+rm -f "$DEST"/bin/pip "$DEST"/bin/pip3 "$DEST"/bin/pip3.14
+find "$DEST" -type d -name __pycache__ -prune -exec rm -rf {} +
+find "$DEST" -type f -name '*.pyc' -delete
+
+"$ROOT/scripts/relocate-venv.sh" "$DEST" /opt/scriptorium/build-venv \
+  /opt/scriptorium/runtime/python-3.14

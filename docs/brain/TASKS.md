@@ -1,8 +1,12 @@
 # TASKS
 
-Last updated: 2026-10-28 / 0036 URL durability pushed (`be5af83`), CI ×3 green
+Last updated: 2026-10-30 / 0037 stack upgrade implemented (local gates green; push pending)
 
 ## In progress (max 1–2)
+- [x] Stack-upgrade phase (0037): bundled Python 3.14.10 + Redis 8.10.2,
+  Node 26.13.0 LTS, Sphinx 9.2.0, current backend/frontend pins, CI/audit
+  gates, support matrix. Local backend/frontend gates green; commit/push
+  pending.
 - Dedicated SEO phase plan (owner-requested; per-Athenaeum editorial
   controls; no implementation before plan + rulings). Q-EDITOR-1 remains
   open/non-blocking.

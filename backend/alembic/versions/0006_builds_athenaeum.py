@@ -17,8 +17,9 @@ Revises: 0005foliochapter
 from __future__ import annotations
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy.dialects import postgresql
+
+from alembic import op
 
 revision = "0006buildsite"
 down_revision = "0005foliochapter"

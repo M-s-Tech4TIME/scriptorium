@@ -18,7 +18,8 @@ The same headers apply to public and private sites. Private sites add
 
 from __future__ import annotations
 
-from typing import Any, Mapping
+from collections.abc import Mapping
+from typing import Any
 
 from app.serving.manifest import manifest_script_hashes
 

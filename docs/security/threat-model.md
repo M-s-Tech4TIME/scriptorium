@@ -1,6 +1,6 @@
 # Threat model (initial, Q22 / §10)
 
-Last updated: 2026-10-28 / Ref: URL-durability phase (0036 A1/D1/E1/F1)
+Last updated: 2026-10-30 / Ref: stack-upgrade phase (0037)
 
 ## Primary risk: untrusted content → Sphinx code exec
 - Generated-only `conf.py`; extension allowlist (any addition = Rule 4 + record).
@@ -11,8 +11,10 @@ Last updated: 2026-10-28 / Ref: URL-durability phase (0036 A1/D1/E1/F1)
   of the pinned stack (no credentials/proxy in the whitelisted env), not
   a kernel namespace — disclosed P3 limitation.
 - No remote fetch at build; link-check opt-in with allowlist (SSRF guard).
-- Package install: `config.env` seeded 0600 only when absent; `postinst`
-  never migrates or fetches; worker/web `Requires=redis.service`.
+- Package install: bundled Python 3.14.10 + Redis 8.10.2 are built and
+  verified at package-build time; the target host never runs pip or
+  fetches code. `config.env`/`redis.conf` are seeded only when absent;
+  `postinst` never migrates; worker/web `Requires=scriptorium-redis.service`.
 
 ## Serving risks → mitigations (0035)
 - **Private artifact disclosure / IDOR:** per-Athenaeum `is_public`

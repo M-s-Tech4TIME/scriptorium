@@ -1,6 +1,6 @@
 # DECISIONS-INDEX
 
-Last updated: 2026-10-28 / Ref: URL-durability phase (0036)
+Last updated: 2026-10-30 / Ref: stack-upgrade phase (0037)
 
 | ID | One-line | Status | Date | Approver |
 |---|---|---|---|---|
@@ -40,8 +40,9 @@ Last updated: 2026-10-28 / Ref: URL-durability phase (0036)
 | 0034 | Theme fourth-feedback batch: panel placeholder only, code-language label fix with `Code` fallback, pager inside `.sd-reading-main`, and pre-paint collapsed-panel state so pager navigation never flashes the panel open; Node/theme-build/browser regressions | accepted | 2026-10-24 | owner |
 | 0035 | Serving phase (A2/B3/C1/D1/E2): owner-published latest/stable pointers over immutable numbered builds, private-by-default per-Athenaeum visibility with owner/member access, FastAPI artifact serving, strict manifest-derived CSP, and bounded namespaced custom CSS; D1 public-name immutability amended by 0036; distribution remains later | accepted | 2026-10-24 | owner |
 | 0036 | URL durability (A1/B1/C1/D1/E1/F1): owner-renamable public name, single `public_names` registry, permanent aliases/tombstones, owner-only rename API, `308` aliases after auth with path/query preservation and flattening, no rebuild; Option 1 URL shape retained; page-path aliases and SEO deferred | accepted | 2026-10-28 | owner |
+| 0037 | Technical-stack upgrade: Python 3.14.10 bundled via PBS, Node 26.13.0 LTS, PostgreSQL 18.6, Redis 8.10.2 bundled + redis-py 6.4.0, Sphinx 9.2.0, FastAPI/SQLA/Alembic/asyncpg/Celery current, frontend React 19.3.1/TipTap 3.32.1/Vite 8.3.5/Vitest 5.0.5/ESLint 10.13.0; support matrix + audit gates; docutils 0.22.4 exception retained | accepted | 2026-10-30 | owner |
 
-Full records: `docs/decisions/0001-*.md` … `0036-*.md`.
+Full records: `docs/decisions/0001-*.md` … `0037-*.md`.
 Pending: none.
 
-Last updated: 2026-10-28 / Ref: 0036 URL durability recorded
+Last updated: 2026-10-30 / Ref: 0037 stack upgrade recorded

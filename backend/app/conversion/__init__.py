@@ -1,6 +1,6 @@
 """TipTap↔RST/MyST converters (decision 0017, Q-M2-1=A).
 
-Node scope = exactly the TipTap starter-kit 3.31.4 set:
+Node scope = exactly the TipTap starter-kit 3.32.1 set:
 doc, paragraph, heading(1-6), bulletList/orderedList/listItem, codeBlock,
 blockquote, hardBreak, horizontalRule, and text marks
 bold/italic/strike/code/link/underline.

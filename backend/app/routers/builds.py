@@ -18,6 +18,7 @@ from __future__ import annotations
 import os
 import uuid
 from datetime import datetime
+from typing import Annotated
 
 import anyio
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -94,8 +95,8 @@ async def _member_or_none(
 @router.post("/{athenaeum_id}/builds", status_code=status.HTTP_201_CREATED)
 async def trigger_build(
     athenaeum_id: uuid.UUID,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> dict[str, object]:
     athenaeum = await _load_athenaeum(athenaeum_id, session)
     if athenaeum.owner_id != user_id:
@@ -171,8 +172,8 @@ async def trigger_build(
 @router.get("/{athenaeum_id}/builds")
 async def list_builds(
     athenaeum_id: uuid.UUID,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> list[dict[str, object]]:
     athenaeum = await _load_athenaeum(athenaeum_id, session)
     allowed = athenaeum.owner_id == user_id or await _member_or_none(
@@ -194,8 +195,8 @@ async def list_builds(
 async def get_build(
     athenaeum_id: uuid.UUID,
     build_id: uuid.UUID,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> dict[str, object]:
     athenaeum = await _load_athenaeum(athenaeum_id, session)
     allowed = athenaeum.owner_id == user_id or await _member_or_none(

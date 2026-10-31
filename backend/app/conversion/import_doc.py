@@ -55,7 +55,7 @@ def _parse_doctree(text: str, source_format: str) -> DocutilsNode:
     for msg in doctree.findall(nodes.system_message):
         try:
             level = int(msg.get("level", 0))
-        except (TypeError, ValueError):
+        except TypeError, ValueError:
             level = 0
         if level >= 3:  # error/severe — never silently convert broken source
             raise ConversionError(f"Source has docutils errors: {msg.astext()}")

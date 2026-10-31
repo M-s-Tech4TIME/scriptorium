@@ -23,10 +23,12 @@ durability (0036) followed; next: dedicated SEO phase and distribution.
 - **C4 — packaging/probe groundwork:** isolated
   `/opt/scriptorium/build-venv` from a 27-pin engine-only lock;
   `SC_BUILD_PYTHON` production wiring; `config.env.example` with the
-  queue/build keys; both units `Requires=redis.service` /
-  `After=redis.service`; postinst seeds config 0600, creates
+  queue/build keys; both units `Requires=scriptorium-redis.service` /
+  `After=scriptorium-redis.service`; postinst seeds config 0600, creates
   `artifacts/`, and fails loud without the build venv; manual
-  docutils-0.23 probe workflow + script.
+  docutils-0.23 probe workflow + script. **0037 adds** the bundled
+  Python 3.14.10 runtime, app venv assembly, bundled Redis 8.10.2, and
+  the `scriptorium-redis.service`.
 
 ## Evidence
 
@@ -40,7 +42,7 @@ durability (0036) followed; next: dedicated SEO phase and distribution.
   search 7 folios/12 sections, dialog/clear/toggles/scrollspy intact.
 - CI green ×3 on `2680738` (lint-type-test, security, packaging);
   C4 commit re-runs the same gates plus the packaging contract.
-- docutils-0.23 probe run 2026-10-24: **58 passed** with Sphinx 9.1.0 /
+- docutils-0.23 probe run 2026-10-30: **59 passed** with Sphinx 9.2.0 /
   MyST 5.1.0; pin stays 0.22.4 because MyST's metadata cap is the gate
   and a version bump is an owner decision.
 
@@ -49,9 +51,9 @@ durability (0036) followed; next: dedicated SEO phase and distribution.
 - Egress isolation is by construction of the pinned stack (no
   credentials/proxy in the whitelisted child env), not a kernel network
   namespace — P3 explicitly rejected containers/nspawn.
-- M4-C4 packages the **build** venv and config contract; the full signed
-  `.deb`/`.rpm`, app-venv assembly, lintian/rpmlint, SBOM/provenance,
-  and clean-install matrix remain M5.
+- M4-C4 packages the **build** venv and config contract; 0037 adds the
+  app venv and bundled runtimes. The full signed `.deb`/`.rpm`,
+  lintian/rpmlint, SBOM/provenance, and clean-install matrix remain M5.
 - docutils 0.23 stays gated; the probe is a manual bump gate, not a
   push gate.
 - Serving decisions (stable/latest pointers, routing, brand injection,

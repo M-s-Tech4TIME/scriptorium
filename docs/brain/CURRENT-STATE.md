@@ -1,7 +1,21 @@
 # CURRENT-STATE
 
-Last updated: 2026-10-28 / Ref: URL-durability phase 0036 pushed (`be5af83`), CI ×3 green
+Last updated: 2026-10-30 / Ref: stack-upgrade phase 0037 implemented (local gates green; push pending)
 
+- **Stack-upgrade phase (0037) implemented (2026-10-30):** Python 3.14.10
+  bundled via PBS `20261026`; app and engine-only venvs built from pinned
+  locks and relocated to `/opt/scriptorium`; Redis 8.10.2 built from the
+  pinned source and run by `scriptorium-redis.service`; Node 26.13.0 LTS;
+  Sphinx 9.2.0; FastAPI 0.162.0 / SQLA 2.1.6 / Alembic 1.20.1 / asyncpg
+  0.32.0 / Celery 5.6.3; React 19.3.1 / TipTap 3.32.1 / Vite 8.3.5 /
+  Vitest 5.0.5 / ESLint 10.13.0. Backend **114 passed, 40 skipped**;
+  ruff/format/mypy clean; `pip-audit` clean; frontend `npm ci`, lint,
+  format check and audit clean. Docutils stays 0.22.4 (probe 59 passed
+  with Sphinx 9.2.0); typescript-eslint cannot lint TS 7 (tsc is the
+  type gate). Decision 0037 + support matrix + CI/audit gates added.
+  nfpm 2.48.0 built a 117 MB `.deb`; extracted runtimes/imports and
+  `scriptorium-admin --help` verified; runtime and venvs ship without
+  pip/bytecode.
 - **Phase:** **URL-durability phase (0036) pushed (`be5af83`), CI ×3
   green: owner-renamable
   public names, permanent aliases, tombstones, migration 0008, live

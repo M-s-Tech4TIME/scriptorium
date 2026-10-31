@@ -1,8 +1,9 @@
-# Technology — argon2-cffi 25.1.0 + PyJWT 2.15.1 + redis-py 5.2.1 (+ httpx 0.28.1 dev)
+# Technology — argon2-cffi 25.1.0 + PyJWT 2.15.1 + redis-py 6.4.0 (+ httpx 0.28.1 dev)
 
-Last updated: 2026-10-25 / Ref: serving access cookie (0035 B3)
+Last updated: 2026-10-30 / Ref: stack-upgrade phase (0037)
 
-- Versions (locked): argon2-cffi 25.1.0, PyJWT (`pyjwt`) 2.15.1; httpx 0.28.1 (dev/test).
+- Versions (locked): argon2-cffi 25.1.0, PyJWT (`pyjwt`) 2.15.1,
+  redis-py 6.4.0 (Celery/kombu-compatible cap); httpx 0.28.1 (dev/test).
 - Why: Argon2id (OWASP-recommended) for passwords; minimal proven JWT for
   short-lived access + rotating refresh (Q22); httpx 0.28.1 also drives
   in-process ASGI tests (`httpx.ASGITransport` — `starlette.testclient` is
@@ -41,4 +42,4 @@ Last updated: 2026-10-25 / Ref: serving access cookie (0035 B3)
 
 - Known gap resolved (0019): per-IP login rate limiting shipped in M3 C2.5;
   M4 packaging docs add the `After=redis` systemd note + proxy guidance.
-- Verified: 2026-10-16 (PyPI; lock resolved 2026-10-16); endpoints 2026-10-20.
+- Verified: 2026-10-30 (PyPI; lock resolved 2026-10-30); endpoints 2026-10-20.

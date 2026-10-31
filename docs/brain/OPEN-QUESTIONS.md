@@ -1,6 +1,6 @@
 # OPEN-QUESTIONS
 
-Last updated: 2026-10-28 / Ref: URL durability 0036 implemented; SEO phase requested; Q-DIST-A…D remain parked
+Last updated: 2026-10-30 / Ref: stack upgrade 0037 implemented; SEO phase requested; Q-DIST-A…D remain parked
 
 | ID | Question | Blocks | Asked |
 |---|---|---|---|

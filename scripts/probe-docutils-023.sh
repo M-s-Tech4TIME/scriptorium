@@ -10,7 +10,7 @@
 set -euo pipefail
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-PYTHON=${PYTHON:-python3.12}
+PYTHON=${PYTHON:-python3.14}
 WORK=$(mktemp -d "${TMPDIR:-/tmp}/scriptorium-docutils-probe.XXXXXX")
 trap 'rm -rf "$WORK"' EXIT
 

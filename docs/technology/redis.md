@@ -1,9 +1,9 @@
-# Technology — Redis 8.10.2 (server) + redis-py 5.2.1 (driver)
+# Technology — Redis 8.10.2 (bundled server) + redis-py 6.4.0
 
-- Versions: Redis **8.10.2** (latest stable, GA Jul 2026 — CI service pin);
-  `redis-py` **5.2.1** (already in requirements.lock as Celery's Redis
-  broker driver — part of the Celery-compatible set, Rule 5; no separate
-  bump without a Celery-compat owner check).
+- Versions: Redis **8.10.2** (latest stable) is built from the pinned source
+  tarball at package-build time and bundled at `/opt/scriptorium/redis`.
+  `redis-py` **6.4.0** is the latest driver compatible with the pinned
+  Celery/kombu set (`kombu 5.6.2` requires `redis<6.5`).
 - Why (0019, Q-002=B): login rate limiting needs counters that survive
   restarts and hold across workers — a TTL'd fixed window in Redis gives
   that with zero new dependencies (Redis is frozen stack via Celery).
@@ -18,9 +18,14 @@
 - X-Forwarded-For NOT trusted — peer = socket address; document a proxy
   transition by running uvicorn with `--proxy-headers
   --forwarded-allow-ips` (M4 deployment docs).
-- CI: `redis:8.10.2` service on the backend job (`REDIS_URL=redis://…/1`).
-  Ops/packaging (M4-C4): both `scriptorium-web` and
-  `scriptorium-worker` declare `Requires=redis.service` and start
-  `After=redis.service`; the packaged `config.env.example` carries
-  `REDIS_URL` (limiter DB 1) and `CELERY_BROKER_URL` (broker DB 0).
-- Verified: 2026-10-20 (releases.sh / eosl.date: 8.10.2 current stable).
+- Packaging: `packaging/scripts/build-redis.sh` verifies the source
+  SHA-256 (`b9ffee…c02b3`), builds core `redis-server` + `redis-cli`, and
+  packages them at `/opt/scriptorium/redis`. The new
+  `scriptorium-redis.service` is `Type=notify`, runs as the `scriptorium`
+  user, and is required by both web and worker units. The packaged config
+  seeds `/etc/scriptorium/redis.conf` (localhost-only, append-only AOF,
+  `noeviction`) without overwriting an existing file.
+- Dev/CI: `docker-compose.yml` uses `redis:8.10.2-alpine` with AOF and a
+  healthcheck; the backend CI service pins `redis:8.10.2`.
+- Verified: 2026-10-30 — bundled `redis-server v=8.10.2` starts from the
+  packaged config and answers `PONG`; Redis packaging contract tests pass.

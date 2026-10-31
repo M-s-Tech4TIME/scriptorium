@@ -2,9 +2,9 @@ name: security
 on: [push, pull_request]
 jobs:
   scan:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with: { fetch-depth: 0 }
       # OSS gitleaks CLI (decision: public repo for free CI, no paid license).
       # The gitleaks-action wrapper bills orgs; the Apache-2.0 CLI is free.
@@ -15,3 +15,19 @@ jobs:
           echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  /tmp/gitleaks.tgz" | sha256sum -c -
           tar -xzf /tmp/gitleaks.tgz -C /tmp
           /tmp/gitleaks detect --source . --verbose --redact --exit-code 1
+      - uses: actions/setup-python@v7
+        with: { python-version: "3.14.10" }
+      - name: Python dependency audit
+        run: |
+          python -m pip install -r backend/requirements.lock
+          pip-audit -r backend/requirements.lock --strict --progress-spinner off
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "26.13.0"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Node dependency audit
+        working-directory: frontend
+        run: |
+          npm ci --ignore-scripts
+          npm audit --audit-level=high

@@ -31,13 +31,16 @@ unapproved decision immediately with revert/approve options.
 4. Continue from `HANDOFF.md` next steps. Do not proceed on anything blocked by an open question.
 
 ## Frozen foundation (changes need owner approval)
-- Section 8: monorepo, nfpm, web+worker systemd units (`scriptorium-web`, `scriptorium-worker`,
-  user `scriptorium`), FHS `/opt`+`/etc/scriptorium`+`/var/lib|log|cache/scriptorium`,
+- Section 8: monorepo, nfpm, web+worker+redis systemd units (`scriptorium-web`,
+  `scriptorium-worker`, `scriptorium-redis`, user `scriptorium`), FHS
+  `/opt`+`/etc/scriptorium`+`/var/lib|log|cache/scriptorium`,
   file+env+`setup` config, explicit `migrate`, bundled frontend, GPG+SBOM/provenance,
   GitHub Releases first then static APT/YUM repo.
-- Stack: Python 3.12.x, Node 24 LTS, React 19.3.x, TS 7.0.2, TipTap 3.31.x, Sphinx 9.1.0,
-  docutils 0.22.4 (0.23 gated), MyST 5.1.0, FastAPI 0.143.0, SQLA 2.1.4, Alembic 1.20.0,
-  Celery 5.6.3 + Redis, PG 18.x exclusive, TipTap-JSON canonical, generic-tree schema.
+- Stack (0037): Python 3.14.10 bundled, Node 26.13.0 LTS, React 19.3.1, TS 7.0.2,
+  TipTap 3.32.1, Sphinx 9.2.0, docutils 0.22.4 (0.23 gated), MyST 5.1.0,
+  FastAPI 0.162.0, SQLA 2.1.6, Alembic 1.20.1, asyncpg 0.32.0, Celery 5.6.3 +
+  redis-py 6.4.0 + bundled Redis 8.10.2, PG 18.6 exclusive, TipTap-JSON canonical,
+  generic-tree schema.
 - Workflow: Conventional Commits, trunk-based (`main` + `feat/*`), 5 CI gates
   (lint-type-test, security, docs, brain, packaging).
 

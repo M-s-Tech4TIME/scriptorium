@@ -136,8 +136,10 @@ def _sphinx_static_dir(build_python: Path) -> Path:
         [
             str(build_python),
             "-c",
-            "import sphinx; from pathlib import Path;"
-            " print(Path(sphinx.__file__).resolve().parent)",
+            (
+                "import sphinx; from pathlib import Path;"
+                " print(Path(sphinx.__file__).resolve().parent)"
+            ),
         ],
         capture_output=True,
         text=True,

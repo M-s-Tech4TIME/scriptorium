@@ -109,7 +109,7 @@ async def usage(peer_ip: str, email_addr: str) -> int:
 async def count_failure(peer_ip: str, email_addr: str) -> None:
     """INCR both counters; window anchored at the first failure (SET NX EX + INCR).
 
-    redis-py 5.2.1 has no `keepttl` in its stubs; SET-NX-EX then INCR gives
+    redis-py 6.4.0 has no `keepttl` in its stubs; SET-NX-EX then INCR gives
     identical fixed-window semantics (TTL set at first failure, INCR never
     resets TTL).
     """

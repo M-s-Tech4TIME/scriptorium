@@ -8,10 +8,10 @@ blocks. Import and export both funnel through these helpers.
 
 from __future__ import annotations
 
-from typing import Any, TypeAlias
+from typing import Any
 
-Node: TypeAlias = dict[str, Any]
-Mark: TypeAlias = dict[str, Any]
+type Node = dict[str, Any]
+type Mark = dict[str, Any]
 
 # Canonical mark order (alphabetical by type; link keeps its attrs).
 _MARK_ORDER = ("bold", "code", "italic", "link", "strike", "underline")

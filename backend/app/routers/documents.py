@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import json
 import uuid
-from typing import Any
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
@@ -111,8 +111,8 @@ def _validate_body(body: DocumentPut) -> tuple[dict[str, Any] | None, str | None
 async def get_document(
     grimoire_id: uuid.UUID,
     node_id: uuid.UUID,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> dict[str, object]:
     await _member_node(grimoire_id, node_id, user_id, session, need_editor=False)
     document = (
@@ -131,8 +131,8 @@ async def put_document(
     grimoire_id: uuid.UUID,
     node_id: uuid.UUID,
     body: DocumentPut,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> dict[str, object]:
     await _member_node(grimoire_id, node_id, user_id, session, need_editor=True)
     tiptap_in, source_in = _validate_body(body)
@@ -211,8 +211,8 @@ async def put_document(
 async def get_history(
     grimoire_id: uuid.UUID,
     node_id: uuid.UUID,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> dict[str, object]:
     await _member_node(grimoire_id, node_id, user_id, session, need_editor=False)
     document = (

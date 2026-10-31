@@ -10,6 +10,7 @@ leaves its grimoires Uncategorized (NULL) inside the same Athenaeum.
 from __future__ import annotations
 
 import uuid
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel, Field
@@ -76,8 +77,8 @@ async def compact_positions(athenaeum_id: uuid.UUID, session: AsyncSession) -> N
 @router.get("")
 async def list_categories(
     athenaeum_id: uuid.UUID,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> list[dict[str, object]]:
     await _own_athenaeum(athenaeum_id, user_id, session)
     rows = await session.scalars(
@@ -94,8 +95,8 @@ async def list_categories(
 async def create_category(
     athenaeum_id: uuid.UUID,
     body: CategoryIn,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> dict[str, object]:
     await _own_athenaeum(athenaeum_id, user_id, session)
     dup = await session.scalar(
@@ -136,8 +137,8 @@ async def patch_category(
     athenaeum_id: uuid.UUID,
     category_id: uuid.UUID,
     body: CategoryPatch,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> dict[str, object]:
     await _own_athenaeum(athenaeum_id, user_id, session)
     category = await _own_category(athenaeum_id, category_id, session)
@@ -195,8 +196,8 @@ async def patch_category(
 async def delete_category(
     athenaeum_id: uuid.UUID,
     category_id: uuid.UUID,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> Response:
     await _own_athenaeum(athenaeum_id, user_id, session)
     category = await _own_category(athenaeum_id, category_id, session)

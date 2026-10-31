@@ -22,6 +22,7 @@ drafts are not exposed.
 from __future__ import annotations
 
 import uuid
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.responses import FileResponse, RedirectResponse
@@ -178,7 +179,7 @@ async def _serve(
         try:
             candidate_dir = (html_root / relative).resolve()
             inside = candidate_dir.is_relative_to(html_root.resolve())
-        except (OSError, RuntimeError):
+        except OSError, RuntimeError:
             candidate_dir = None
             inside = False
         if candidate_dir is not None and inside and candidate_dir.is_dir():
@@ -222,8 +223,8 @@ async def _serve_channel(
 async def site_root(
     public_slug: str,
     request: Request,
-    user_id: uuid.UUID | None = Depends(get_optional_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID | None, Depends(get_optional_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> RedirectResponse:
     athenaeum, alias = await _authorized_target(session, public_slug, user_id)
     if alias:
@@ -243,8 +244,8 @@ async def site_root(
 async def site_channel_root(
     public_slug: str,
     request: Request,
-    user_id: uuid.UUID | None = Depends(get_optional_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID | None, Depends(get_optional_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> RedirectResponse:
     channel = "latest" if request.url.path.endswith("/latest") else "stable"
     athenaeum, alias = await _authorized_target(session, public_slug, user_id)
@@ -264,8 +265,8 @@ async def site_channel_root(
 async def site_channel_index(
     public_slug: str,
     request: Request,
-    user_id: uuid.UUID | None = Depends(get_optional_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID | None, Depends(get_optional_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> Response:
     channel = (
         "latest"
@@ -281,8 +282,8 @@ async def site_channel_file(
     public_slug: str,
     path: str,
     request: Request,
-    user_id: uuid.UUID | None = Depends(get_optional_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID | None, Depends(get_optional_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> Response:
     channel = (
         "latest"
@@ -297,8 +298,8 @@ async def site_build_root(
     public_slug: str,
     build_number: str,
     request: Request,
-    user_id: uuid.UUID | None = Depends(get_optional_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID | None, Depends(get_optional_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> RedirectResponse:
     athenaeum, alias = await _authorized_target(session, public_slug, user_id)
     if alias:
@@ -323,8 +324,8 @@ async def site_build_index(
     public_slug: str,
     build_number: str,
     request: Request,
-    user_id: uuid.UUID | None = Depends(get_optional_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID | None, Depends(get_optional_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> Response:
     return await _serve_numbered(
         request, public_slug, build_number, "", user_id, session
@@ -337,8 +338,8 @@ async def site_build_file(
     build_number: str,
     path: str,
     request: Request,
-    user_id: uuid.UUID | None = Depends(get_optional_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID | None, Depends(get_optional_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> Response:
     return await _serve_numbered(
         request, public_slug, build_number, path, user_id, session

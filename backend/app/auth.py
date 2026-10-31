@@ -16,7 +16,8 @@ from __future__ import annotations
 
 import os
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
+from typing import Annotated
 
 import jwt
 from argon2 import PasswordHasher
@@ -74,7 +75,7 @@ def _mint(
     lifetime: timedelta,
     extra: dict[str, str] | None = None,
 ) -> str:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     claims: dict[str, object] = {
         "sub": str(user_id),
         "type": kind,
@@ -193,7 +194,7 @@ async def rotate_refresh(
         # Forged or cross-account claims: burn the REAL stored family.
         await revoke_family(session, row.family, "reuse")
         raise _UNAUTHORIZED
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     if row.revoked_at is not None:
         # Token was already used — theft indicator. Burn the entire chain.
         await session.execute(
@@ -231,7 +232,7 @@ async def rotate_refresh(
 
 
 async def get_current_user_id(
-    credentials: HTTPAuthorizationCredentials | None = Depends(_bearer),
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(_bearer)],
 ) -> uuid.UUID:
     if credentials is None or credentials.scheme.lower() != "bearer":
         raise HTTPException(
@@ -247,7 +248,7 @@ async def get_current_user_id(
 
 async def get_optional_user_id(
     request: Request,
-    credentials: HTTPAuthorizationCredentials | None = Depends(_bearer),
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(_bearer)],
 ) -> uuid.UUID | None:
     """Best-effort reader identity for the public serving surface.
 
@@ -266,7 +267,7 @@ async def get_optional_user_id(
     for token in candidates:
         try:
             return decode_token(token, get_secret(), "access")
-        except (AuthError, RuntimeError):
+        except AuthError, RuntimeError:
             continue
     return None
 
@@ -288,7 +289,7 @@ async def require_membership(
 
 
 async def get_session_user(
-    session: AsyncSession = Depends(get_session),
-    user_id: uuid.UUID = Depends(get_current_user_id),
+    session: Annotated[AsyncSession, Depends(get_session)],
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
 ) -> tuple[AsyncSession, uuid.UUID]:
     return session, user_id

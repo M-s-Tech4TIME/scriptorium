@@ -13,8 +13,9 @@ Revises: 0003grimoire
 from __future__ import annotations
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy.dialects import postgresql
+
+from alembic import op
 
 revision = "0004athenaeum"
 down_revision = "0003grimoire"

@@ -1,8 +1,8 @@
-# Technology — Sphinx 9.1.0 + docutils 0.22.4 + MyST-Parser 5.1.0
+# Technology — Sphinx 9.2.0 + docutils 0.22.4 + MyST-Parser 5.1.0
 
-Last updated: 2026-10-25 / Ref: serving phase (0035)
+Last updated: 2026-10-30 / Ref: stack-upgrade phase (0037)
 
-- Versions (locked): Sphinx 9.1.0 (2025-12-31), docutils 0.22.4 (0.23 gated —
+- Versions (locked): Sphinx 9.2.0, docutils 0.22.4 (0.23 gated —
   MyST 5.x upper-bounds docutils; manual probe before bump, decision 0003),
   MyST-Parser 5.1.0 (2026-05-13, needs Sphinx ≥8<10, markdown-it-py ~4.2).
 - Why: documentation engine core; RST default + MyST opt-in per project (§5).
@@ -57,7 +57,7 @@ Last updated: 2026-10-25 / Ref: serving phase (0035)
   pages emit the MyST fenced `{toctree}` (masters stay RST); the save
   path itself exports sources, so staged builds are exporter-clean by
   construction. **Theme code shipped (M4-C3.5):** the theme package
-  (`theme.conf` `inherit = none` — Sphinx 9.1 requires the explicit
+  (`theme.conf` `inherit = none` — Sphinx 9.2 requires the explicit
   setting; `layout.html` with inline sprite + CSS-only drawer,
   `page.html`, `search.html`, `genindex.html`, `static/scriptorium.css`,
   `static/scriptorium.js`, `style.py`) is staged by the runner
@@ -124,7 +124,7 @@ Last updated: 2026-10-25 / Ref: serving phase (0035)
   asset set (0027) unloaded. `file://` previews degrade to
   folio/heading links without snippets (disclosed). A build-time section
   index is the documented scale upgrade, not this tranche.
-  **Engine finding (9.1):** `pathto(docname, 1)` = RESOURCE mode
+  **Engine finding (9.2):** `pathto(docname, 1)` = RESOURCE mode
   (the second positional is `resource`, not a relative flag) — all
   sidebar document links must use `pathto(docname)` to get the `.html`
   target; pinned by theme-build tests. The same test now crawls every
@@ -148,13 +148,14 @@ Last updated: 2026-10-25 / Ref: serving phase (0035)
   (html/ + build.log); `SC_BUILD_PYTHON` defaults to `sys.executable`
   pre-packaging.
 - **C4 build venv (0026 P3):** `packaging/scripts/build-venv.sh` creates
-  `/opt/scriptorium/build-venv` from
-  `packaging/build-requirements.lock` (27 exact pins, constrained by the
-  app lock; Sphinx/docutils/MyST only). The script installs with
-  `--no-deps` and asserts FastAPI/SQLAlchemy/Celery/asyncpg/Alembic are
-  absent. `postinst` fails loud if the venv is missing; production sets
-  `SC_BUILD_PYTHON=/opt/scriptorium/build-venv/bin/python`. No installs
-  happen at build time.
+  `/opt/scriptorium/build-venv` from the bundled Python 3.14.10 runtime
+  and `packaging/build-requirements.lock` (27 exact pins, constrained by
+  the app lock; Sphinx/docutils/MyST only). The script installs with
+  `--no-deps`, relocates the venv to `/opt/scriptorium/build-venv`, and
+  asserts FastAPI/SQLAlchemy/Celery/asyncpg/Alembic are absent.
+  `postinst` fails loud if the runtime or venv is missing; production
+  sets `SC_BUILD_PYTHON=/opt/scriptorium/build-venv/bin/python`. No
+  installs happen on the target host.
 - **Serving integration (0035 E2):** sourcegen accepts the Athenaeum's
   immutable `public_slug` and normalized `custom_css`. The generated
   `conf.py` sets `html_context["site_id"]`, and when custom CSS exists it
@@ -174,17 +175,18 @@ Last updated: 2026-10-25 / Ref: serving phase (0035)
   with `--no-deps`, and runs the round-trip/sourcegen/real-Sphinx-build
   suites under `-W error`. It is exposed as the manual
   `docutils-0.23-probe` workflow, not a push gate: a red probe means the
-  pin stays 0.22.4. Probe run 2026-10-24: 58 passed with 0.23; the pin
-  remains 0.22.4 because MyST's metadata cap is still the gate.
-- Verified: 2026-10-16 (sphinx-doc.org/PyPI; lock resolved 2026-10-16);
-  theme design baseline verified against Sphinx 9.1.0 in-repo probe
+  pin stays 0.22.4. Probe run 2026-10-30: 59 passed with Sphinx 9.2.0 /
+  docutils 0.23; the pin remains 0.22.4 because MyST's metadata cap is
+  still the gate.
+- Verified: 2026-10-30 (sphinx-doc.org/PyPI; lock resolved 2026-10-30);
+  theme design baseline verified against Sphinx 9.2.0 in-repo probe
   (2026-10-22); C3.5 verified offline-but-real (2026-10-22): full
   sandboxed `-W` build in the test suite — exact `_static` inventory
   (theme assets + vendored trio + the two `.jinja`-rendered scripts +
   engine-emitted stemmer/pygments/searchindex), byte-identical vendoring
   against the pinned engine, `html_context` dict typing (list rejected
   by the engine's config validator; `inherit = none` is mandatory in
-  9.1), the search contract (first-party since 0032), and AA pairs
+  9.2), the search contract (first-party since 0032), and AA pairs
   computed from the stylesheet in `tests/test_theme_contrast.py`.
   Dev-only typing stub
   `types-Pygments==2.21.0.20260819` added (mypy strict on the style

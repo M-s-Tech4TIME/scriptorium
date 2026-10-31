@@ -7,8 +7,21 @@ services:
       POSTGRES_DB: scriptorium
     ports: ["5432:5432"]
     volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U scriptorium"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
   redis:
-    image: redis:7-alpine
+    image: redis:8.10.2-alpine
+    command: ["redis-server", "--appendonly", "yes"]
     ports: ["6379:6379"]
+    volumes: [redisdata:/data]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 volumes:
   pgdata:
+  redisdata:

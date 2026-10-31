@@ -7,8 +7,8 @@ timestamptz created/updated, per-grimoire cascade deletes, SET NULL for audit tr
 from __future__ import annotations
 
 import uuid
-from typing import Any
 from datetime import datetime
+from typing import Any
 
 from sqlalchemy import (
     BigInteger,
@@ -291,7 +291,7 @@ class Document(Base):
     # fetch server-generated values (INSERT default + onupdate timestamp)
     # during flush via RETURNING — otherwise the onupdate expiry makes a
     # post-commit read attempt lazy sync IO (MissingGreenlet in async).
-    __mapper_args__ = {"eager_defaults": True}
+    __mapper_args__ = {"eager_defaults": True}  # noqa: RUF012 - SQLAlchemy API
 
     id: Mapped[uuid.UUID] = _uuid_pk()
     node_id: Mapped[uuid.UUID] = mapped_column(

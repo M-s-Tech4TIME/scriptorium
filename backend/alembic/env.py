@@ -8,10 +8,10 @@ from __future__ import annotations
 
 import asyncio
 
-from alembic import context
 from sqlalchemy import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
+from alembic import context
 from app.models import Base
 
 config = context.config

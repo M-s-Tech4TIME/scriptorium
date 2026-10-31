@@ -76,9 +76,10 @@ def test_public_names_backfill_from_existing_public_slugs() -> None:
     """0008 must turn every existing canonical public_slug into a current row."""
     import uuid
 
-    from alembic import command
     from sqlalchemy import text
     from sqlalchemy.ext.asyncio import create_async_engine
+
+    from alembic import command
 
     cfg = _alembic_cfg()
     command.downgrade(cfg, "0007serving")

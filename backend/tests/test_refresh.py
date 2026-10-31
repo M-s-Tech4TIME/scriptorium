@@ -10,7 +10,7 @@ from __future__ import annotations
 import asyncio
 import secrets
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from fastapi import HTTPException
@@ -100,8 +100,7 @@ async def _reuse_scenario() -> None:
                     user_id=user.id,
                     family=fam0,
                     jti=jti0,
-                    expires_at=datetime.now(timezone.utc)
-                    + timedelta(days=REFRESH_DAYS),
+                    expires_at=datetime.now(UTC) + timedelta(days=REFRESH_DAYS),
                 )
             )
             await session.commit()

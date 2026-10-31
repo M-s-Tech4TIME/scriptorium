@@ -22,11 +22,10 @@ import sys
 import uuid
 from html.parser import HTMLParser
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 from urllib.parse import unquote, urlsplit
 
 import pytest
-
 import sphinx
 
 from app.sphinx.runner import RunnerConfigError, _materialize, run_build
@@ -49,7 +48,7 @@ class _LinkCollector(HTMLParser):
 class _PagerPlacement(HTMLParser):
     """0034: prove the pager is a child of the article column, not the page."""
 
-    _VOID = {
+    _VOID: ClassVar[set[str]] = {
         "area",
         "base",
         "br",

@@ -1,10 +1,31 @@
-# Technology — Python 3.12.x
+# Technology — Python 3.14.10 (bundled runtime)
 
-- Version: 3.12.x (latest patch at lock; decision 0003). Released 2023-10, support to Oct 2028.
-- Why: max-common across baselines (U24.04 native; D12/RHEL9 via bundled/AppStream 3.12); all deps support it; 3.15 too new, 3.13 needs PPA/source.
-- Used: backend + isolated Sphinx venv (`/opt/scriptorium`). **M4-C4:**
-  `packaging/scripts/build-venv.sh` builds `/opt/scriptorium/build-venv`
-  from `packaging/build-requirements.lock` (engine trio only, no app
-  deps); `postinst` verifies it and production sets
-  `SC_BUILD_PYTHON` there. Verified: 2026-10-16; build venv created and
-  imported 9.1.0/0.22.4/5.1.0 on 2026-10-24.
+- Version: **3.14.10**, the latest 3.14 patch (released 2026-10). Python 3.14
+  is the current stable LTS line; support runs to October 2030.
+- Distribution: **python-build-standalone** release `20261026`, asset
+  `cpython-3.14.10+20261026-<arch>-unknown-linux-gnu-install_only_stripped.tar.gz`.
+  `packaging/scripts/fetch-python.sh` pins both architectures and their
+  SHA-256 digests, verifies the download, and extracts to
+  `packaging/python-runtime`. nfpm installs it at
+  `/opt/scriptorium/runtime/python-3.14`.
+- Why: removes distro Python skew (Ubuntu 24.04 ships 3.12, Debian 12 ships
+  3.11, RHEL 9 older) while keeping one exact, reproducible interpreter for
+  the app venv and the isolated Sphinx build venv. 3.15 is deliberately
+  deferred until after M5.
+- Used:
+  - `/opt/scriptorium/backend/.venv` — application venv, built by
+    `packaging/scripts/build-app-venv.sh` from
+    `backend/requirements.prod.lock` (runtime-only; the dev lock is used by
+    CI/dev).
+  - `/opt/scriptorium/build-venv` — engine-only Sphinx venv, built by
+    `packaging/scripts/build-venv.sh` from
+    `packaging/build-requirements.lock`.
+  - Both venvs are built at package-build time and relocated to their final
+    paths; the installed package never runs pip and never reaches the network.
+    The runtime and both venvs ship without pip or bytecode, and the app venv
+    uses the runtime-only `requirements.prod.lock` so dev tools stay out of
+    the package.
+- Verification: local bundled runtime reports `Python 3.14.10`; app and build
+  venvs import their pinned stacks; backend suite `114 passed, 40 skipped`
+  (2026-10-30). `pip-audit -r backend/requirements.lock` reports no known
+  vulnerabilities.

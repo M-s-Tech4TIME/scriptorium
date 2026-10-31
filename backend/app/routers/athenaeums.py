@@ -10,7 +10,8 @@ from __future__ import annotations
 
 import re
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel, Field
@@ -165,8 +166,8 @@ def _grimoire_lite(row: Grimoire) -> dict[str, object]:
 
 @router.get("")
 async def list_athenaeums(
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> list[dict[str, object]]:
     rows = await session.scalars(
         select(Athenaeum)
@@ -179,8 +180,8 @@ async def list_athenaeums(
 @router.post("", status_code=status.HTTP_201_CREATED)
 async def create_athenaeum(
     body: AthenaeumIn,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> dict[str, object]:
     _check_slug(body.slug)
     taken = await session.scalar(
@@ -238,8 +239,8 @@ async def create_athenaeum(
 @router.get("/{athenaeum_id}")
 async def get_athenaeum(
     athenaeum_id: uuid.UUID,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> dict[str, object]:
     return _body(await _own_athenaeum(athenaeum_id, user_id, session))
 
@@ -248,8 +249,8 @@ async def get_athenaeum(
 async def patch_athenaeum(
     athenaeum_id: uuid.UUID,
     body: AthenaeumPatch,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> dict[str, object]:
     row = await _own_athenaeum(athenaeum_id, user_id, session)
     provided = body.model_fields_set
@@ -307,8 +308,8 @@ async def patch_athenaeum(
 async def rename_public_slug(
     athenaeum_id: uuid.UUID,
     body: PublicSlugIn,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> dict[str, object]:
     """Owner-only public URL rename (0036 A1/C1/D1/F1).
 
@@ -355,7 +356,7 @@ async def rename_public_slug(
             PublicName.athenaeum_id == row.id,
             PublicName.slug != new_slug,
         )
-        .values(is_current=False, retired_at=datetime.now(timezone.utc))
+        .values(is_current=False, retired_at=datetime.now(UTC))
     )
     target.is_current = True
     old_slug = row.public_slug
@@ -385,8 +386,8 @@ async def rename_public_slug(
 @router.get("/{athenaeum_id}/custom-css")
 async def get_custom_css(
     athenaeum_id: uuid.UUID,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> dict[str, object]:
     row = await _own_athenaeum(athenaeum_id, user_id, session)
     return {
@@ -400,8 +401,8 @@ async def get_custom_css(
 async def put_custom_css(
     athenaeum_id: uuid.UUID,
     body: AthenaeumCustomCssIn,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> dict[str, object]:
     row = await _own_athenaeum(athenaeum_id, user_id, session)
     try:
@@ -433,8 +434,8 @@ async def put_custom_css(
 @router.delete("/{athenaeum_id}/custom-css", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_custom_css(
     athenaeum_id: uuid.UUID,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> Response:
     row = await _own_athenaeum(athenaeum_id, user_id, session)
     row.custom_css = ""
@@ -451,8 +452,8 @@ async def delete_custom_css(
 @router.delete("/{athenaeum_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_athenaeum(
     athenaeum_id: uuid.UUID,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> Response:
     row = await _own_athenaeum(athenaeum_id, user_id, session)
     held = await session.scalar(
@@ -469,7 +470,7 @@ async def delete_athenaeum(
     await session.execute(
         update(PublicName)
         .where(PublicName.athenaeum_id == athenaeum_id)
-        .values(is_current=False, retired_at=datetime.now(timezone.utc))
+        .values(is_current=False, retired_at=datetime.now(UTC))
     )
     await session.delete(row)
     add_audit(
@@ -489,8 +490,8 @@ async def delete_athenaeum(
 @router.get("/{athenaeum_id}/sidebar")
 async def get_sidebar(
     athenaeum_id: uuid.UUID,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> dict[str, object]:
     """One call for the sidebar: categories → grimoires + uncategorized (Q-M3-13)."""
     row = await _own_athenaeum(athenaeum_id, user_id, session)

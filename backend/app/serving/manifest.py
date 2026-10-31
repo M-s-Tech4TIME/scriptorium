@@ -21,7 +21,7 @@ import hashlib
 import json
 import re
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -131,7 +131,7 @@ def write_artifact_manifest(
         "site_id": site_id,
         "athenaeum_id": str(athenaeum_id),
         "build_number": build_number,
-        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),
         "entrypoint": "index.html",
         "files": inventory,
         "custom_css": custom_css,
@@ -149,7 +149,7 @@ def read_artifact_manifest(artifact_dir: Path) -> dict[str, Any] | None:
     target = artifact_dir / MANIFEST_NAME
     try:
         raw = json.loads(target.read_text(encoding="utf-8"))
-    except (OSError, ValueError):
+    except OSError, ValueError:
         return None
     if not isinstance(raw, dict):
         return None

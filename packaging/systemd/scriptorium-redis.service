@@ -1,0 +1,27 @@
+[Unit]
+Description=Scriptorium Redis (bundled 8.10.2 broker/cache)
+Documentation=file:/usr/share/doc/scriptorium/redis.conf.example
+After=network.target
+Before=scriptorium-web.service scriptorium-worker.service
+
+[Service]
+Type=notify
+User=scriptorium
+Group=scriptorium
+RuntimeDirectory=scriptorium-redis
+RuntimeDirectoryMode=0750
+ExecStart=/opt/scriptorium/redis/bin/redis-server /etc/scriptorium/redis.conf --supervised systemd
+ExecStop=/opt/scriptorium/redis/bin/redis-cli -p 6379 shutdown
+Restart=on-failure
+RestartSec=2
+LimitNOFILE=65536
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/scriptorium/redis /var/log/scriptorium
+CapabilityBoundingSet=
+AmbientCapabilities=
+
+[Install]
+WantedBy=multi-user.target
