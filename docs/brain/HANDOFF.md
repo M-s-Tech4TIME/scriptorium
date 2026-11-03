@@ -1,6 +1,15 @@
 # HANDOFF
 
-Last updated: 2026-11-03 / Ref: backup/restore phase (0039) + media-build fix
+Last updated: 2026-11-03 / Ref: backup/restore 0039 green; server-move plan drafted
+
+## Next phase (drafted 2026-11-03): server move/first-run provisioning
+
+Dedicated plan at `docs/roadmap/server-move-plan.md`; Q-SM-A…M are open in
+`OPEN-QUESTIONS.md`. No implementation starts until the owner rules.
+Key gaps found: there is no user-create CLI (a fresh install cannot log
+in), the CLI does not load all of `/etc/scriptorium/config.env`, and
+per-Athenaeum backups omit global public-name tombstones for deleted
+Athenaeums.
 
 ## Current tranche (2026-11-01): backup/restore 0039
 
@@ -47,9 +56,8 @@ in `55276ff` and CI ×3 green. Tranche pushed as `31ac99d` + `55276ff`.
   denied), so the new live tests only run in CI. TypeScript ESLint remains
   blocked by typescript-eslint's TS `<6.1` peer range; `tsc --noEmit` is
   the type gate.
-- **Next:** server move/first-run provisioning (dedicated plan + owner
-  rulings; consumes the Full backup format), then page aliases, M5, and
-  the SEO plan.
+- **Next:** owner rulings on Q-SM-A…M, then implement the server-move/
+  first-run phase; then page aliases, M5, and the SEO plan.
 
 ## Previous tranche (2026-10-31): editor/content completion 0038
 

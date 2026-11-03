@@ -1,6 +1,6 @@
 # PROJECT-SUMMARY (brain map, not a copy)
 
-Last updated: 2026-11-03 / Ref: backup/restore phase (0039) + media-build fix
+Last updated: 2026-11-03 / Ref: backup/restore 0039 green; server-move plan drafted
 
 - **What:** Scriptorium — self-hosted docs platform. Browser WYSIWYG (TipTap) → valid
   Sphinx source (RST default, MyST opt-in) → sandboxed background build → served HTML.
@@ -59,9 +59,10 @@ Last updated: 2026-11-03 / Ref: backup/restore phase (0039) + media-build fix
   URLs; frontend backup panel; Celery discovery/registration/dispatch
   repair. A CI-discovered media-build fix stages canonical
   `/_static/media/...` URLs by stripping the leading slash. Pushed
-  `31ac99d` + `55276ff`; CI ×3 green. Server move/first-run provisioning,
-  page-path aliases, M5, and the dedicated SEO phase remain later;
-  distribution awaits Q-DIST-A…D.
+  `31ac99d` + `55276ff`; CI ×3 green. The server-move/first-run plan is
+  drafted (`docs/roadmap/server-move-plan.md`; Q-SM-A…M open). Server
+  move/first-run provisioning, page-path aliases, M5, and the dedicated
+  SEO phase remain later; distribution awaits Q-DIST-A…D.
   Owner ruled the artifact
   to be a portable static website + design mandates (security parity;
   structure locked, skin open). Terminology: "grimoire" everywhere

@@ -10,8 +10,8 @@ Last updated: 2026-11-03 / backup/restore phase (0039) + media-build fix
       dispatch repair, frontend panel, migration 0010, docs/brain.
       Pushed `31ac99d`; CI-discovered media-build fix `55276ff`; CI ×3
       green.
-- [ ] Server move/first-run provisioning phase (next; dedicated plan and
-      owner rulings before implementation).
+- [ ] Server move/first-run provisioning phase (plan drafted
+      `docs/roadmap/server-move-plan.md`; awaiting Q-SM-A…M; no code).
 - [x] Editor/content completion (0038): V1 React app, TipTap surface,
       tree/history/import, image/GIF media, build media copying,
       `GET /auth/me`; docs + tests. Pushed as `476dfff`; CI ×3 green
@@ -51,8 +51,8 @@ Last updated: 2026-11-03 / backup/restore phase (0039) + media-build fix
       export/restore, Full jobs + signed download, frontend panel,
       packaging config, archive/live tests, docs/brain. Pushed
       `31ac99d`; media-build fix `55276ff`; CI ×3 green.
-- [ ] Server move/first-run provisioning: dedicated plan + owner rulings;
-      consumes the Full backup format. Not started.
+- [ ] Server move/first-run provisioning: dedicated plan drafted
+      (`docs/roadmap/server-move-plan.md`); Q-SM-A…M open; not started.
 - [ ] Page aliases: owner-approved later phase; no implementation yet.
 - [ ] Dedicated SEO phase: owner requested a structured, detailed plan;
       every SEO feature/attribute must be per-Athenaeum editorial-panel

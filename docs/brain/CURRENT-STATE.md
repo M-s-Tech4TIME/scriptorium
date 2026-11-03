@@ -1,6 +1,14 @@
 # CURRENT-STATE
 
-Last updated: 2026-11-03 / Ref: backup/restore phase (0039) + media-build fix
+Last updated: 2026-11-03 / Ref: backup/restore 0039 green; server-move plan drafted
+
+- **Server-move/first-run plan drafted (2026-11-03):** proposal at
+  `docs/roadmap/server-move-plan.md`; Q-SM-A…M open, no code. It covers
+  first-account CLI bootstrap, preflight/migrate sequencing, headless
+  export/restore, strict name preservation, maintenance-window cutover,
+  TLS/reverse-proxy examples, verification, and rollback. Gaps found: no
+  user-create CLI, incomplete CLI config-file loading, and no global
+  public-name tombstones in per-Athenaeum archives.
 
 - **Backup/restore phase (0039, 2026-11-01):** owner rulings A1/B3/C1/D1/E1
   implemented. Owners export one Athenaeum as ZIP or `.tar.gz` in

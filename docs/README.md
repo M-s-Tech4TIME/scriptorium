@@ -16,7 +16,9 @@
 - `changelog/` — per-push entries.
 - `roadmap/` — phases, milestones, gates.
 
-## Status (2026-10-28)
+## Status (2026-11-03)
 M0–M4 implementation and serving (0035) are complete; URL durability
-(0036) is implemented. Dedicated SEO and distribution phases remain.
+(0036) and backup/restore (0039) are implemented and pushed. The
+server-move/first-run plan is drafted (`roadmap/server-move-plan.md`,
+Q-SM-A…M open). Dedicated SEO and distribution phases remain.
 Approved: Q1–Q23, Rules 1–8. See `brain/DECISIONS-INDEX.md`.
