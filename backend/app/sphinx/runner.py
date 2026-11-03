@@ -186,13 +186,20 @@ def _materialize(
         path.write_text(text, encoding="utf-8", newline="\n")
 
     for relpath, source in (media or {}).items():
-        # The URL is generated from an asset UUID; refuse anything that
-        # could escape the staged static directory.
-        if not relpath.startswith("_static/media/") or ".." in Path(relpath).parts:
+        # Content stores site-root URLs (``/_static/media/...``); Sphinx
+        # resolves a leading slash against the source dir, so stage the
+        # path without it. The URL is generated from an asset UUID;
+        # refuse anything that could escape the staged static directory.
+        relative = relpath.lstrip("/")
+        if (
+            "\\" in relative
+            or not relative.startswith("_static/media/")
+            or ".." in Path(relative).parts
+        ):
             raise RunnerConfigError(f"unsafe media path: {relpath!r}")
         if not source.is_file():
             raise RunnerConfigError(f"media file missing: {source}")
-        target = workspace / relpath
+        target = workspace / relative
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy(source, target)
 

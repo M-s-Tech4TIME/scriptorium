@@ -235,7 +235,9 @@ def test_materialize_copies_media_and_rejects_unsafe_paths(
         ws,
         _plan(),
         Path(sys.executable),
-        {"_static/media/asset.png": source},
+        # Content stores the canonical site-root URL; Sphinx resolves the
+        # leading slash against the source dir (the live build path).
+        {"/_static/media/asset.png": source},
     )
     assert (ws / "_static" / "media" / "asset.png").read_bytes() == (
         source.read_bytes()
@@ -248,12 +250,19 @@ def test_materialize_copies_media_and_rejects_unsafe_paths(
             Path(sys.executable),
             {"../escape.png": source},
         )
+    with pytest.raises(RunnerConfigError, match="unsafe media path"):
+        _materialize(
+            tmp_path / "unsafe-root",
+            _plan(),
+            Path(sys.executable),
+            {"/_static/media/../../escape.png": source},
+        )
     with pytest.raises(RunnerConfigError, match="media file missing"):
         _materialize(
             tmp_path / "missing",
             _plan(),
             Path(sys.executable),
-            {"_static/media/asset.png": tmp_path / "nope.png"},
+            {"/_static/media/asset.png": tmp_path / "nope.png"},
         )
 
 
@@ -274,6 +283,51 @@ def test_materialize_engine_missing_fail_loud(
     broken.chmod(0o755)
     with pytest.raises(RunnerConfigError, match="cannot import Sphinx"):
         _materialize(tmp_path / "ws2", plan, broken)
+
+
+def test_run_build_with_canonical_media_url(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A canonical ``/_static/media/...`` image builds and lands in the artifact."""
+    monkeypatch.setenv("SC_ARTIFACT_ROOT", str(tmp_path / "artifacts"))
+    monkeypatch.setenv("SC_BUILD_ROOT", str(tmp_path / "builds"))
+
+    media_id = uuid.uuid4()
+    url = f"/_static/media/{media_id}.png"
+    source = tmp_path / "dot.png"
+    source.write_bytes(b"\x89PNG\r\n\x1a\n")
+    book = StagedBook(
+        slug="media-book",
+        title="Media book",
+        source_format="rst",
+        nodes=(
+            SnapshotNode(
+                id="one",
+                kind="folio",
+                slug="one",
+                title="One",
+                tiptap={
+                    "type": "doc",
+                    "content": [
+                        {"type": "image", "attrs": {"src": url, "alt": "dot"}},
+                    ],
+                },
+            ),
+        ),
+        category_label=None,
+    )
+    plan = plan_site("Athos", [book], site_id="athos")
+    outcome = run_build(
+        plan, uuid.uuid4(), uuid.uuid4(), 1, site_id="athos", media={url: source}
+    )
+    assert outcome.ok, (
+        Path(outcome.log_path).read_text() if outcome.log_path else outcome
+    )
+
+    artifact = Path(str(outcome.artifact_path)) / "html"
+    page = (artifact / "media-book" / "one.html").read_text(encoding="utf-8")
+    assert "<img" in page
+    assert list(artifact.rglob("*.png")), "media bytes are missing from the artifact"
 
 
 def test_run_build_theme_artifact(

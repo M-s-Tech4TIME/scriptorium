@@ -180,7 +180,13 @@ Audit actions: `backup_exported`, `backup_export_failed`,
 - **Hardening:** corrupt ZIP/tar.gz containers normalize to `BackupError`;
   file/directory path collisions are rejected before extraction; tests
   cover both. Archive tests: 23; live-DB backup tests: 4.
-- **Gates:** backend 140 passed / 48 skipped locally (live tests run in CI
+- **CI-discovered build fix:** the live round-trip exposed that
+  `runner._materialize` required a `_static/media/` prefix while content
+  stores canonical `/_static/media/...` URLs. Staging now strips the
+  leading slash (Sphinx resolves `/` against the source dir) and keeps
+  the traversal/backslash jail; tests cover canonical staging and a full
+  offline Sphinx build with media.
+- **Gates:** backend 141 passed / 48 skipped locally (live tests run in CI
   against PG18/Redis); ruff/format/mypy clean; frontend typecheck, lint,
   format, 19 tests, production build clean.
 

@@ -1,6 +1,6 @@
 # TASKS
 
-Last updated: 2026-11-01 / backup/restore phase (0039) implemented; Q-BK-A…E closed
+Last updated: 2026-11-03 / backup/restore phase (0039) + media-build fix
 
 ## In progress (max 1–2)
 - [x] Backup/restore phase (0039): owner rulings A1/B3/C1/D1/E1;

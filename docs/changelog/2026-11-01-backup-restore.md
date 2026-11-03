@@ -50,6 +50,12 @@ provisioning, page aliases, M5, and SEO remain later phases.
   with a crash log and return `503`.
 - Archive hardening: corrupt ZIP/tar.gz containers and file/directory
   path collisions are rejected as `BackupError`.
+- CI-discovered build fix: `runner._materialize` now stages canonical
+  `/_static/media/{uuid}.{ext}` content URLs by stripping the leading
+  slash (Sphinx resolves a leading `/` against the source dir). The
+  `_static/media/` jail, traversal, and backslash checks still apply.
+  Regression tests cover canonical staging plus a full offline Sphinx
+  build with media.
 
 ## Frontend
 
@@ -71,7 +77,7 @@ provisioning, page aliases, M5, and SEO remain later phases.
 
 ## Tests and gates
 
-- Backend: `140 passed, 48 skipped` locally; archive suite 23 passed;
+- Backend: `141 passed, 48 skipped` locally; archive suite 23 passed;
   live-DB backup suite (4 tests) runs in CI against PG18/Redis. Ruff,
   format, and mypy clean.
 - Frontend: typecheck, lint, format check, 19 Vitest tests, production

@@ -1,6 +1,6 @@
 # PROJECT-SUMMARY (brain map, not a copy)
 
-Last updated: 2026-11-01 / Ref: backup/restore phase (0039) implemented; Q-BK-A…E closed
+Last updated: 2026-11-03 / Ref: backup/restore phase (0039) + media-build fix
 
 - **What:** Scriptorium — self-hosted docs platform. Browser WYSIWYG (TipTap) → valid
   Sphinx source (RST default, MyST opt-in) → sandboxed background build → served HTML.
@@ -57,8 +57,10 @@ Last updated: 2026-11-01 / Ref: backup/restore phase (0039) implemented; Q-BK-A�
   `/b/{n}/` URLs, reclaims free/same-user-tombstoned public names,
   auto-suffixes conflicts, nulls unmatched identities, and rewrites media
   URLs; frontend backup panel; Celery discovery/registration/dispatch
-  repair. Server move/first-run provisioning, page-path aliases, M5, and
-  the dedicated SEO phase remain later; distribution awaits Q-DIST-A…D.
+  repair. A CI-discovered media-build fix stages canonical
+  `/_static/media/...` URLs by stripping the leading slash. Server move/
+  first-run provisioning, page-path aliases, M5, and the dedicated SEO
+  phase remain later; distribution awaits Q-DIST-A…D.
   Owner ruled the artifact
   to be a portable static website + design mandates (security parity;
   structure locked, skin open). Terminology: "grimoire" everywhere

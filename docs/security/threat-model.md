@@ -70,8 +70,9 @@ Last updated: 2026-11-01 / Ref: backup/restore phase (0039)
   stream with a 10 MiB cap, write atomically, and roll back the file when
   the DB insert fails. Content responses are `nosniff` and private-cached.
 - **Build-time media integrity:** referenced assets are resolved from DB
-  rows (not user paths), the runner refuses non-`_static/media/` or
-  traversal paths, and missing files fail the build loudly.
+  rows (not user paths), the runner normalizes the canonical leading `/`
+  then refuses non-`_static/media/`, traversal, or backslash paths, and
+  missing files fail the build loudly.
 - **Backup archive attacks (0039):** restore treats every archive as
   untrusted. It rejects absolute/traversal/backslash paths, symlinks,
   hardlinks, devices, duplicate or file/directory-colliding entries,

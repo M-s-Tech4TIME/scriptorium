@@ -1,6 +1,6 @@
 # MODULE-NOTES — backend (planned, M1)
 
-Last updated: 2026-11-01 / Ref: backup/restore phase 0039
+Last updated: 2026-11-03 / Ref: backup/restore phase 0039 + media-build fix
 - Purpose: FastAPI API + SQLA models + convert/sphinx adapters + Celery worker.
 - Key files: `backend/app/{routers,schemas,models,convert,sphinx,serving,worker,backup}/`, `backend/alembic/`.
 - Interfaces: REST `/api/v1/*` (RBAC per request); browser `/a/{public_slug}/...` serving; `convert.export(tiptap,format)`; `sphinx.build(snapshot)`; backup export/restore routes.
@@ -10,8 +10,9 @@ Last updated: 2026-11-01 / Ref: backup/restore phase 0039
 - Media (0038): `media_assets` owns bytes under `SC_MEDIA_ROOT`; uploads
   are magic-byte sniffed (PNG/JPEG/GIF/WebP/AVIF), 10 MiB capped, atomic;
   canonical refs are `/_static/media/{uuid}.{ext}`; document saves reject
-  external/foreign refs; builds copy referenced files and fail loud on
-  missing/unsafe paths.
+  external/foreign refs; builds stage canonical URLs by stripping the
+  leading slash (Sphinx resolves `/` against the source dir) and fail
+  loud on missing/unsafe paths.
 - History (0038): detail + restore endpoints append a new version; restore
   re-validates media and audits `document_restored`.
 - Auth: `GET /auth/me` returns the authenticated identity.

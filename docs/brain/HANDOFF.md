@@ -1,11 +1,12 @@
 # HANDOFF
 
-Last updated: 2026-11-01 / Ref: backup/restore phase (0039) implemented; Q-BK-A…E closed
+Last updated: 2026-11-03 / Ref: backup/restore phase (0039) + media-build fix
 
 ## Current tranche (2026-11-01): backup/restore 0039
 
-Owner rulings A1/B3/C1/D1/E1 implemented; docs/brain closeout in progress.
-All local gates pass; commit/push and CI verification follow.
+Owner rulings A1/B3/C1/D1/E1 implemented; docs/brain closeout complete.
+The first CI run found a build defect in the live round-trip test; the
+fix is committed and CI verification follows.
 
 - **Backend:** `app/backup/` (`manifest`, `archive`, `snapshot`, `export`,
   `restore`, `execute`, `tokens`), `app/routers/backups.py`, shared
@@ -29,10 +30,16 @@ All local gates pass; commit/push and CI verification follow.
   `authorizedFetch`, `lib/download.ts`, client tests.
 - **Packaging:** `SC_BACKUP_DISPATCH`, `SC_BACKUP_ROOT`, commented
   `SC_BACKUP_*` overrides; `postinst` creates `backups/`.
-- **Gates:** backend `140 passed, 48 skipped` locally; archive suite 23
+- **Gates:** backend `141 passed, 48 skipped` locally; archive suite 23
   passed; live-DB backup suite runs in CI against PG18/Redis; ruff/format/
   mypy clean. Frontend typecheck, lint, format check, 19 Vitest tests,
   production build, and high-severity audit pass.
+- **CI-discovered media-build fix:** the live round-trip's first build
+  failed because `runner._materialize` required a `_static/media/` prefix
+  while content stores canonical `/_static/media/...` URLs. Staging now
+  strips the leading slash (Sphinx resolves `/` against the source dir)
+  and still rejects traversal/backslash paths; tests cover canonical
+  staging and a full offline Sphinx build with media.
 - **Docs:** decision 0039 implementation note, changelog
   `2026-11-01-backup-restore.md`, API/data-model/overview/operations/
   security/celery, brain.

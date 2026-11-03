@@ -1,6 +1,6 @@
 # CURRENT-STATE
 
-Last updated: 2026-11-01 / Ref: backup/restore phase (0039) implemented; Q-BK-Aâ€¦E closed
+Last updated: 2026-11-03 / Ref: backup/restore phase (0039) + media-build fix
 
 - **Backup/restore phase (0039, 2026-11-01):** owner rulings A1/B3/C1/D1/E1
   implemented. Owners export one Athenaeum as ZIP or `.tar.gz` in
@@ -17,13 +17,16 @@ Last updated: 2026-11-01 / Ref: backup/restore phase (0039) implemented; Q-BK-Aâ
   Archive hardening rejects corrupt containers, traversal/symlinks/
   duplicates/encryption, file-directory collisions, and inventory/hash/
   size mismatches. Fixed three latent production Celery defects (app
-  discovery, task registration, `celery`-mode build dispatch). Frontend
-  `BackupPanel` covers export/job polling/single-use download/restore with
-  warnings and cache invalidation. Backend `140 passed, 48 skipped`
-  locally; archive suite 23 passed; live-DB backup suite runs in CI;
-  ruff/format/mypy clean. Frontend typecheck/lint/format/19 tests/build
-  pass. Server move/first-run provisioning, page aliases, M5, and SEO
-  remain later.
+  discovery, task registration, `celery`-mode build dispatch). A
+  CI-discovered media-build fix makes `runner._materialize` stage
+  canonical `/_static/media/...` URLs by stripping the leading slash
+  (Sphinx resolves `/` against the source dir) while keeping the
+  traversal/backslash jail. Frontend `BackupPanel` covers export/job
+  polling/single-use download/restore with warnings and cache
+  invalidation. Backend `141 passed, 48 skipped` locally; archive suite
+  23 passed; live-DB backup suite runs in CI; ruff/format/mypy clean.
+  Frontend typecheck/lint/format/19 tests/build pass. Server move/
+  first-run provisioning, page aliases, M5, and SEO remain later.
 
 - **Editor/content completion (0038, 2026-10-31, pushed `476dfff`):** the V1 React
   app is implemented (`frontend/src/`), with memory-only access token +
