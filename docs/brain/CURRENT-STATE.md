@@ -26,7 +26,8 @@ Last updated: 2026-11-03 / Ref: backup/restore phase (0039) + media-build fix
   invalidation. Backend `141 passed, 48 skipped` locally; archive suite
   23 passed; live-DB backup suite runs in CI; ruff/format/mypy clean.
   Frontend typecheck/lint/format/19 tests/build pass. Server move/
-  first-run provisioning, page aliases, M5, and SEO remain later.
+  first-run provisioning, page aliases, M5, and SEO remain later. Pushed
+  as `31ac99d` + `55276ff`; CI ×3 green.
 
 - **Editor/content completion (0038, 2026-10-31, pushed `476dfff`):** the V1 React
   app is implemented (`frontend/src/`), with memory-only access token +

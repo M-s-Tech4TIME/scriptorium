@@ -83,7 +83,7 @@ provisioning, page aliases, M5, and SEO remain later phases.
 - Frontend: typecheck, lint, format check, 19 Vitest tests, production
   build, and high-severity audit gate pass.
 - Live local PG/Redis unavailable (Docker socket denied), so the new
-  live tests are CI-only.
+  live tests are CI-only. Pushed as `31ac99d` + `55276ff`; CI ×3 green.
 
 ## Docs
 

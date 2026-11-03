@@ -5,8 +5,8 @@ Last updated: 2026-11-03 / Ref: backup/restore phase (0039) + media-build fix
 ## Current tranche (2026-11-01): backup/restore 0039
 
 Owner rulings A1/B3/C1/D1/E1 implemented; docs/brain closeout complete.
-The first CI run found a build defect in the live round-trip test; the
-fix is committed and CI verification follows.
+The first CI run found a build defect in the live round-trip test; fixed
+in `55276ff` and CI ×3 green. Tranche pushed as `31ac99d` + `55276ff`.
 
 - **Backend:** `app/backup/` (`manifest`, `archive`, `snapshot`, `export`,
   `restore`, `execute`, `tokens`), `app/routers/backups.py`, shared
@@ -39,7 +39,7 @@ fix is committed and CI verification follows.
   while content stores canonical `/_static/media/...` URLs. Staging now
   strips the leading slash (Sphinx resolves `/` against the source dir)
   and still rejects traversal/backslash paths; tests cover canonical
-  staging and a full offline Sphinx build with media.
+  staging and a full offline Sphinx build with media. Fixed in `55276ff`.
 - **Docs:** decision 0039 implementation note, changelog
   `2026-11-01-backup-restore.md`, API/data-model/overview/operations/
   security/celery, brain.

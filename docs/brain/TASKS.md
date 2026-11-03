@@ -8,6 +8,8 @@ Last updated: 2026-11-03 / backup/restore phase (0039) + media-build fix
       restore, numbered `/b/{n}/` durability, name reclaim/suffix,
       media URL rewrite, Full Celery jobs + single-use download, worker
       dispatch repair, frontend panel, migration 0010, docs/brain.
+      Pushed `31ac99d`; CI-discovered media-build fix `55276ff`; CI ×3
+      green.
 - [ ] Server move/first-run provisioning phase (next; dedicated plan and
       owner rulings before implementation).
 - [x] Editor/content completion (0038): V1 React app, TipTap surface,
@@ -47,7 +49,8 @@ Last updated: 2026-11-03 / backup/restore phase (0039) + media-build fix
       migration tests, docs. Pushed `be5af83`; CI ×3 green.
 - [x] Backup/restore phase (0039): migration 0010, archive/snapshot/
       export/restore, Full jobs + signed download, frontend panel,
-      packaging config, archive/live tests, docs/brain.
+      packaging config, archive/live tests, docs/brain. Pushed
+      `31ac99d`; media-build fix `55276ff`; CI ×3 green.
 - [ ] Server move/first-run provisioning: dedicated plan + owner rulings;
       consumes the Full backup format. Not started.
 - [ ] Page aliases: owner-approved later phase; no implementation yet.
