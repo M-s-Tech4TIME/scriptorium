@@ -12,6 +12,7 @@ import { Link, useNavigate, useParams } from "react-router";
 
 import { ApiError, api } from "../api/client";
 import type { Athenaeum, Build, Grimoire } from "../api/types";
+import { BackupPanel } from "../components/BackupPanel";
 import {
   Button,
   ConfirmDialog,
@@ -546,6 +547,8 @@ export function AthenaeumPage() {
           </div>
         </aside>
       </div>
+
+      <BackupPanel athenaeumId={lib.id} />
 
       <CreateGrimoireDialog
         athenaeumId={lib.id}

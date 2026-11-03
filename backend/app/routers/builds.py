@@ -29,7 +29,7 @@ from app.audit import add_audit
 from app.auth import get_current_user_id
 from app.db import get_session
 from app.models import Athenaeum, Build, Grimoire, Membership
-from app.sphinx.execute import execute_build_sync
+from app.sphinx.execute import execute_build_sync, mark_dispatch_failed_sync
 
 router = APIRouter(prefix="/api/v1/athenaeums", tags=["builds"])
 
@@ -74,6 +74,12 @@ def dispatch_mode() -> str:
             f"SC_BUILD_DISPATCH must be 'celery' or 'inline', got {mode!r}."
         )
     return mode
+
+
+def _dispatch_build(build_id: str) -> None:
+    from app.worker.celery_app import get_app
+
+    get_app().send_task("app.worker.tasks.run_athenaeum_build", args=[build_id])
 
 
 async def _member_or_none(
@@ -165,6 +171,21 @@ async def trigger_build(
         # inline ran in another session (fresh engine per Rule) — the
         # request copy is stale: re-read before reporting the outcome.
         await session.refresh(build)
+    else:
+        try:
+            _dispatch_build(str(build.id))
+        except Exception as exc:
+            # The worker never received the job: unwind the queued row
+            # (an eternal `queued` build would poison E3) and fail loud.
+            await anyio.to_thread.run_sync(
+                mark_dispatch_failed_sync,
+                str(build.id),
+                f"{type(exc).__name__}: {exc}",
+            )
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Build worker dispatch failed.",
+            ) from exc
 
     return _body(build)
 

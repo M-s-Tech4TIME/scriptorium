@@ -29,16 +29,11 @@ from app.serving.css import (
     custom_css_sha256,
     sanitize_custom_css,
 )
+from app.serving.names import PUBLIC_NAMES_LOCK, RESERVED_PUBLIC_SLUGS
 
 router = APIRouter(prefix="/api/v1/athenaeums", tags=["athenaeums"])
 
 _SLUG_RE = re.compile(r"[a-z0-9-]+")
-_RESERVED_PUBLIC_SLUGS = frozenset({"latest", "stable", "b", "_static", "api"})
-# One transaction-scoped namespace lock for create/rename/delete. The
-# registry's slug PK is the hard guard; the lock turns ordinary
-# concurrent checks into deterministic 409s instead of unique-violation
-# races across the two tables.
-_PUBLIC_NAMES_LOCK = int.from_bytes(b"SDNS", "big", signed=True)
 
 
 class AthenaeumIn(BaseModel):
@@ -71,7 +66,7 @@ def _check_slug(slug: str) -> str:
 
 async def _lock_public_names(session: AsyncSession) -> None:
     """Serialize public-name mutations on the single global namespace."""
-    await session.execute(select(func.pg_advisory_xact_lock(_PUBLIC_NAMES_LOCK)))
+    await session.execute(select(func.pg_advisory_xact_lock(PUBLIC_NAMES_LOCK)))
 
 
 async def _public_name_taken(session: AsyncSession, slug: str) -> bool:
@@ -95,7 +90,7 @@ def _check_public_slug(slug: str) -> str:
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="Public slug must match [a-z0-9-]+.",
         )
-    if slug in _RESERVED_PUBLIC_SLUGS:
+    if slug in RESERVED_PUBLIC_SLUGS:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="Public slug is reserved by a serving route.",
@@ -110,7 +105,7 @@ async def _public_slug(session: AsyncSession, base: str) -> str:
     a current name, alias, tombstone, or reserved route word, suffix it
     with 8 hex characters. The caller holds the public-name lock.
     """
-    if base not in _RESERVED_PUBLIC_SLUGS and not await _public_name_taken(
+    if base not in RESERVED_PUBLIC_SLUGS and not await _public_name_taken(
         session, base
     ):
         return base
@@ -209,6 +204,7 @@ async def create_athenaeum(
             PublicName(
                 slug=row.public_slug,
                 athenaeum_id=row.id,
+                owner_id=user_id,
                 is_current=True,
             )
         )
@@ -338,6 +334,7 @@ async def rename_public_slug(
         target = PublicName(
             slug=new_slug,
             athenaeum_id=row.id,
+            owner_id=user_id,
             is_current=False,
         )
         session.add(target)

@@ -1,6 +1,6 @@
 # Architecture (Q20–Q22, Section 10)
 
-Last updated: 2026-10-31 / Ref: editor/content completion tranche
+Last updated: 2026-11-01 / Ref: backup/restore phase (0039)
 
 ```
 [Browser: React 19.3 + TipTap 3.32] --REST /api/v1--> [FastAPI 0.162 web@gunicorn+uvicorn]
@@ -36,6 +36,16 @@ Last updated: 2026-10-31 / Ref: editor/content completion tranche
   tombstones. Page-level path aliases and distribution remain later
   phases.
 - **Canonical:** TipTap JSON `tiptap@1`; export RST/MyST deterministic; DB tree `nodes` → `toctree`; `conf.py` generated (allowlisted extensions only). V1 media is images/GIF only: uploads are sniffed, stored under `SC_MEDIA_ROOT`, referenced as `/_static/media/{uuid}.{ext}`, validated against the owning grimoire on save, and copied into each build artifact. Video/audio/attachments and bulk import are later.
+- **Backup/restore (0039):** owners export one Athenaeum as a self-contained
+  ZIP or `.tar.gz` in **Editorial** (content, media, names, every
+  ever-published successful build + artifact) or **Full** (adds failed
+  builds, logs, and artifacts for every successful build) mode. Editorial
+  streams synchronously; Full runs as a Celery job with a 15-minute
+  single-use signed download. Restore validates the whole archive before
+  any write, creates a fresh Athenaeum owned by the importer, preserves
+  build numbers/pointers and reclaimable public names, nulls unmatched
+  identities, and rewrites media URLs to fresh asset UUIDs. Archives are
+  untrusted input with strict traversal/inventory/hash/size checks.
 - **Module boundaries:** `convert/` (pure), `sphinx/` adapter (generation+theming), `worker/` (queue only),
   `routers/` (RBAC per request), `editor/` (schema v1). Third-party behind adapters (Rule 5.4).
 - **Future-proof:** tree + `document_history` version-keyed → Phase A adds `versions` without rewrite;

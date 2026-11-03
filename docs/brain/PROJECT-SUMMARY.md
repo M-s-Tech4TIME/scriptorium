@@ -1,6 +1,6 @@
 # PROJECT-SUMMARY (brain map, not a copy)
 
-Last updated: 2026-10-31 / Ref: editor/content completion 0038 pushed (`476dfff`), CI ×3 green
+Last updated: 2026-11-01 / Ref: backup/restore phase (0039) implemented; Q-BK-A…E closed
 
 - **What:** Scriptorium — self-hosted docs platform. Browser WYSIWYG (TipTap) → valid
   Sphinx source (RST default, MyST opt-in) → sandboxed background build → served HTML.
@@ -49,9 +49,17 @@ Last updated: 2026-10-31 / Ref: editor/content completion 0038 pushed (`476dfff`
   (`media_assets`, migration 0009), build media copying, `GET /auth/me`;
   frontend typecheck/test/build gates added to CI. CI ×3 green; backend
   ran 159 tests with no skips (live PG18 media/history/migration).
-  Page-path aliases, backup/restore, server move/first-run provisioning,
-  M5, and the dedicated SEO phase remain later; distribution awaits
-  Q-DIST-A…D. Owner ruled the artifact
+  **Backup/restore phase 0039 implemented (2026-11-01):** migration head
+  `0010backup` (`public_names.owner_id`, `backup_jobs`); owner-only
+  Editorial/Full export (ZIP or `.tar.gz`), streamed Editorial vs Celery
+  Full jobs with a 15-minute single-use signed download; validation-before-
+  write restore creates a fresh Athenaeum, preserves build numbers and
+  `/b/{n}/` URLs, reclaims free/same-user-tombstoned public names,
+  auto-suffixes conflicts, nulls unmatched identities, and rewrites media
+  URLs; frontend backup panel; Celery discovery/registration/dispatch
+  repair. Server move/first-run provisioning, page-path aliases, M5, and
+  the dedicated SEO phase remain later; distribution awaits Q-DIST-A…D.
+  Owner ruled the artifact
   to be a portable static website + design mandates (security parity;
   structure locked, skin open). Terminology: "grimoire" everywhere
   (0018). Auth surface = login/refresh/logout + `/auth/me`; serving adds the
@@ -60,7 +68,8 @@ Last updated: 2026-10-31 / Ref: editor/content completion 0038 pushed (`476dfff`
 - **Config keys:** `SECRET_KEY` (JWT; empty fails loud), `DATABASE_URL`,
   `SCRIPTORIUM_COOKIE_SECURE` (prod sets Secure), `REDIS_URL` (limiter,
   fail-closed when missing), `CELERY_BROKER_URL` (worker), and the
-  `SC_BUILD_*` / `SC_SPHINX_*` build paths/limits and `SC_MEDIA_ROOT`
-  (media storage); optional
+  `SC_BUILD_*` / `SC_SPHINX_*` build paths/limits, `SC_MEDIA_ROOT`
+  (media storage), `SC_BACKUP_DISPATCH` / `SC_BACKUP_ROOT` (backups) and
+  optional `SC_BACKUP_*` size/entry/TTL overrides; optional
   `SCRIPTORIUM_RATELIMIT_LOGIN_MAX` / `_WINDOW_S` (0019). Packaged
   example at `packaging/config.env.example` (0600 seed).

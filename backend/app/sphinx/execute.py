@@ -91,3 +91,37 @@ async def _execute_build(build_id: uuid.UUID) -> None:
 def execute_build_sync(build_id: str) -> None:
     """Blocking wrapper for thread-pool calls (inline dispatch) and Celery."""
     asyncio.run(_execute_build(uuid.UUID(build_id)))
+
+
+async def _mark_dispatch_failed(build_id: uuid.UUID, reason: str) -> None:
+    engine = create_async_engine(get_database_url(), pool_pre_ping=True)
+    try:
+        maker = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
+        async with maker() as session:
+            build = await session.get(Build, build_id)
+            if build is None:
+                return
+            if build.status not in _ACTIVE:
+                return  # already terminal (moved on) — nothing to unwind
+            # The worker never received the job; a `queued` row left behind
+            # would block the next trigger forever (E3 discipline), so the
+            # build terminates failed with a crash-style log.
+            build.status = "failed"
+            build.finished = datetime.now(UTC)
+            log_text = (
+                "Scriptorium build log (0026) — dispatch failed: the worker "
+                f"never received this build.\n{reason}\n"
+            )
+            cfg = build_config()
+            crash = cfg.build_root / str(build.id) / "build.log"
+            crash.parent.mkdir(parents=True, exist_ok=True)
+            crash.write_text(log_text, encoding="utf-8")
+            build.log_path = str(crash)
+            await session.commit()
+    finally:
+        await engine.dispose()
+
+
+def mark_dispatch_failed_sync(build_id: str, reason: str) -> None:
+    """Blocking wrapper for the router's dispatch-failure unwind."""
+    asyncio.run(_mark_dispatch_failed(uuid.UUID(build_id), reason))

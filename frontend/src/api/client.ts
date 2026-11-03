@@ -1,5 +1,10 @@
 import type {
   Athenaeum,
+  BackupExport,
+  BackupFormat,
+  BackupJob,
+  BackupMode,
+  BackupRestoreResult,
   Build,
   DocumentBody,
   Grimoire,
@@ -101,10 +106,10 @@ interface RequestOptions {
   retryAuth?: boolean;
 }
 
-async function request<T>(
+async function authorizedFetch(
   path: string,
   options: RequestOptions = {},
-): Promise<T> {
+): Promise<Response> {
   const {
     method = "GET",
     body,
@@ -134,13 +139,34 @@ async function request<T>(
   if (response.status === 401 && retryAuth && !path.startsWith("/auth/login")) {
     const refreshed = await refreshAccessToken();
     if (refreshed) {
-      return request<T>(path, { ...options, retryAuth: false });
+      return authorizedFetch(path, { ...options, retryAuth: false });
     }
   }
+  return response;
+}
 
+async function request<T>(
+  path: string,
+  options: RequestOptions = {},
+): Promise<T> {
+  const response = await authorizedFetch(path, options);
   if (!response.ok) throw await parseError(response);
   if (response.status === 204) return undefined as T;
   return (await response.json()) as T;
+}
+
+function attachmentFilename(header: string | null, fallback: string): string {
+  if (!header) return fallback;
+  const encoded = /filename\*=UTF-8''([^;]+)/i.exec(header);
+  if (encoded?.[1]) {
+    try {
+      return decodeURIComponent(encoded[1]);
+    } catch {
+      // Fall through to the plain filename parameter.
+    }
+  }
+  const plain = /filename="?([^";]+)"?/i.exec(header);
+  return plain?.[1] ?? fallback;
 }
 
 export const api = {
@@ -332,23 +358,47 @@ export const api = {
   },
 
   async mediaBlob(assetId: string): Promise<Blob> {
-    const headers: Record<string, string> = {};
-    if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
-    let response = await fetch(`${API_ROOT}/media/${assetId}/content`, {
-      headers,
-      credentials: "include",
+    const response = await authorizedFetch(`/media/${assetId}/content`, {
+      headers: { Accept: "*/*" },
     });
-    if (response.status === 401) {
-      const refreshed = await refreshAccessToken();
-      if (refreshed) {
-        response = await fetch(`${API_ROOT}/media/${assetId}/content`, {
-          headers: { Authorization: `Bearer ${refreshed}` },
-          credentials: "include",
-        });
-      }
-    }
     if (!response.ok) throw await parseError(response);
     return response.blob();
+  },
+
+  async exportBackup(
+    athenaeumId: string,
+    mode: BackupMode,
+    format: BackupFormat,
+  ): Promise<BackupExport | BackupJob> {
+    const response = await authorizedFetch(
+      `/athenaeums/${athenaeumId}/backups`,
+      { method: "POST", body: { mode, format } },
+    );
+    if (!response.ok) throw await parseError(response);
+    if (response.status === 202) return (await response.json()) as BackupJob;
+    const blob = await response.blob();
+    const size = Number(response.headers.get("x-backup-size") ?? blob.size);
+    return {
+      blob,
+      filename: attachmentFilename(
+        response.headers.get("content-disposition"),
+        `scriptorium-${mode}.${format}`,
+      ),
+      sha256: response.headers.get("x-backup-sha256"),
+      size_bytes: Number.isFinite(size) ? size : blob.size,
+    };
+  },
+
+  restoreBackup(file: File): Promise<BackupRestoreResult | BackupJob> {
+    return request<BackupRestoreResult | BackupJob>("/backups/restore", {
+      method: "POST",
+      rawBody: file,
+      headers: { "Content-Type": file.type || "application/octet-stream" },
+    });
+  },
+
+  getBackupJob(jobId: string): Promise<BackupJob> {
+    return request<BackupJob>(`/backup-jobs/${jobId}`);
   },
 
   listBuilds(athenaeumId: string): Promise<Build[]> {

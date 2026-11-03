@@ -1,6 +1,6 @@
-# API surface — auth, athenaeums, categories, grimoires, documents, media, serving
+# API surface — auth, athenaeums, categories, grimoires, documents, media, serving, backups
 
-Last updated: 2026-10-31 / Ref: editor/content completion tranche
+Last updated: 2026-11-01 / Ref: backup/restore phase (0039)
 
 ## Conventions
 
@@ -169,11 +169,36 @@ manifest-derived CSP and the E2 security headers; private file and redirect
 responses add `private, no-store`, `Vary: Cookie`, and
 `X-Robots-Tag: noindex, nofollow`; public alias redirects are `no-cache`.
 
+## Backups (`routers/backups.py`, 0039)
+
+Owner-only export of one Athenaeum; restore is authenticated and always
+creates a fresh Athenaeum owned by the caller. Archives are untrusted
+input and are fully validated before any database write (see
+`docs/decisions/0039-backup-restore.md`).
+
+| Route | Access | Notes |
+|---|---|---|
+| POST `/athenaeums/{id}/backups` `{mode,format}` | owner | `mode` = `editorial`\|`full`; `format` = `zip`\|`tar.gz`. Editorial → `200` streamed archive with `Content-Disposition`, `X-Backup-SHA256`, `X-Backup-Size`; Full → `202` job |
+| GET `/backup-jobs/{job_id}` | requester | job status (`queued`\|`running`\|`ok`\|`failed`), error, result Athenaeum id, and a signed `download_url` while valid |
+| GET `/backup-jobs/{job_id}/download?token=…` | signed token | streams the Full archive; single-use, 15-minute window, deleted after send/expiry; no bearer required |
+| POST `/backups/restore` (raw archive body) | authenticated | container and mode auto-detected from the manifest; Editorial → `201` `{athenaeum_id,title,public_slug,mode,warnings,counts}`; Full → `202` job whose `result_athenaeum_id` is set on success |
+
+Editorial carries content, media, names, and every ever-published
+successful build with its artifact; Full adds failed builds, build logs,
+and artifacts for every successful build. Restored build numbers,
+`latest`/`stable` pointers, and public names survive where available.
+Unmatched user identities are nulled; the importer owns the new site.
+Full-restore alias-collision warnings are recorded in the
+`backup_restored` audit meta (the job body exposes the result id only).
+Limits: 8 GiB archive, 16 GiB expanded, 200,000 entries, 512 MiB per
+entry.
+
 ## Audit actions (through this tranche)
 
 `category_created|patched|deleted`, `grimoire_created|patched|deleted|moved`,
 `member_added|role_changed|removed`, `athenaeum_created|patched|deleted`,
 `athenaeum_public_slug_changed`, `node_created|patched|moved|deleted`,
 `document_saved`, `document_restored`, `grimoire_duplicated`, `build_published`,
-`build_unpublished`, `athenaeum_custom_css_updated`
+`build_unpublished`, `athenaeum_custom_css_updated`,
+`backup_exported|backup_export_failed|backup_restored|backup_restore_failed`
 (refused deletes/saves write no audit row — nothing happened).

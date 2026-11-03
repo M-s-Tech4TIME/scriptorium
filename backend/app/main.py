@@ -6,6 +6,7 @@ from fastapi import FastAPI
 
 from app.routers import athenaeums as athenaeums_router
 from app.routers import auth as auth_router
+from app.routers import backups as backups_router
 from app.routers import builds as builds_router
 from app.routers import categories as categories_router
 from app.routers import documents as documents_router
@@ -22,6 +23,7 @@ def create_app() -> FastAPI:
     app = FastAPI(title="Scriptorium", version=APP_VERSION)
     app.include_router(auth_router.router)
     app.include_router(athenaeums_router.router)
+    app.include_router(backups_router.router)
     app.include_router(builds_router.router)
     app.include_router(categories_router.router)
     app.include_router(grimoires_router.router)

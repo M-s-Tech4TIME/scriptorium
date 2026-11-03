@@ -1,6 +1,6 @@
 # DECISIONS-INDEX
 
-Last updated: 2026-10-30 / Ref: stack-upgrade phase (0037)
+Last updated: 2026-11-01 / Ref: backup/restore phase (0039)
 
 | ID | One-line | Status | Date | Approver |
 |---|---|---|---|---|
@@ -42,8 +42,9 @@ Last updated: 2026-10-30 / Ref: stack-upgrade phase (0037)
 | 0036 | URL durability (A1/B1/C1/D1/E1/F1): owner-renamable public name, single `public_names` registry, permanent aliases/tombstones, owner-only rename API, `308` aliases after auth with path/query preservation and flattening, no rebuild; Option 1 URL shape retained; page-path aliases and SEO deferred | accepted | 2026-10-28 | owner |
 | 0037 | Technical-stack upgrade: Python 3.14.10 bundled via PBS, Node 26.13.0 LTS, PostgreSQL 18.6, Redis 8.10.2 bundled + redis-py 6.4.0, Sphinx 9.2.0, FastAPI/SQLA/Alembic/asyncpg/Celery current, frontend React 19.3.1/TipTap 3.32.1/Vite 8.3.5/Vitest 5.0.5/ESLint 10.13.0; support matrix + audit gates; docutils 0.22.4 exception retained | accepted | 2026-10-30 | owner |
 | 0038 | Editor/content completion: V1 React app, image/GIF media with canonical `/_static/media/{uuid}.{ext}` URLs and magic-byte validation, history detail/restore, single-file RST/MyST import; backup/restore (Editorial + Full, numbered URLs preserved), page aliases, M5, and SEO remain separate phases | accepted | 2026-10-31 | owner |
+| 0039 | Backup/restore (A1/B3/C1/D1/E1): Editorial = content/media/names/ever-published successful builds+artifacts, Full adds failed builds/logs/all successful artifacts; both ZIP and `.tar.gz` with one manifest; on-demand no retention (Editorial sync stream, Full Celery job + 15-min single-use signed download); restore creates a fresh Athenaeum owned by the importer, nulls unmatched identities, never exports users/memberships/refresh tokens/audit; reclaim free or same-user-tombstoned names, otherwise auto-suffix; migration 0010 (`public_names.owner_id`, `backup_jobs`) | accepted | 2026-11-01 | owner |
 
-Full records: `docs/decisions/0001-*.md` … `0038-*.md`.
+Full records: `docs/decisions/0001-*.md` … `0039-*.md`.
 Pending: none.
 
-Last updated: 2026-10-31 / Ref: 0038 editor/content completion recorded
+Last updated: 2026-11-01 / Ref: 0039 backup/restore recorded and implemented

@@ -45,6 +45,45 @@ def test_celery_broker_fail_loud_without_url() -> None:
         reset_app()
 
 
+def test_worker_app_resolution_and_task_registration(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The systemd `-A app.worker` unit must resolve AND register tasks."""
+    from celery.bin.celery import find_app
+
+    monkeypatch.setenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
+    app = find_app("app.worker")
+    assert app.main == "scriptorium"
+    assert app.conf.task_default_queue == "scriptorium"
+    app.loader.import_default_modules()  # what a worker boot does
+    registered = {name for name in app.tasks if name.startswith("app.worker.")}
+    assert registered == {
+        "app.worker.tasks.run_athenaeum_build",
+        "app.worker.tasks.run_backup_export",
+        "app.worker.tasks.run_backup_restore",
+    }
+
+
+def test_build_dispatch_uses_registered_task(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from app.routers import builds as builds_router
+
+    captured: dict[str, object] = {}
+
+    class FakeApp:
+        def send_task(
+            self, name: str, args: list[str] | None = None, **kwargs: object
+        ) -> None:
+            captured["name"] = name
+            captured["args"] = args
+
+    monkeypatch.setattr("app.worker.celery_app.get_app", lambda: FakeApp())
+    builds_router._dispatch_build("11111111-2222-3333-4444-555555555555")
+    assert captured["name"] == "app.worker.tasks.run_athenaeum_build"
+    assert captured["args"] == ["11111111-2222-3333-4444-555555555555"]
+
+
 def test_build_config_fhs_defaults(monkeypatch: pytest.MonkeyPatch) -> None:
     for name in (
         "SC_ARTIFACT_ROOT",

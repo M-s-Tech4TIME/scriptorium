@@ -1,6 +1,6 @@
 # OPEN-QUESTIONS
 
-Last updated: 2026-10-31 / Ref: editor/content 0038 pushed (`476dfff`), CI ×3 green; Q-BK-A…E asked for the backup/restore phase
+Last updated: 2026-11-01 / Ref: backup/restore phase (0039) implemented; Q-BK-A…E closed by owner rulings
 
 | ID | Question | Blocks | Asked |
 |---|---|---|---|
@@ -18,11 +18,11 @@ Last updated: 2026-10-31 / Ref: editor/content 0038 pushed (`476dfff`), CI ×3 g
 | Q-DIST-B | Delivery semantics — retries/backoff, per-target status log, "re-push latest" button rules. | distribution phase | 2026-10-21 |
 | Q-DIST-C | Target roster priority + mode (repo backup vs Pages hosting) — GitHub → GitLab → SFTP → FTP? | distribution phase | 2026-10-21 |
 | Q-DIST-D | React shell format spec — `content.json`/`site.json` schema, routing/404 fallback, CSP posture. | distribution phase | 2026-10-21 |
-| Q-BK-A | **Backup mode contents:** does the Editorial-mode restore preserve numbered `/b/{n}` URLs (i.e. Editorial also carries build rows + served artifacts), or is numbered-URL durability a Full-only guarantee while Editorial restores content-only and rebuilds from content? Owner requirement on record: "a restored site must preserve numbered `/b/{n}` URLs exactly" (0038) — the split between the modes needs a ruling. | backup/restore phase | 2026-10-31 |
-| Q-BK-B | **Backup container format:** ZIP (zip64, deterministic entry order, `manifest.json`, per-entry SHA-256) vs `.tar.gz` (single-stream, POSIX-born). | backup/restore phase | 2026-10-31 |
-| Q-BK-C | **Delivery/retention mechanics:** on-demand export with **no server-side retention** — Editorial streamed synchronously; Full (media + artifact bytes) as an async Celery job serving an expiring tokenized download link — vs everything synchronous with a size cap. | backup/restore phase | 2026-10-31 |
-| Q-BK-D | **Identity mapping on restore:** the importing user owns everything; member/author identities from the backup that do not match the importer are nulled (needs `document_history.author`/`media_assets.created_by`-style nullable handling) vs restore fails loudly on any unmatched identity. Refresh tokens, memberships, and `audit_log` are proposed as never exported — confirm. | backup/restore phase | 2026-10-31 |
-| Q-BK-E | **Restore target & public names:** restore always creates a **fresh Athenaeum owned by the importing user**; the backup's current public name is re-claimed only if free or tombstoned by the same user; anything else (taken/foreign tombstone) → auto-suffixed name; aliases/tombstones rows carried in Full. Confirm vs "error if the original name is not free". | backup/restore phase | 2026-10-31 |
+| Q-BK-A | **RESOLVED by owner (A1, decision 0039):** Editorial carries content, media, names, and every ever-published successful build with its served artifact, so numbered `/b/{n}` URLs survive in both modes; Full adds failed builds, logs, and artifacts for every successful build. | — | closed 2026-11-01 |
+| Q-BK-B | **RESOLVED by owner (B3, decision 0039):** both ZIP and `.tar.gz`, selectable per export; restore auto-detects the container; one shared manifest. | — | closed 2026-11-01 |
+| Q-BK-C | **RESOLVED by owner (C1, decision 0039):** on-demand, no server-side retention; Editorial streams synchronously; Full runs as a Celery job with an expiring single-use signed download. | — | closed 2026-11-01 |
+| Q-BK-D | **RESOLVED by owner (D1, decision 0039):** the importer owns the restored site; unmatched identities are nulled; users, memberships, refresh tokens, and audit rows are never exported. | — | closed 2026-11-01 |
+| Q-BK-E | **RESOLVED by owner (E1, decision 0039):** restore always creates a fresh Athenaeum owned by the importer; reclaim a public name only when free or tombstoned by the same user; conflicts get the standard auto-suffix; other owners' names/tombstones are never touched. | — | closed 2026-11-01 |
 
 Notes: Q-SERVE/Q-DIST wording was drafted by the assistant from the
 owner's rulings (placement + concepts ratified 2026-10-21, see decision
@@ -74,9 +74,10 @@ style, first-party copy script, zero asset-injecting extensions v1,
 uniform `--sd-page-ink` callout body ink. A future second color scheme
 (`[data-theme]`) is its own later ruling, not an open question here.
 
-**Backup/restore (Q-BK-A…E, asked 2026-10-31):** the owner-approved
-requirements stand — Editorial **and** Full modes are required, and a
-restored site must preserve numbered `/b/{n}/` URLs exactly. The five
-rows above seek the rulings needed before any implementation; nothing
-is implemented until they are answered and recorded as a decision
-(0039 expected).
+**Backup/restore (Q-BK-A…E, asked 2026-10-31): RESOLVED by owner
+2026-11-01 (A1/B3/C1/D1/E1, decision 0039) and implemented.** Editorial
+and Full both preserve numbered `/b/{n}/` URLs; ZIP and `.tar.gz` are both
+supported; Full is async with no retention; the importer owns the restored
+site with unmatched identities nulled; restore creates a fresh Athenaeum
+and reclaims only free or same-user-tombstoned names. Server move/
+first-run provisioning, page aliases, M5, and SEO remain later phases.

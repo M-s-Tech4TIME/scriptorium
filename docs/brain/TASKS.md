@@ -1,17 +1,20 @@
 # TASKS
 
-Last updated: 2026-10-31 / editor/content completion 0038 pushed (`476dfff`), CI ×3 green
+Last updated: 2026-11-01 / backup/restore phase (0039) implemented; Q-BK-A…E closed
 
 ## In progress (max 1–2)
+- [x] Backup/restore phase (0039): owner rulings A1/B3/C1/D1/E1;
+      Editorial + Full export (ZIP/`.tar.gz`), validation-before-write
+      restore, numbered `/b/{n}/` durability, name reclaim/suffix,
+      media URL rewrite, Full Celery jobs + single-use download, worker
+      dispatch repair, frontend panel, migration 0010, docs/brain.
+- [ ] Server move/first-run provisioning phase (next; dedicated plan and
+      owner rulings before implementation).
 - [x] Editor/content completion (0038): V1 React app, TipTap surface,
       tree/history/import, image/GIF media, build media copying,
       `GET /auth/me`; docs + tests. Pushed as `476dfff`; CI ×3 green
       (backend 159 passed, no skips, incl. live PG18 media/history and
       migration 0009).
-- [ ] Backup/restore phase: **blocked on owner rulings Q-BK-A…E**
-      (OPEN-QUESTIONS). Editorial + Full modes; restored numbered
-      `/b/{n}/` URLs must be preserved exactly; then server move/first-run
-      provisioning.
 - [x] Stack-upgrade phase (0037): bundled Python 3.14.10 + Redis 8.10.2,
   Node 26.13.0 LTS, Sphinx 9.2.0, current backend/frontend pins, CI/audit
   gates, support matrix. Pushed as `9d645e3`; CI ×3 green.
@@ -42,6 +45,12 @@ Last updated: 2026-10-31 / editor/content completion 0038 pushed (`476dfff`), CI
       `public_names` registry/migration 0008, owner-only public-slug
       rename, permanent aliases/tombstones, 308 serving, audit, live/
       migration tests, docs. Pushed `be5af83`; CI ×3 green.
+- [x] Backup/restore phase (0039): migration 0010, archive/snapshot/
+      export/restore, Full jobs + signed download, frontend panel,
+      packaging config, archive/live tests, docs/brain.
+- [ ] Server move/first-run provisioning: dedicated plan + owner rulings;
+      consumes the Full backup format. Not started.
+- [ ] Page aliases: owner-approved later phase; no implementation yet.
 - [ ] Dedicated SEO phase: owner requested a structured, detailed plan;
       every SEO feature/attribute must be per-Athenaeum editorial-panel
       controllable. Do not implement before plan + owner rulings.

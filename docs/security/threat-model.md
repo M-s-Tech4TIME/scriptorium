@@ -1,6 +1,6 @@
 # Threat model (initial, Q22 / §10)
 
-Last updated: 2026-10-31 / Ref: editor/content completion tranche
+Last updated: 2026-11-01 / Ref: backup/restore phase (0039)
 
 ## Primary risk: untrusted content → Sphinx code exec
 - Generated-only `conf.py`; extension allowlist (any addition = Rule 4 + record).
@@ -72,6 +72,19 @@ Last updated: 2026-10-31 / Ref: editor/content completion tranche
 - **Build-time media integrity:** referenced assets are resolved from DB
   rows (not user paths), the runner refuses non-`_static/media/` or
   traversal paths, and missing files fail the build loudly.
+- **Backup archive attacks (0039):** restore treats every archive as
+  untrusted. It rejects absolute/traversal/backslash paths, symlinks,
+  hardlinks, devices, duplicate or file/directory-colliding entries,
+  encrypted ZIP entries, undeclared/missing entries, hash or size
+  mismatches, invalid JSON/rows/FKs/cycles, and media/build payloads that
+  do not match their rows. Limits: 8 GiB archive, 16 GiB expanded, 200,000
+  entries, 512 MiB per entry. Validation/extraction completes before any
+  DB write; filesystem staging is cleaned on failure and the import is one
+  transaction. Full archives live outside the web root and download only
+  through an owner-scoped job plus a 15-minute HMAC single-use token; files
+  are deleted after send/expiry. Export is owner-only; restore always
+  creates a fresh site owned by the importer and never exports users,
+  memberships, refresh tokens, or audit rows.
 - Path traversal: slug allowlist `[a-z0-9-]+`, jail to project dir, no `..`.
 - IDOR/tenancy: membership check on every project request + tests (M1 gate).
 - Auth: Argon2id, lockout, short JWT + rotating refresh (HttpOnly/Secure/SameSite), audit log.

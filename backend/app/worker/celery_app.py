@@ -30,7 +30,7 @@ def _broker_url() -> str:
 
 
 def build_app() -> Celery:
-    app = Celery("scriptorium", broker=_broker_url())
+    app = Celery("scriptorium", broker=_broker_url(), include=["app.worker.tasks"])
     app.conf.update(
         task_default_queue="scriptorium",
         task_serializer="json",

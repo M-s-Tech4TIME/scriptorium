@@ -1,6 +1,29 @@
 # CURRENT-STATE
 
-Last updated: 2026-10-31 / Ref: editor/content completion (0038) pushed (`476dfff`), CI ×3 green
+Last updated: 2026-11-01 / Ref: backup/restore phase (0039) implemented; Q-BK-A…E closed
+
+- **Backup/restore phase (0039, 2026-11-01):** owner rulings A1/B3/C1/D1/E1
+  implemented. Owners export one Athenaeum as ZIP or `.tar.gz` in
+  **Editorial** (content, media, names, every ever-published successful
+  build + served artifact) or **Full** (adds failed builds, logs, and
+  artifacts for every successful build) mode. Editorial streams
+  synchronously; Full is a Celery job with a 15-minute single-use
+  HMAC-signed download and no retention. Restore validates the entire
+  archive before any write, creates a fresh Athenaeum owned by the
+  importer, preserves build numbers/pointers and numbered `/b/{n}/` URLs,
+  rewrites media URLs to fresh UUIDs, nulls unmatched identities, reclaims
+  free or same-user-tombstoned public names (migration `0010backup` adds
+  `public_names.owner_id` + `backup_jobs`), and auto-suffixes conflicts.
+  Archive hardening rejects corrupt containers, traversal/symlinks/
+  duplicates/encryption, file-directory collisions, and inventory/hash/
+  size mismatches. Fixed three latent production Celery defects (app
+  discovery, task registration, `celery`-mode build dispatch). Frontend
+  `BackupPanel` covers export/job polling/single-use download/restore with
+  warnings and cache invalidation. Backend `140 passed, 48 skipped`
+  locally; archive suite 23 passed; live-DB backup suite runs in CI;
+  ruff/format/mypy clean. Frontend typecheck/lint/format/19 tests/build
+  pass. Server move/first-run provisioning, page aliases, M5, and SEO
+  remain later.
 
 - **Editor/content completion (0038, 2026-10-31, pushed `476dfff`):** the V1 React
   app is implemented (`frontend/src/`), with memory-only access token +
@@ -15,7 +38,7 @@ Last updated: 2026-10-31 / Ref: editor/content completion (0038) pushed (`476dff
   44 skipped` locally and `159 passed` in CI with no skips (live PG18
   media/history/migration); frontend typecheck/lint/format/16 tests/build/
   audit pass. CI frontend job includes typecheck, test, and build.
-  Backup/restore (Editorial + Full, numbered URLs preserved), server move/
+  Backup/restore is now implemented (0039); server move/
   first-run provisioning, page aliases, M5, and SEO remain later.
 - **Stack-upgrade phase (0037) implemented (2026-10-30):** Python 3.14.10
   bundled via PBS `20261026`; app and engine-only venvs built from pinned
@@ -75,7 +98,7 @@ Last updated: 2026-10-31 / Ref: editor/content completion (0038) pushed (`476dff
   **CI-discovered staging rulings** in 0026 (absolute `</docname>`
   refs, generated top sections, MyST fenced toctree, downgrade mirror,
   save-path exporter guarantee). Q-SERVE-A…E resolved by 0035; Q-DIST-A…D
-  remain parked. Migrate head `0008urldurability`.
+  remain parked. Migrate head `0010backup`.
   **C3.5 code (this tranche):** Scriptorium's own theme shipped in
   `backend/app/sphinx/theme/scriptorium/` (`theme.conf` `inherit=none`
   — 9.1 mandates the explicit key; layout/page/search/genindex
@@ -252,7 +275,8 @@ Last updated: 2026-10-31 / Ref: editor/content completion (0038) pushed (`476dff
   theme ruling(0027) + design baseline(0028) + preview-feedback
   rulings(0029) + typography(0030) + second feedback batch(0031) +
   third feedback batch(0032) + Standing Rule 8(0033) +
-  fourth feedback(0034) + serving(0035) + URL durability(0036);
+  fourth feedback(0034) + serving(0035) + URL durability(0036) +
+  backup/restore(0039);
   Rules 1–8. M0 locks; M1 green (2539391); M2 A–C green; M3 C1–C6 green
   ×3; M4 C1 `2aed3ef` + C2 `3a15b52` + C3 `1e1637e` green ×3; 0028
   record `556bbce` green ×3; C3.5 baseline `b15446f` green ×3 (0029 +
@@ -307,7 +331,7 @@ Last updated: 2026-10-31 / Ref: editor/content completion (0038) pushed (`476dff
   markup does not nest — 0017 fail-loud matrix in
   `docs/technology/conversion.md`; RST writer rejects mark-run edge spaces,
   mark combinations, and heading level skips; MyST keeps them via HTML
-  paths. Live-DB tests migrate to the current head (`0008urldurability`).
+  paths. Live-DB tests migrate to the current head (`0010backup`).
   Search on the static artifact requires JavaScript; `file://` previews
   degrade to folio/heading links without snippets; candidate/group/row
   caps are 10/8/6; a build-time section index is the documented scale
@@ -320,4 +344,12 @@ Last updated: 2026-10-31 / Ref: editor/content completion (0038) pushed (`476dff
   so `latest`/`stable` page paths can change after an editor rename while
   numbered builds keep their old paths. SEO canonical/sitemap/robots/
   structured/social policy is a dedicated later phase with per-Athenaeum
-  editorial controls; distribution is not implemented.
+  editorial controls; distribution is not implemented. Backup/restore
+  (0039): Editorial preserves every ever-published successful build and
+  its numbered URL; Full adds failed builds/logs/all successful artifacts.
+  Full archives are deleted after single-use download or 15-minute expiry
+  (no server-side retention); a restart may leave an orphan temp file that
+  the next job/status request sweeps. Restore never merges into an existing
+  site; conflicting public names are auto-suffixed and conflicting aliases
+  are skipped with an audit-meta warning. Full restore omits queued/running
+  builds (terminal imported builds keep their numbers; gaps are valid).

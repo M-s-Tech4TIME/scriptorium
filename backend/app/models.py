@@ -157,6 +157,12 @@ class PublicName(Base):
         nullable=True,
         index=True,
     )
+    # 0039: tombstones survive Athenaeum deletion, so ownership must too.
+    # Restore may re-claim a name only when it is free or when this owner
+    # holds the tombstone.
+    owner_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
     is_current: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default=text("false")
     )
@@ -423,6 +429,62 @@ class Build(Base):
         ),
         UniqueConstraint(
             "athenaeum_id", "build_number", name="uq_builds_athenaeum_number"
+        ),
+    )
+
+
+class BackupJob(Base):
+    """One asynchronous backup export or restore (0039 C1).
+
+    Editorial exports are synchronous and never create a row. Full exports
+    and Full restores are queued here so the web request can return while a
+    worker writes/reads the archive. ``path`` always lives under
+    ``SC_BACKUP_ROOT``; the download route serves it only with a valid,
+    expiring HMAC token, and deletes it after the response completes.
+    """
+
+    __tablename__ = "backup_jobs"
+
+    id: Mapped[uuid.UUID] = _uuid_pk()
+    kind: Mapped[str] = mapped_column(String(16), nullable=False)
+    athenaeum_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("athenaeums.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+    result_athenaeum_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("athenaeums.id", ondelete="SET NULL"), nullable=True
+    )
+    requested_by: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    mode: Mapped[str] = mapped_column(String(16), nullable=False)
+    format: Mapped[str] = mapped_column(String(8), nullable=False)
+    status: Mapped[str] = mapped_column(
+        String(16), nullable=False, server_default="queued"
+    )
+    path: Mapped[str | None] = mapped_column(Text, nullable=True)
+    size_bytes: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    sha256: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = _now()
+    started_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    finished_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    downloaded_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    __table_args__ = (
+        CheckConstraint("kind IN ('export', 'restore')", name="ck_backup_jobs_kind"),
+        CheckConstraint("mode IN ('editorial', 'full')", name="ck_backup_jobs_mode"),
+        CheckConstraint("format IN ('zip', 'tar.gz')", name="ck_backup_jobs_format"),
+        CheckConstraint(
+            "status IN ('queued', 'running', 'ok', 'failed')",
+            name="ck_backup_jobs_status",
         ),
     )
 

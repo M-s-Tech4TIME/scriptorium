@@ -122,6 +122,45 @@ export interface Publication {
   stable_url: string;
 }
 
+export type BackupMode = "editorial" | "full";
+export type BackupFormat = "zip" | "tar.gz";
+export type BackupJobStatus = "queued" | "running" | "ok" | "failed";
+
+export interface BackupJob {
+  id: string;
+  kind: "export" | "restore";
+  athenaeum_id: string | null;
+  result_athenaeum_id: string | null;
+  mode: BackupMode;
+  format: BackupFormat;
+  status: BackupJobStatus;
+  size_bytes: number | null;
+  sha256: string | null;
+  error: string | null;
+  created_at: string;
+  started_at: string | null;
+  finished_at: string | null;
+  expires_at: string | null;
+  downloaded_at: string | null;
+  download_url: string | null;
+}
+
+export interface BackupExport {
+  blob: Blob;
+  filename: string;
+  sha256: string | null;
+  size_bytes: number;
+}
+
+export interface BackupRestoreResult {
+  athenaeum_id: string;
+  title: string;
+  public_slug: string;
+  mode: BackupMode;
+  warnings: string[];
+  counts: Record<string, number>;
+}
+
 export interface LoginResponse {
   access_token: string;
   token_type: string;

@@ -1,8 +1,50 @@
 # HANDOFF
 
-Last updated: 2026-10-31 / Ref: editor/content completion (0038) pushed (`476dfff`), CI ×3 green
+Last updated: 2026-11-01 / Ref: backup/restore phase (0039) implemented; Q-BK-A…E closed
 
-## Current tranche (2026-10-31): editor/content completion 0038
+## Current tranche (2026-11-01): backup/restore 0039
+
+Owner rulings A1/B3/C1/D1/E1 implemented; docs/brain closeout in progress.
+All local gates pass; commit/push and CI verification follow.
+
+- **Backend:** `app/backup/` (`manifest`, `archive`, `snapshot`, `export`,
+  `restore`, `execute`, `tokens`), `app/routers/backups.py`, shared
+  `app/serving/names.py`, migration `0010backup` (`public_names.owner_id`,
+  `backup_jobs`). Editorial export streams a ZIP/`.tar.gz` with
+  `X-Backup-SHA256`/`X-Backup-Size`; Full export is a `202` job. Restore
+  validates the manifest, rows, FKs, cycles, payload inventory, hashes,
+  and sizes before any DB write; it creates a fresh Athenaeum, maps every
+  row to fresh UUIDs, preserves build numbers/pointers, rewrites media
+  URLs, nulls unmatched identities, reclaims free/same-user-tombstoned
+  public names, and stages/cleans files on failure. Full downloads use a
+  single-use 15-minute HMAC token; archives are deleted after send/expiry.
+- **Worker:** `app/worker/celery.py` (`-A app.worker` discovery),
+  `include=["app.worker.tasks"]`, and `@shared_task` names for build +
+  backup export/restore. Fixed three latent production-only defects (app
+  resolution, task registration, build dispatch in `celery` mode);
+  dispatch failure marks the job/build failed and returns `503`.
+- **Frontend:** `BackupPanel` on the Athenaeum page (Editorial/Full,
+  ZIP/`.tar.gz`, streamed download, Full job polling + single-use download,
+  restore upload/job/result/warnings, cache invalidation), shared
+  `authorizedFetch`, `lib/download.ts`, client tests.
+- **Packaging:** `SC_BACKUP_DISPATCH`, `SC_BACKUP_ROOT`, commented
+  `SC_BACKUP_*` overrides; `postinst` creates `backups/`.
+- **Gates:** backend `140 passed, 48 skipped` locally; archive suite 23
+  passed; live-DB backup suite runs in CI against PG18/Redis; ruff/format/
+  mypy clean. Frontend typecheck, lint, format check, 19 Vitest tests,
+  production build, and high-severity audit pass.
+- **Docs:** decision 0039 implementation note, changelog
+  `2026-11-01-backup-restore.md`, API/data-model/overview/operations/
+  security/celery, brain.
+- **Known limits:** local live PG18/Redis unavailable (Docker socket
+  denied), so the new live tests only run in CI. TypeScript ESLint remains
+  blocked by typescript-eslint's TS `<6.1` peer range; `tsc --noEmit` is
+  the type gate.
+- **Next:** server move/first-run provisioning (dedicated plan + owner
+  rulings; consumes the Full backup format), then page aliases, M5, and
+  the SEO plan.
+
+## Previous tranche (2026-10-31): editor/content completion 0038
 
 Implemented and **pushed (`476dfff`)**; CI ×3 green. The live-PG18 run
 completed 159 tests with no skips, covering media/history and migration
@@ -30,12 +72,9 @@ completed 159 tests with no skips, covering media/history and migration
   denied), so media/history/migration tests only run in CI. TypeScript
   ESLint remains blocked by typescript-eslint's TS `<6.1` peer range;
   `tsc --noEmit` is the type gate.
-- **Next:** the backup/restore phase is **blocked on owner rulings
-  Q-BK-A…E** (mode contents/numbered-URL guarantee, container format,
-  delivery/retention, identity mapping, target + public-name policy).
-  Implementation starts only after the answers are recorded (0039);
-  then server move/first-run provisioning, page aliases, M5, and the
-  SEO plan.
+- **Next:** backup/restore was the next phase and is now implemented
+  (0039, this tranche). Server move/first-run provisioning, page aliases,
+  M5, and the SEO plan remain later.
 
 ## Previous tranche (2026-10-30): technical-stack upgrade 0037
 
@@ -208,16 +247,20 @@ sphinx.md + changelogs + brain synced. The entire C3.5 stack (0029–
 approval; M4-C4 is pushed as `1add6c8` with CI green ×3.
 
 ## Next steps (in order)
-1. **Dedicated SEO phase:** owner requested a structured, detailed plan
+1. **Server move/first-run provisioning:** present a dedicated plan and
+   owner rulings before implementation. It consumes the Full backup
+   format and must preserve numbered `/b/{n}/` URLs exactly.
+2. **Page aliases:** owner-approved later phase; plan/rulings first.
+3. **M5:** signed package pipeline (lintian/rpmlint, SBOM/provenance,
+   clean-install matrix).
+4. **Dedicated SEO phase:** owner requested a structured, detailed plan
    in its own phase; every SEO feature/attribute must be user-controllable
    per Athenaeum in the editorial panel. Do not implement before the
-   plan and owner rulings. Canonical host/channel, robots/sitemap,
-   structured data, and social metadata are still undecided.
-2. **Distribution phase:** present Q-DIST-A…D (credentials, delivery
+   plan and owner rulings.
+5. **Distribution phase:** present Q-DIST-A…D (credentials, delivery
    semantics, target roster, React shell) and wait; do not implement
-   before owner approval. Sequencing (recommended URL durability → SEO →
-   distribution) is not yet ruled.
-3. **Junk-sweep before every gate:** re-read written files; grep the
+   before owner approval.
+6. **Junk-sweep before every gate:** re-read written files; grep the
    standing junk markers before committing.
 
 ## Gotchas (carried)
@@ -235,7 +278,7 @@ approval; M4-C4 is pushed as `1add6c8` with CI green ×3.
   engine distribution the build used; in production `SC_BUILD_PYTHON`
   points at the isolated build venv and vendoring follows it
   (`_sphinx_static_dir` subprocess probe).
-- Migrate head `0008urldurability`; verify migration SQL against older
+- Migrate head `0010backup`; verify migration SQL against older
   definitions before push (C1 lesson). `ck_nodes_kind` is dropped before
   the kind UPDATE runs (values outside the CHECK are otherwise illegal).
   Downgrade re-adds `user_id` as a trailing column — harmless, but
@@ -302,3 +345,16 @@ approval; M4-C4 is pushed as `1add6c8` with CI green ×3.
   aliases are deferred (B1), so `latest`/`stable` page paths can change
   after editor renames; numbered builds keep old paths. SEO canonical/
   robots/sitemap/structured/social policy is a separate later phase.
+- **Backup/restore (0039):** archives are untrusted; validate the whole
+  manifest/inventory/hashes before any DB write. `public_names.owner_id`
+  is the only way to distinguish a user's own tombstone from another
+  user's — never reclaim a name without checking it. Restore maps every
+  row to fresh UUIDs and rewrites media URLs in TipTap/source/history;
+  artifact HTML stays untouched (`site_id` remains the old public slug).
+  Build numbers/pointers are preserved; queued/running builds are omitted
+  in Full restore. Full downloads are single-use (`UPDATE … WHERE
+  downloaded_at IS NULL … RETURNING`) and expire in 15 minutes; files are
+  unlinked after send/expiry. Editorial restore is synchronous `201`;
+  Full restore is a `202` job. `SC_BACKUP_DISPATCH=celery` in production;
+  `inline` in dev/CI. Celery must resolve `-A app.worker` via
+  `app/worker/celery.py` and register tasks via `include`.
