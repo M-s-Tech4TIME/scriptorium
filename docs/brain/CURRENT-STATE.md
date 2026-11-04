@@ -1,6 +1,13 @@
 # CURRENT-STATE
 
-Last updated: 2026-11-04 / Ref: server-move/first-run + built-in TLS (0040)
+Last updated: 2026-11-04 / Ref: server-move/first-run + built-in TLS (0040); Dependabot cleanup
+
+- **CI housekeeping (2026-11-04):** owner approved removing the unused
+  `docker` ecosystem from `.github/dependabot.yml`; the repository has no
+  Dockerfile or Kubernetes manifest, so scheduled Dependabot Updates
+  runs failed with `dependency_file_not_found`. Config-only; see
+  `docs/changelog/2026-11-04-dependabot-cleanup.md`. CI results are
+  recorded in the closeout commit.
 
 - **Server move/first-run + built-in TLS (0040, 2026-11-04):** owner
   approved Q-SM-A…E/G…M as recommended, revised Q-SM-F (F-A1…F-L1), and

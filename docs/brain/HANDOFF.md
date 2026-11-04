@@ -1,6 +1,15 @@
 # HANDOFF
 
-Last updated: 2026-11-04 / Ref: server-move/first-run + built-in TLS (0040)
+Last updated: 2026-11-04 / Ref: server-move/first-run + built-in TLS (0040); Dependabot cleanup
+
+## CI housekeeping (2026-11-04)
+
+Owner approved removing the unused `docker` ecosystem from
+`.github/dependabot.yml` (added in `9d645e3`). No Dockerfile or
+Kubernetes manifest exists, so scheduled Dependabot Updates runs failed
+with `dependency_file_not_found`. The change is config-only; see
+`docs/changelog/2026-11-04-dependabot-cleanup.md`. CI results are
+recorded in the closeout commit.
 
 ## Current tranche (2026-11-04): server move/first-run + built-in TLS 0040
 
