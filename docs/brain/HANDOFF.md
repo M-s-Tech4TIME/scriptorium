@@ -50,10 +50,16 @@ binding record is `docs/decisions/0040-server-move-first-run.md`.
 - **Fixed during the gate:** `test_config.py` used
   `get_setting("SECRET_KEY")`, which was bypassed by the dummy
   `SECRET_KEY` set at import time in `test_auth_api.py`; the test now
-  exercises `load_config()` directly.
-- **Closeout:** implementation commit pushed to `dev`; CI ×3 green;
-  `main` fast-forwarded to the same commit so both branches are
-  byte-identical. Exact hash/CI result recorded in the closeout sync.
+  exercises `load_config()` directly. The first CI run then found a
+  second isolation defect: live CLI tests mutated `os.environ` directly
+  and CI's ambient `DATABASE_URL` leaked into config tests. CLI tests now
+  use `monkeypatch.setenv`, and config tests clear the specific ambient
+  keys they assert.
+- **Closeout in progress:** implementation commit `f7f6d06` was pushed
+  to `dev`; the first CI run was red on the isolation defect above and
+  is being fixed in a follow-up commit. `main` is fast-forwarded only
+  after CI ×3 is green; the exact closeout hash/result is recorded in
+  the final sync.
 - **Known limits:** local live PG18/Redis is unavailable here (Docker
   socket denied), so live tests are CI-only; TypeScript ESLint remains
   blocked by `typescript-eslint`'s TS <6.1 peer range (`tsc --noEmit`

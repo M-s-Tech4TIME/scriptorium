@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-import os
 import uuid
 from pathlib import Path
 
@@ -95,24 +94,27 @@ def test_cli_user_create_and_list() -> None:
     asyncio.run(run())
 
 
-def _paths(tmp_path: Path) -> dict[str, str]:
-    return {
+def _set_paths(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    for key, value in {
         "SC_ARTIFACT_ROOT": str(tmp_path / "artifacts"),
         "SC_BUILD_ROOT": str(tmp_path / "builds"),
         "SC_MEDIA_ROOT": str(tmp_path / "media"),
         "SC_BACKUP_ROOT": str(tmp_path / "backups"),
         "SC_BUILD_DISPATCH": "inline",
         "SC_BACKUP_DISPATCH": "inline",
-    }
+    }.items():
+        monkeypatch.setenv(key, value)
 
 
 @needs_db
-def test_cli_export_and_strict_restore(tmp_path: Path) -> None:
+def test_cli_export_and_strict_restore(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     users = asyncio.run(_seed_users(1))
     me = users[0]
 
     async def run() -> None:
-        os.environ.update(_paths(tmp_path))
+        _set_paths(monkeypatch, tmp_path)
         async with _client() as client:
             aid = await _mk_lib(client, me, "climove")
             shown = await client.get(f"/api/v1/athenaeums/{aid}", headers=_headers(me))
@@ -156,12 +158,14 @@ def test_cli_export_and_strict_restore(tmp_path: Path) -> None:
 
 
 @needs_db
-def test_cli_strict_restore_refuses_foreign_name(tmp_path: Path) -> None:
+def test_cli_strict_restore_refuses_foreign_name(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     users = asyncio.run(_seed_users(2))
     owner, other = users
 
     async def run() -> None:
-        os.environ.update(_paths(tmp_path))
+        _set_paths(monkeypatch, tmp_path)
         async with _client() as client:
             aid = await _mk_lib(client, owner, "cliforeign")
             shown = await client.get(

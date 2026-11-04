@@ -300,6 +300,13 @@ do not force-push or rewrite it.
   `get_setting("SECRET_KEY")` can therefore bypass file parsing. Test
   the loader with `load_config()` or an unset key; this was a real
   local failure fixed in the 0040 tranche.
+- **CI ambient environment / test isolation:** CI sets `DATABASE_URL`
+  and `REDIS_URL` for the whole job. Tests that assert file-derived
+  values must clear the specific keys with `monkeypatch.delenv`, and
+  tests that set the process environment must use `monkeypatch.setenv`
+  so they restore automatically. The first 0040 CI run caught live CLI
+  tests leaking `SC_BUILD_DISPATCH`/`SC_BACKUP_DISPATCH` into config
+  tests; do not mutate `os.environ` directly in tests.
 - **Config precedence:** a present-but-empty environment variable wins
   over the file, deliberately, so `SECRET_KEY=` fails loud. Do not
   “helpfully” fall back to the file.

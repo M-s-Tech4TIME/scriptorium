@@ -156,6 +156,11 @@ numbered `/b/{n}/` URLs, and makes Scriptorium terminate HTTPS itself.
   `get_setting("SECRET_KEY")`, which was bypassed by the dummy
   `SECRET_KEY` set at import time in `test_auth_api.py`; it now tests
   `load_config()` directly.
+- The first CI run found a second test-isolation defect: live CLI tests
+  set `SC_BUILD_DISPATCH`/`SC_BACKUP_DISPATCH`/`SC_*_ROOT` directly in
+  `os.environ`, and CI's ambient `DATABASE_URL` leaked into config tests.
+  The CLI tests now use `monkeypatch.setenv` (auto-restored), and the
+  file-parsing config tests clear the specific ambient keys they assert.
 - Local gates at implementation: backend **169 passed, 51 skipped**
   (`-W error`; live PG18/Redis unavailable), ruff check/format clean,
   mypy strict clean; packaging contract **12 passed**; frontend

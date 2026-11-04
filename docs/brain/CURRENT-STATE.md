@@ -24,8 +24,10 @@ Last updated: 2026-11-04 / Ref: server-move/first-run + built-in TLS (0040)
   TLS/server-move/install runbooks, architecture/threat/compatibility/
   onboarding/structure/roadmap/docs index/changelog, and new
   `docs/history/` (project history + environment-migration handoff).
-  Implementation commit pushed to `dev`; CI ×3 green; `main`
-  fast-forwarded so both branches are byte-identical. Page aliases, M5,
+  Implementation commit `f7f6d06` was pushed to `dev`; the first CI run
+  found a test-isolation defect (ambient `DATABASE_URL` plus CLI tests
+  mutating `os.environ`), fixed in a follow-up commit. `main` is
+  fast-forwarded only after CI ×3 is green. Page aliases, M5,
   distribution, and SEO remain later; SEO still needs its own plan and
   owner rulings.
 
@@ -329,8 +331,10 @@ Last updated: 2026-11-04 / Ref: server-move/first-run + built-in TLS (0040)
   backend **169 passed, 51 skipped** (`-W error`; live PG18/Redis
   unavailable), ruff/format/mypy clean; packaging 12 passed; frontend
   typecheck/lint/format/19 Vitest/build/audit pass; docs validator
-  passes; `pip-audit --strict` clean. Pushed to `dev`; CI ×3 green;
-  `main` fast-forwarded to the same commit.
+  passes; `pip-audit --strict` clean. Implementation pushed to `dev`
+  (`f7f6d06`); the first CI run found a test-isolation defect (ambient
+  `DATABASE_URL` plus CLI tests mutating `os.environ`), fixed in a
+  follow-up commit. `main` is fast-forwarded only after CI ×3 is green.
 - **Serving work (pushed `6169696`, CI ×3):** 0035 schema/migration,
   serving modules/routers, auth access cookie, build manifest/custom CSS,
   tests, docs/brain. Local gates: full suite **147 passed / 1 deselected**

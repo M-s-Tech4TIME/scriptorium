@@ -18,7 +18,9 @@ def _restore_config() -> Generator[None]:
     config.set_config_file("/etc/scriptorium/config.env")
 
 
-def test_file_values_and_quotes(tmp_path: Path) -> None:
+def test_file_values_and_quotes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     path = tmp_path / "config.env"
     path.write_text(
         "# comment\n\nDATABASE_URL='postgresql+asyncpg://u:p@h/db'\n"
@@ -26,6 +28,8 @@ def test_file_values_and_quotes(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     config.set_config_file(path)
+    monkeypatch.delenv("DATABASE_URL", raising=False)
+    monkeypatch.delenv("SC_MEDIA_ROOT", raising=False)
     assert config.get_setting("DATABASE_URL") == "postgresql+asyncpg://u:p@h/db"
     assert config.get_setting("SC_MEDIA_ROOT") == "/var/lib/scriptorium/media"
 
@@ -58,16 +62,20 @@ def test_malformed_file_fails_loud(tmp_path: Path) -> None:
         config.load_config()
 
 
-def test_cache_invalidates_on_file_change(tmp_path: Path) -> None:
+def test_cache_invalidates_on_file_change(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     path = tmp_path / "config.env"
     path.write_text("SC_BUILD_DISPATCH=inline\n", encoding="utf-8")
     config.set_config_file(path)
+    monkeypatch.delenv("SC_BUILD_DISPATCH", raising=False)
     assert config.get_setting("SC_BUILD_DISPATCH") == "inline"
     path.write_text("SC_BUILD_DISPATCH=celery\n# size changes\n", encoding="utf-8")
     assert config.get_setting("SC_BUILD_DISPATCH") == "celery"
 
 
-def test_missing_file_is_empty(tmp_path: Path) -> None:
+def test_missing_file_is_empty(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("SC_BUILD_DISPATCH", raising=False)
     config.set_config_file(tmp_path / "missing.env")
     assert config.load_config() == {}
     assert config.get_setting("SC_BUILD_DISPATCH", "inline") == "inline"
