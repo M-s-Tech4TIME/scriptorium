@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily Scriptorium TLS renewal check
+Documentation=file:/usr/share/doc/scriptorium/tls.md
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+RandomizedDelaySec=1h
+
+[Install]
+WantedBy=timers.target

@@ -24,7 +24,6 @@ production must point it at the isolated build venv (packaging, C4).
 
 from __future__ import annotations
 
-import os
 import shlex
 import shutil
 import subprocess
@@ -34,6 +33,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
+from app.config import ConfigError, get_int_setting, get_setting
 from app.serving.manifest import write_artifact_manifest
 from app.sphinx.sourcegen import SitePlan
 
@@ -75,22 +75,21 @@ class RunnerConfigError(RuntimeError):
 
 
 def _env_int(name: str, default: int) -> int:
-    raw = os.environ.get(name)
-    if raw is None:
-        return default
     try:
-        return int(raw)
-    except ValueError as exc:
-        raise RunnerConfigError(f"{name} must be an integer, got {raw!r}") from exc
+        return get_int_setting(name, default)
+    except ConfigError as exc:
+        raise RunnerConfigError(str(exc)) from exc
 
 
 def build_config() -> BuildConfig:
     return BuildConfig(
         artifact_root=Path(
-            os.environ.get("SC_ARTIFACT_ROOT", "/var/lib/scriptorium/artifacts")
+            get_setting("SC_ARTIFACT_ROOT", "/var/lib/scriptorium/artifacts") or ""
         ),
-        build_root=Path(os.environ.get("SC_BUILD_ROOT", "/var/lib/scriptorium/builds")),
-        build_python=Path(os.environ.get("SC_BUILD_PYTHON", sys.executable)),
+        build_root=Path(
+            get_setting("SC_BUILD_ROOT", "/var/lib/scriptorium/builds") or ""
+        ),
+        build_python=Path(get_setting("SC_BUILD_PYTHON", sys.executable) or ""),
         cpu_seconds=_env_int("SC_SPHINX_CPU_SECONDS", 600),
         memory_bytes=_env_int("SC_SPHINX_MEMORY_BYTES", 1_610_612_736),
         max_file_bytes=_env_int("SC_SPHINX_MAX_FILE_BYTES", 536_870_912),

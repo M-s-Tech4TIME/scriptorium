@@ -10,14 +10,12 @@ address only (decision 0019).
 
 from __future__ import annotations
 
-import os
-
 import redis.asyncio as redis
+
+from app.config import ConfigError, get_int_setting, get_setting
 
 LOGIN_MAX_FAILURES = 5
 LOGIN_WINDOW_SECONDS = 900
-
-_CONFIG_FILE = "/etc/scriptorium/config.env"
 
 
 class LimiterUnavailable(RuntimeError):
@@ -25,13 +23,7 @@ class LimiterUnavailable(RuntimeError):
 
 
 def _redis_url() -> str:
-    url = os.environ.get("REDIS_URL")
-    if not url and os.path.exists(_CONFIG_FILE):
-        with open(_CONFIG_FILE, encoding="utf-8") as fh:
-            for line in fh:
-                line = line.strip()
-                if line.startswith("REDIS_URL="):
-                    url = line.split("=", 1)[1].strip().strip("'\"")
+    url = get_setting("REDIS_URL")
     if not url:
         raise LimiterUnavailable(
             "REDIS_URL is not set (env or /etc/scriptorium/config.env)."
@@ -40,13 +32,10 @@ def _redis_url() -> str:
 
 
 def _env_int(name: str, default: int) -> int:
-    raw = os.environ.get(name)
-    if raw is None:
-        return default
     try:
-        return int(raw)
-    except ValueError as exc:
-        raise LimiterUnavailable(f"{name} must be an integer, got {raw!r}") from exc
+        return get_int_setting(name, default)
+    except ConfigError as exc:
+        raise LimiterUnavailable(str(exc)) from exc
 
 
 def max_failures() -> int:

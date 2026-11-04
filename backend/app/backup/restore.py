@@ -805,14 +805,39 @@ async def _claimable_name(
 
 
 async def _allocate_public_name(
-    session: AsyncSession, importer_id: uuid.UUID, desired: str
+    session: AsyncSession,
+    importer_id: uuid.UUID,
+    desired: str,
+    *,
+    strict: bool = False,
 ) -> str:
+    if strict:
+        if await _claimable_name(session, desired, importer_id):
+            return desired
+        raise BackupError(
+            f"Public name '{desired}' is not free for this restore "
+            "(strict move mode; no automatic suffix)."
+        )
     candidate = desired
     for _ in range(8):
         if await _claimable_name(session, candidate, importer_id):
             return candidate
         candidate = _suffix(desired, 160)
     raise BackupError("Could not allocate a free public name for the restore.")
+
+
+async def _validate_strict_names(
+    session: AsyncSession, importer_id: uuid.UUID, plan: _Plan
+) -> None:
+    """Fail before staging any file when a move would change a public URL."""
+    desired = {plan.athenaeum["public_slug"]}
+    desired.update(row["slug"] for row in plan.public_names)
+    for name in sorted(desired):
+        if not await _claimable_name(session, name, importer_id):
+            raise BackupError(
+                f"Public name '{name}' conflicts with existing data; "
+                "strict move restore refuses to rename it."
+            )
 
 
 async def _write_public_name(
@@ -984,6 +1009,8 @@ async def _import_plan(
     staged: _Staged,
     url_by_id: dict[uuid.UUID, str],
     warnings: list[str],
+    *,
+    strict_names: bool = False,
 ) -> str:
     await session.execute(select(func.pg_advisory_xact_lock(PUBLIC_NAMES_LOCK)))
 
@@ -991,7 +1018,10 @@ async def _import_plan(
         session, importer_id, plan.athenaeum["slug"]
     )
     public_slug = await _allocate_public_name(
-        session, importer_id, plan.athenaeum["public_slug"]
+        session,
+        importer_id,
+        plan.athenaeum["public_slug"],
+        strict=strict_names,
     )
     athenaeum = Athenaeum(
         id=new_athenaeum_id,
@@ -1155,6 +1185,11 @@ async def _import_plan(
         if row["slug"] == public_slug:
             continue
         if not await _claimable_name(session, row["slug"], importer_id):
+            if strict_names:
+                raise BackupError(
+                    f"Public name alias '{row['slug']}' conflicts with existing "
+                    "data; strict move restore refuses to drop it."
+                )
             warnings.append(
                 f"Public name alias '{row['slug']}' was skipped because "
                 "it belongs to another site."
@@ -1191,6 +1226,8 @@ async def restore_archive(
     importer_id: uuid.UUID,
     archive_path: Path,
     workdir: Path,
+    *,
+    strict_names: bool = False,
 ) -> RestoreResult:
     extracted = workdir / "extracted"
     remove_tree(extracted)
@@ -1200,6 +1237,8 @@ async def restore_archive(
         manifest = extract_archive(archive_path, extracted)
         data = load_data(extracted)
         plan = _parse_plan(manifest, data)
+        if strict_names:
+            await _validate_strict_names(session, importer_id, plan)
         new_athenaeum_id = uuid.uuid4()
         url_by_id = _stage_media(plan, extracted, staged)
         _stage_builds(plan, extracted, new_athenaeum_id, staged)
@@ -1213,6 +1252,7 @@ async def restore_archive(
                 staged,
                 url_by_id,
                 warnings,
+                strict_names=strict_names,
             )
             await session.commit()
         except IntegrityError as exc:
@@ -1239,20 +1279,39 @@ async def restore_archive(
 
 
 async def _restore(
-    archive_path: Path, importer_id: uuid.UUID, workdir: Path
+    archive_path: Path,
+    importer_id: uuid.UUID,
+    workdir: Path,
+    *,
+    strict_names: bool = False,
 ) -> RestoreResult:
     engine = create_async_engine(get_database_url(), pool_pre_ping=True)
     try:
         maker = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
         async with maker() as session:
-            return await restore_archive(session, importer_id, archive_path, workdir)
+            return await restore_archive(
+                session,
+                importer_id,
+                archive_path,
+                workdir,
+                strict_names=strict_names,
+            )
     finally:
         await engine.dispose()
 
 
 def restore_archive_sync(
-    archive_path: str, importer_id: str, workdir: str
+    archive_path: str,
+    importer_id: str,
+    workdir: str,
+    *,
+    strict_names: bool = False,
 ) -> RestoreResult:
     return asyncio.run(
-        _restore(Path(archive_path), uuid.UUID(importer_id), Path(workdir))
+        _restore(
+            Path(archive_path),
+            uuid.UUID(importer_id),
+            Path(workdir),
+            strict_names=strict_names,
+        )
     )

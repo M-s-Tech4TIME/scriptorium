@@ -1,17 +1,67 @@
 # HANDOFF
 
-Last updated: 2026-11-03 / Ref: backup/restore 0039 green; server-move plan drafted
+Last updated: 2026-11-04 / Ref: server-move/first-run + built-in TLS (0040)
 
-## Next phase (drafted 2026-11-03): server move/first-run provisioning
+## Current tranche (2026-11-04): server move/first-run + built-in TLS 0040
 
-Dedicated plan at `docs/roadmap/server-move-plan.md`; Q-SM-A…M are open in
-`OPEN-QUESTIONS.md`. No implementation starts until the owner rules.
-Key gaps found: there is no user-create CLI (a fresh install cannot log
-in), the CLI does not load all of `/etc/scriptorium/config.env`, and
-per-Athenaeum backups omit global public-name tombstones for deleted
-Athenaeums.
+Owner rulings Q-SM-A…E and Q-SM-G…M were accepted as recommended;
+revised Q-SM-F (F-A1…F-L1) and ownership ruling O1 were accepted. The
+binding record is `docs/decisions/0040-server-move-first-run.md`.
 
-## Current tranche (2026-11-01): backup/restore 0039
+- **First run:** `scriptorium-admin setup` is a read-only preflight;
+  `migrate` is explicit and PG18-only; `user create/list` provides the
+  first account with a TTY prompt or `--password-stdin`, 12–1024
+  characters, Argon2id, and no open registration.
+- **Move:** CLI `backup export`/`restore` share the 0039 core; restore
+  requires an existing importer, refuses a non-empty target unless
+  `--force`, and uses strict public names (a live name or another owner's
+  tombstone fails before writes). The API owner restore keeps 0039
+  auto-suffix. `verify` is a read-only post-move gate for DB/head,
+  names/pointers, artifacts/manifests/jail, media hashes, config, and TLS.
+- **Config parity:** `backend/app/config.py` is the one loader for
+  `/etc/scriptorium/config.env`; no shell evaluation, malformed lines
+  fail loud, and a real environment variable (including empty) wins.
+  Existing env readers were migrated.
+- **TLS:** `backend/app/tls/` implements native HTTPS termination,
+  local CA/leaf generation, SAN detection/normalization, import
+  validation, renewal, history/rollback/prune, HSTS, a hardened
+  ECDHE+AEAD context, and the HTTP→HTTPS `308` redirect. The web unit
+  uses `TlsUvicornWorker` on 443; the redirect unit serves port 80.
+  Proxy headers are disabled; `X-Forwarded-For` remains untrusted.
+- **Ownership/packaging:** `postinst` creates the group/user/dirs,
+  seeds config once, applies `scriptorium:scriptorium` recursively,
+  forces `ca.key` back to `root:root 0600`, and enables the renewal
+  timer. Units are sandboxed with read-only `/opt` and `/etc`;
+  privileged binds use `CAP_NET_BIND_SERVICE`.
+- **Dependencies:** added `cryptography==50.0.2` and
+  `uvicorn-worker==0.4.0`, regenerated both backend locks, and added a
+  local mypy stub for `uvicorn_worker` (no `py.typed`).
+- **Tests:** new `test_config.py`, `test_tls.py`, `test_tls_redirect.py`,
+  `test_cli.py`, and TLS packaging assertions. Local gates: backend
+  **169 passed, 51 skipped** (`-W error`; live PG18/Redis unavailable),
+  ruff/format/mypy clean; packaging **12 passed**; frontend
+  typecheck/lint/format/19 Vitest/build/audit pass; docs validator
+  passes; `pip-audit --strict` clean. Live CLI/backup tests run in CI.
+- **Docs:** decision 0040, approved plan, `operations/tls.md`,
+  `operations/server-move.md`, rewritten `operations/install.md`,
+  architecture/threat/compatibility/onboarding/structure/roadmap/docs
+  index/changelog, and new `docs/history/` (project history +
+  environment-migration handoff).
+- **Fixed during the gate:** `test_config.py` used
+  `get_setting("SECRET_KEY")`, which was bypassed by the dummy
+  `SECRET_KEY` set at import time in `test_auth_api.py`; the test now
+  exercises `load_config()` directly.
+- **Closeout:** implementation commit pushed to `dev`; CI ×3 green;
+  `main` fast-forwarded to the same commit so both branches are
+  byte-identical. Exact hash/CI result recorded in the closeout sync.
+- **Known limits:** local live PG18/Redis is unavailable here (Docker
+  socket denied), so live tests are CI-only; TypeScript ESLint remains
+  blocked by `typescript-eslint`'s TS <6.1 peer range (`tsc --noEmit`
+  is the type gate); no ACME, reverse proxy, HSTS preload, or automatic
+  renewal of imported certificates; page aliases, M5, distribution, and
+  SEO remain later phases.
+
+## Previous tranche (2026-11-01): backup/restore 0039
 
 Owner rulings A1/B3/C1/D1/E1 implemented; docs/brain closeout complete.
 The first CI run found a build defect in the live round-trip test; fixed
@@ -262,23 +312,56 @@ sphinx.md + changelogs + brain synced. The entire C3.5 stack (0029–
 approval; M4-C4 is pushed as `1add6c8` with CI green ×3.
 
 ## Next steps (in order)
-1. **Server move/first-run provisioning:** present a dedicated plan and
-   owner rulings before implementation. It consumes the Full backup
-   format and must preserve numbered `/b/{n}/` URLs exactly.
-2. **Page aliases:** owner-approved later phase; plan/rulings first.
-3. **M5:** signed package pipeline (lintian/rpmlint, SBOM/provenance,
-   clean-install matrix).
-4. **Dedicated SEO phase:** owner requested a structured, detailed plan
+1. **Page aliases:** owner-approved later phase; plan/rulings first.
+2. **M5:** signed package pipeline (lintian/rpmlint, SBOM/provenance,
+   clean-install matrix) and fold the first-run/TLS runbooks into the
+   admin guide.
+3. **Dedicated SEO phase:** owner requested a structured, detailed plan
    in its own phase; every SEO feature/attribute must be user-controllable
    per Athenaeum in the editorial panel. Do not implement before the
    plan and owner rulings.
-5. **Distribution phase:** present Q-DIST-A…D (credentials, delivery
+4. **Distribution phase:** present Q-DIST-A…D (credentials, delivery
    semantics, target roster, React shell) and wait; do not implement
    before owner approval.
-6. **Junk-sweep before every gate:** re-read written files; grep the
+5. **Junk-sweep before every gate:** re-read written files; grep the
    standing junk markers before committing.
 
 ## Gotchas (carried)
+- **Shared config loader (0040):** `app/config.py` does no shell
+  evaluation. A present-but-empty environment variable wins over the
+  file (so `SECRET_KEY=` fails loud). Malformed `KEY=VALUE` lines raise
+  `ConfigError`; do not add `source`/expansion semantics. Tests must
+  call `load_config()` when asserting parse failures, because test
+  modules set a dummy `SECRET_KEY` at import time.
+- **TLS CA key:** the local CA private key is `root:root 0600` and the
+  service cannot read it. `tls generate` needs root only for the default
+  `/etc/scriptorium/tls`; tests use a non-default `SC_TLS_ROOT`
+  unprivileged. `postinst` applies `scriptorium:scriptorium` then forces
+  `ca.key` back to root.
+- **TLS worker:** `TlsUvicornWorker` requires Gunicorn `--certfile` and
+  `--keyfile` and refuses to run without them. It installs the hardened
+  `ssl_context_factory` after the base Uvicorn config is created; keep
+  proxy headers disabled (`--no-proxy-headers`). Do not add a plaintext
+  app listener.
+- **Redirect safety:** the port-80 app honors `Host` only when it
+  matches an active certificate SAN; otherwise `SC_TLS_REDIRECT_HOST`, a
+  certificate SAN, or `400`. Never reflect an arbitrary Host.
+- **Strict move names:** CLI restore (`strict_names=True`) fails on a
+  live name or another owner's tombstone; free/same-user-tombstoned
+  names are claimable. `--force` bypasses only the empty-target guard.
+  The API restore keeps 0039 auto-suffix — do not conflate the paths.
+- **TLS versions:** version IDs include UTC microseconds + 8 hex chars;
+  history ordering is deterministic. Prune protects the active version
+  even if it is older than the newest `--keep`.
+- **CLI privilege:** `scriptorium-admin` refuses any account other than
+  root or `scriptorium`. `setup`/`verify` are read-only; `migrate` is
+  explicit; `postinst` never migrates or issues certificates.
+- **Live CLI tests:** `test_cli.py` live cases skip without
+  `DATABASE_URL`; they run in CI against PG18/Redis. Do not claim a local
+  skip is coverage.
+- **Mypy/uvicorn-worker:** the package has no `py.typed`; the local stub
+  in `backend/typings/` plus `mypy_path = "typings"` is the approved
+  mechanism. Do not add a broad missing-imports ignore.
 - **Sphinx 9.2 theme:** `theme.conf` MUST carry `inherit = none`
   explicitly (absence → `ThemeError`); with a parentless theme the
   builder only reaches YOUR staged theme statics — engine basic-theme

@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-import os
 import re
 from datetime import timedelta
 from pathlib import Path, PurePosixPath
 from typing import Any
+
+from app.config import ConfigError, get_int_setting, get_setting
 
 BACKUP_FORMAT = "scriptorium-backup@1"
 MANIFEST_NAME = "manifest.json"
@@ -25,13 +26,10 @@ class BackupError(RuntimeError):
 
 
 def _int_env(name: str, default: int) -> int:
-    raw = os.environ.get(name)
-    if raw is None:
-        return default
     try:
-        value = int(raw)
-    except ValueError as exc:
-        raise RuntimeError(f"{name} must be an integer, got {raw!r}.") from exc
+        value = get_int_setting(name, default)
+    except ConfigError as exc:
+        raise RuntimeError(str(exc)) from exc
     if value <= 0:
         raise RuntimeError(f"{name} must be positive, got {value}.")
     return value
@@ -58,7 +56,7 @@ def download_ttl() -> timedelta:
 
 
 def backup_root() -> Path:
-    return Path(os.environ.get("SC_BACKUP_ROOT", "/var/lib/scriptorium/backups"))
+    return Path(get_setting("SC_BACKUP_ROOT", "/var/lib/scriptorium/backups") or "")
 
 
 def safe_relpath(name: str) -> str:

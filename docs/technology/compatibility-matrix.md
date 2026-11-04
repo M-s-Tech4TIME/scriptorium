@@ -1,4 +1,4 @@
-# Compatibility matrix (frozen set, verified 2026-10-30)
+# Compatibility matrix (frozen set, verified 2026-11-04)
 
 | Component | Pinned | Latest stable seen | Support | Verified source |
 |---|---|---|---|---|
@@ -12,6 +12,8 @@
 | Pydantic | 2.14.1 | 2.14.1 | current | PyPI |
 | Uvicorn | 0.54.0 | 0.54.0 | current | PyPI |
 | Gunicorn | 26.2.0 | 26.2.0 | current | PyPI |
+| uvicorn-worker | 0.4.0 | 0.4.0 | current; Gunicorn worker bridge | PyPI |
+| cryptography | 50.0.2 | 50.0.2 | current; bundled OpenSSL via Python | PyPI |
 | SQLAlchemy | 2.1.6 | 2.1.6 (2026-10) | needs Py ≥3.11 | PyPI/GitHub |
 | Alembic | 1.20.1 | 1.20.1 (2026-09-11) | needs SQLA ≥2.0 | PyPI |
 | asyncpg | 0.32.0 | 0.32.0 | current | PyPI |
@@ -55,8 +57,11 @@
 
 ## Policy
 
-- Exact pins in `backend/requirements.lock`, `packaging/build-requirements.lock`
-  and `frontend/package-lock.json`; lockfiles are committed.
+- Exact pins in `backend/requirements.lock`, `backend/requirements.prod.lock`,
+  `packaging/build-requirements.lock` and `frontend/package-lock.json`;
+  lockfiles are committed. `cryptography`/`uvicorn-worker` are runtime
+  dependencies (decision 0040 F-H1) and ship in both app locks; no new OS
+  package is required.
 - Weekly Dependabot for npm, pip, GitHub Actions and Docker.
 - Blocking `npm audit --audit-level=high` and `pip-audit -r
   backend/requirements.lock --strict`; CycloneDX SBOM and license checks are

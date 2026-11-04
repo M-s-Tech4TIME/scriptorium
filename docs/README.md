@@ -5,6 +5,7 @@
 
 ## Map
 - `brain/` — fast-resume memory. Start here after `AGENTS.md`. See `brain/README.md`.
+- `history/` — project-wide narrative + environment-migration handoff (`PROJECT-HISTORY.md`, `ENVIRONMENT-MIGRATION.md`).
 - `onboarding/` — zero-to-productive: `getting-started.md`, `codebase-map.md`, `common-tasks.md`, `agent-guide.md`.
 - `architecture/` — system design, data flow, module boundaries.
 - `decisions/` — numbered ADRs `0001-*.md`, immutable once accepted.
@@ -16,9 +17,13 @@
 - `changelog/` — per-push entries.
 - `roadmap/` — phases, milestones, gates.
 
-## Status (2026-11-03)
-M0–M4 implementation and serving (0035) are complete; URL durability
-(0036) and backup/restore (0039) are implemented and pushed. The
-server-move/first-run plan is drafted (`roadmap/server-move-plan.md`,
-Q-SM-A…M open). Dedicated SEO and distribution phases remain.
-Approved: Q1–Q23, Rules 1–8. See `brain/DECISIONS-INDEX.md`.
+## Status (2026-11-04)
+M0–M4 implementation, serving (0035), URL durability (0036), backup/restore
+(0039), and server move/first-run + built-in TLS (0040) are implemented.
+Decision 0040 adds the CLI first-run/move/verify lifecycle, a shared
+no-shell-evaluation config loader, native HTTPS termination with a local
+CA and HTTP→HTTPS `308`, and the `scriptorium:scriptorium` ownership
+contract. M5 signing/provenance, page aliases, distribution, and the
+dedicated SEO phase remain later; SEO still requires its own plan and
+owner rulings. Approved: Q1–Q23, Rules 1–8. See
+`brain/DECISIONS-INDEX.md`.

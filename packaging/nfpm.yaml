@@ -42,6 +42,18 @@ contents:
     dst: /lib/systemd/system/scriptorium-web.service
   - src: packaging/systemd/scriptorium-worker.service
     dst: /lib/systemd/system/scriptorium-worker.service
+  - src: packaging/systemd/scriptorium-redirect.service
+    dst: /lib/systemd/system/scriptorium-redirect.service
+  - src: packaging/systemd/scriptorium-tls-renew.service
+    dst: /lib/systemd/system/scriptorium-tls-renew.service
+  - src: packaging/systemd/scriptorium-tls-renew.timer
+    dst: /lib/systemd/system/scriptorium-tls-renew.timer
+  - src: docs/operations/tls.md
+    dst: /usr/share/doc/scriptorium/tls.md
+  - src: docs/operations/server-move.md
+    dst: /usr/share/doc/scriptorium/server-move.md
+  - src: docs/operations/install.md
+    dst: /usr/share/doc/scriptorium/install.md
 overrides:
   deb:
     depends:

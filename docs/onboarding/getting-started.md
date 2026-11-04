@@ -1,6 +1,6 @@
 # Getting started (local dev)
 
-Last updated: 2026-10-30 / Ref: stack-upgrade phase (0037)
+Last updated: 2026-11-04 / Ref: server-move/first-run + built-in TLS (0040)
 
 ## Prereqs (frozen versions)
 
@@ -35,11 +35,17 @@ ruff format --check .
 mypy --config-file pyproject.toml .
 # frontend
 cd ../frontend
+npm run typecheck
 npm run lint
 npm run format:check
+npm test
+npm run build
 npm audit --audit-level=high
-# package runtimes (M5)
+# docs/packaging contract
 cd ..
+bash scripts/validate-docs.sh
+pytest backend/tests/test_packaging.py -W error
+# package runtimes (M5)
 packaging/scripts/fetch-python.sh
 packaging/scripts/build-app-venv.sh
 packaging/scripts/build-venv.sh
@@ -47,9 +53,30 @@ packaging/scripts/build-redis.sh
 nfpm package --config packaging/nfpm.yaml --target dist/
 ```
 
-## First admin flow (M5 target, Q5/Q6)
+## First-run flow (current, 0040)
 
-Install `.deb`/`.rpm` → `sudo -u scriptorium scriptorium-admin setup` →
-`sudo -u scriptorium scriptorium-admin migrate` → `systemctl enable --now
-scriptorium-redis scriptorium-web scriptorium-worker`.
-`postinst` never auto-touches the DB.
+On a packaged host:
+
+```bash
+# 1. Configure /etc/scriptorium/config.env (0600) with DATABASE_URL,
+#    a fresh SECRET_KEY, cookie security, Redis, SC_* roots, and TLS keys.
+# 2. Issue TLS before enabling the web unit:
+sudo scriptorium-admin tls generate --hostname docs.example.com
+#    or: sudo scriptorium-admin tls import --cert fullchain.pem --key privkey.pem
+sudo scriptorium-admin tls verify
+# 3. Read-only preflight, then schema and first account:
+sudo scriptorium-admin setup
+sudo scriptorium-admin migrate
+sudo scriptorium-admin user create --email owner@example.com --display "Owner"
+# 4. Start the stack (HTTPS 443 + HTTP→HTTPS 308 on 80):
+sudo systemctl enable --now scriptorium-redis scriptorium-redirect \
+  scriptorium-web scriptorium-worker scriptorium-tls-renew.timer
+```
+
+There is no open registration and no plaintext application listener.
+`postinst` never migrates or generates certificates. For local development
+without packaging, set the same variables in your shell and run the CLI
+from the backend venv; the TLS commands accept a non-default
+`SC_TLS_ROOT` so they can be exercised unprivileged. See
+`docs/operations/install.md`, `docs/operations/tls.md`, and
+`docs/operations/server-move.md`.

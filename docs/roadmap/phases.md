@@ -1,6 +1,6 @@
 # Roadmap — phases + gates (Q23)
 
-Last updated: 2026-10-31 / Ref: editor/content completion tranche
+Last updated: 2026-11-04 / Ref: server-move/first-run + built-in TLS (0040)
 
 - **M0 Foundation:** docs/brain/AGENTS, pins/locks, CI skeleton, nfpm skeleton, dev compose. Gate: all green.
 - **M1 Core data + auth:** migrations, RBAC, audit. Gate: IDOR tests.
@@ -15,8 +15,15 @@ Last updated: 2026-10-31 / Ref: editor/content completion tranche
   strict CSP, and bounded custom CSS. **URL-durability phase complete
   (0036, 2026-10-28):** owner-renamable public names, permanent aliases/
   tombstones, `308` redirects, no rebuild; Option 1 URL shape retained.
-  Dedicated SEO phase (per-Athenaeum editorial controls) and distribution
-  are the next phases; sequencing not yet ruled.
+  **Backup/restore complete (0039, 2026-11-01):** Editorial/Full
+  ZIP/`.tar.gz` export and validated restore preserving numbered URLs.
+  **Server move/first-run + built-in TLS complete (0040, 2026-11-04):**
+  read-only `setup`, explicit `migrate`, `user create/list`, CLI
+  `backup export`/`restore` (strict names), read-only `verify`, native
+  HTTPS termination with a local CA and full certificate lifecycle,
+  HTTP→HTTPS `308`, ownership/sandbox contract, and operator runbooks.
+  Dedicated SEO phase (per-Athenaeum editorial controls), page aliases,
+  distribution, and M5 remain; sequencing not yet ruled.
 - **M5 Package+harden:** signed .deb/.rpm, setup/migrate, admin guide, SBOM/provenance. Gate: clean install/upgrade/uninstall ×4 distros.
 - **Phase A:** versions/git-tags + picker (no v1 rewrite). **Phase B:** Yjs collab over JSON canonical.
 - Open design Q (Phase A UX over time) stays owner-decided; v1 stays Git-ready.

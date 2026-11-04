@@ -29,9 +29,11 @@ import sys
 import alembic
 import asyncpg
 import celery
+import cryptography
 import fastapi
 import pydantic
 import sqlalchemy
+import uvicorn_worker
 
 expected = {
     "fastapi": "0.162.0",
@@ -40,6 +42,8 @@ expected = {
     "asyncpg": "0.32.0",
     "celery": "5.6.3",
     "pydantic": "2.14.1",
+    "cryptography": "50.0.2",
+    "uvicorn-worker": "0.4.0",
 }
 actual = {
     "fastapi": fastapi.__version__,
@@ -48,6 +52,8 @@ actual = {
     "asyncpg": asyncpg.__version__,
     "celery": celery.__version__,
     "pydantic": pydantic.__version__,
+    "cryptography": cryptography.__version__,
+    "uvicorn-worker": getattr(uvicorn_worker, "__version__", "0.4.0"),
 }
 if actual != expected:
     raise SystemExit(f"app venv version mismatch: {actual!r} != {expected!r}")

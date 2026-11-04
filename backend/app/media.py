@@ -12,7 +12,6 @@ a ``media_assets`` row owned by the same grimoire.
 
 from __future__ import annotations
 
-import os
 import re
 import uuid
 from collections.abc import Iterator
@@ -22,6 +21,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import get_setting
 from app.models import MediaAsset
 
 MAX_MEDIA_BYTES = 10 * 1024 * 1024
@@ -44,7 +44,7 @@ class MediaRefError(ValueError):
 
 
 def get_media_root() -> Path:
-    return Path(os.environ.get("SC_MEDIA_ROOT", "/var/lib/scriptorium/media"))
+    return Path(get_setting("SC_MEDIA_ROOT", "/var/lib/scriptorium/media") or "")
 
 
 def sniff_image(data: bytes) -> tuple[str, str] | None:

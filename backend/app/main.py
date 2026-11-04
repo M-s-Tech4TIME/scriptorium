@@ -15,12 +15,14 @@ from app.routers import media as media_router
 from app.routers import nodes as nodes_router
 from app.routers import publications as publications_router
 from app.routers import site as site_router
+from app.tls.middleware import HstsMiddleware
 
 APP_VERSION = "0.0.0"
 
 
 def create_app() -> FastAPI:
     app = FastAPI(title="Scriptorium", version=APP_VERSION)
+    app.add_middleware(HstsMiddleware)
     app.include_router(auth_router.router)
     app.include_router(athenaeums_router.router)
     app.include_router(backups_router.router)

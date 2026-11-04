@@ -10,7 +10,6 @@ HttpOnly, SameSite=Lax, path=/; Secure comes from SCRIPTORIUM_COOKIE_SECURE
 
 from __future__ import annotations
 
-import os
 import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Annotated
@@ -36,6 +35,7 @@ from app.auth import (
     verify_dummy,
     verify_password,
 )
+from app.config import get_bool_setting
 from app.db import get_session
 from app.models import AuditLog, RefreshToken, User
 
@@ -61,11 +61,7 @@ async def _login_failed(peer_ip: str, email_addr: str) -> None:
 
 
 def _cookie_secure() -> bool:
-    return os.environ.get("SCRIPTORIUM_COOKIE_SECURE", "").lower() in (
-        "1",
-        "true",
-        "on",
-    )
+    return get_bool_setting("SCRIPTORIUM_COOKIE_SECURE")
 
 
 def _set_refresh_cookie(response: Response, token: str) -> None:

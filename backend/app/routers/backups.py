@@ -8,7 +8,6 @@ and always creates a fresh Athenaeum owned by the caller.
 
 from __future__ import annotations
 
-import os
 import time
 import uuid
 from datetime import UTC, datetime
@@ -35,6 +34,7 @@ from app.backup.manifest import (
 )
 from app.backup.restore import RestoreResult, restore_archive_sync
 from app.backup.tokens import make_download_token, verify_download_token
+from app.config import get_setting
 from app.db import get_session
 from app.models import BackupJob
 from app.serving.access import own_athenaeum
@@ -48,7 +48,7 @@ class BackupIn(BaseModel):
 
 
 def dispatch_mode() -> str:
-    mode = os.environ.get("SC_BACKUP_DISPATCH", "celery")
+    mode = get_setting("SC_BACKUP_DISPATCH", "celery")
     if mode not in ("celery", "inline"):
         raise RuntimeError(
             f"SC_BACKUP_DISPATCH must be 'celery' or 'inline', got {mode!r}."

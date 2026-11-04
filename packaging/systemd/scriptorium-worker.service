@@ -1,7 +1,8 @@
 [Unit]
-Description=Scriptorium worker (Celery build queue)
+Description=Scriptorium worker (Celery build/backup queue)
 Requires=scriptorium-redis.service
-After=network.target postgresql.service scriptorium-redis.service
+After=network-online.target postgresql.service scriptorium-redis.service
+
 [Service]
 User=scriptorium
 Group=scriptorium
@@ -9,7 +10,17 @@ WorkingDirectory=/opt/scriptorium/backend
 EnvironmentFile=/etc/scriptorium/config.env
 ExecStart=/opt/scriptorium/backend/.venv/bin/celery -A app.worker worker --loglevel=INFO --concurrency=2
 Restart=on-failure
+RestartSec=2
+LimitNOFILE=65536
 NoNewPrivileges=true
 PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadOnlyPaths=/opt/scriptorium /etc/scriptorium
+ReadWritePaths=/var/lib/scriptorium /var/log/scriptorium /var/cache/scriptorium
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+CapabilityBoundingSet=
+AmbientCapabilities=
+
 [Install]
 WantedBy=multi-user.target

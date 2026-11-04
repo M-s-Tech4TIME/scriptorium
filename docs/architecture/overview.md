@@ -1,27 +1,46 @@
 # Architecture (Q20–Q22, Section 10)
 
-Last updated: 2026-11-01 / Ref: backup/restore phase (0039)
+Last updated: 2026-11-04 / Ref: server-move/first-run + built-in TLS (0040)
 
 ```
-[Browser: React 19.3 + TipTap 3.32] --REST /api/v1--> [FastAPI 0.162 web@gunicorn+uvicorn]
-        |                                          | SQLA 2.1
-        |                                          v
-        +---- poll build status  +--> [PG18]  [Redis] <-- [Celery 5.6 worker]
-                                                     |
-                                              snapshot sources
-                                                     v
-                                   [isolated Sphinx venv 9.2/MyST 5.1] (net-off,
-                                   NoNewPrivileges, PrivateTmp, limits)
-                                                     v
-                            /var/lib/scriptorium/artifacts/{athenaeum}/{n}/
-                              html/ + build.log + manifest.json
-                                                     |
-                              FastAPI /a/{public_slug}/... (0035/0036)
-                              owner-published latest/stable + numbered builds
-                              permanent 308 aliases + tombstones
-                              manifest-derived CSP + E2 security headers
+[HTTP :80] --308--> [HTTPS :443, built-in TLS] <--REST /api/v1-- [Browser: React 19.3 + TipTap 3.32]
+                         |
+                         v
+             [FastAPI 0.162 web @ gunicorn+uvicorn]
+                         | SQLA 2.1
+                         v
+             [PG18]  [Redis] <-- [Celery 5.6 worker]
+                         |
+                  snapshot sources
+                         v
+       [isolated Sphinx venv 9.2/MyST 5.1] (net-off,
+       NoNewPrivileges, PrivateTmp, limits)
+                         v
+       /var/lib/scriptorium/artifacts/{athenaeum}/{n}/
+         html/ + build.log + manifest.json
+                         |
+       FastAPI /a/{public_slug}/... (0035/0036)
+       owner-published latest/stable + numbered builds
+       permanent 308 aliases + tombstones
+       manifest-derived CSP + E2 security headers
 ```
 
+- **Built-in TLS (0040):** the web tier terminates HTTPS itself with
+  `TlsUvicornWorker` on `SC_TLS_BIND` (default `0.0.0.0:443`) and a
+  hardened ECDHE+AEAD context; `scriptorium-redirect.service` answers
+  port 80 with `308` only. There is no plaintext application listener
+  and no reverse proxy in V1. A local ECDSA P-384 CA issues ECDSA P-256
+  leaves (90 days); the daily timer renews at 30 days, keeps 5 versions,
+  and supports import/rollback/prune/HSTS. The CA key is `root:root
+  0600`; every other app path is `scriptorium:scriptorium` (0040 O1).
+- **First run / server move (0040):** `scriptorium-admin` provides
+  `setup` (read-only preflight), `migrate`, `user create/list`,
+  `backup export`, `restore`, `verify`, and the full `tls` lifecycle. A
+  move is a maintenance-window, content-only export/restore per
+  Athenaeum using the 0039 archive core; CLI restore is strict on public
+  names, preserves numbered `/b/{n}/` URLs, and `verify` checks DB/head,
+  names/pointers, artifacts/manifests, media hashes, and TLS before
+  cutover. CLI and services share one no-shell-evaluation config loader.
 - **Canonical org model (0020):** native hierarchy `user → Athenaeums (libraries) → categories (sections) → grimoires (books)`; grimoire-level sharing only. Detail in `data-model.md` + `api.md`.
 - **Serving (0035):** every successful build is an immutable numbered
   artifact with a manifest. Owners publish a build to `latest` and/or

@@ -1,18 +1,21 @@
 # PROJECT-SUMMARY (brain map, not a copy)
 
-Last updated: 2026-11-03 / Ref: backup/restore 0039 green; server-move plan drafted
+Last updated: 2026-11-04 / Ref: server-move/first-run + built-in TLS (0040)
 
 - **What:** Scriptorium — self-hosted docs platform. Browser WYSIWYG (TipTap) → valid
   Sphinx source (RST default, MyST opt-in) → sandboxed background build → served HTML.
-- **Stack (frozen, Rule 5; 0037):** Python 3.14.10 bundled (PBS 20261026),
+- **Stack (frozen, Rule 5; 0037/0040):** Python 3.14.10 bundled (PBS 20261026),
   FastAPI 0.162.0, SQLA 2.1.6, Alembic 1.20.1, asyncpg 0.32.0, Celery 5.6.3 +
   redis-py 6.4.0 + bundled Redis 8.10.2, PG 18.6 exclusive, Node 26.13.0 LTS,
   React 19.3.1, TS 7.0.2, TipTap 3.32.1, Vite 8.3.5, Vitest 5.0.5,
-  Sphinx 9.2.0, docutils 0.22.4 (0.23 gated), MyST 5.1.0, nfpm 2.x.
-- **Arch in brief:** monorepo `frontend/ backend/ packaging/`; `web` + `worker` systemd
-  units (user `scriptorium`); FHS `/opt`+`/etc/scriptorium`+`/var/lib|log|cache`;
-  TipTap-JSON canonical (`tiptap@1`); DB tree `nodes` drives `toctree`;
-  builds = limited-subprocess Sphinx 9.2.0 sandbox, `-W` (0026).
+  Sphinx 9.2.0, docutils 0.22.4 (0.23 gated), MyST 5.1.0, nfpm 2.x,
+  `cryptography` 50.0.2, `uvicorn-worker` 0.4.0.
+- **Arch in brief:** monorepo `frontend/ backend/ packaging/`; `web` + `worker` +
+  `redis` + `redirect` systemd units (user `scriptorium`); FHS
+  `/opt`+`/etc/scriptorium`+`/var/lib|log|cache`; TipTap-JSON canonical
+  (`tiptap@1`); DB tree `nodes` drives `toctree`; builds = limited-subprocess
+  Sphinx 9.2.0 sandbox, `-W` (0026); built-in TLS on 443 + HTTP→HTTPS 308
+  on 80 (0040).
 - **Conventions:** Conventional Commits, trunk `main` + `feat/*`, 5 CI gates, Rule 6 zero-skip.
 - **Depth:** `docs/architecture/`, `docs/decisions/`, `docs/technology/compatibility-matrix.md`.
 - **M2 (conversion) key facts:** docutils 0.22.4 inline markup never nests —
@@ -59,10 +62,19 @@ Last updated: 2026-11-03 / Ref: backup/restore 0039 green; server-move plan draf
   URLs; frontend backup panel; Celery discovery/registration/dispatch
   repair. A CI-discovered media-build fix stages canonical
   `/_static/media/...` URLs by stripping the leading slash. Pushed
-  `31ac99d` + `55276ff`; CI ×3 green. The server-move/first-run plan is
-  drafted (`docs/roadmap/server-move-plan.md`; Q-SM-A…M open). Server
-  move/first-run provisioning, page-path aliases, M5, and the dedicated
-  SEO phase remain later; distribution awaits Q-DIST-A…D.
+  `31ac99d` + `55276ff`; CI ×3 green. **Server move/first-run + built-in
+  TLS 0040 implemented (2026-11-04):** shared no-shell-evaluation config
+  loader, CLI `setup`/`migrate`/`user create|list`/`backup export`/
+  `restore`/`verify`/`tls …`, strict-name move restore (API keeps
+  auto-suffix), native HTTPS termination with a local ECDSA P-384 CA +
+  P-256 leaves, hardened TLS 1.2/1.3, HTTP→HTTPS 308, daily renewal/
+  history/rollback/prune/import/HSTS, ownership `scriptorium:scriptorium`
+  with `ca.key` root-only, sandboxed read-only code/config, new redirect
+  and renewal units, `cryptography 50.0.2` + `uvicorn-worker 0.4.0`, and
+  `docs/history/` (project history + environment-migration handoff).
+  Pushed `dev`; CI ×3 green; `main` fast-forwarded identical. Page
+  aliases, M5, distribution, and the dedicated SEO phase remain later;
+  distribution awaits Q-DIST-A…D.
   Owner ruled the artifact
   to be a portable static website + design mandates (security parity;
   structure locked, skin open). Terminology: "grimoire" everywhere
@@ -75,5 +87,10 @@ Last updated: 2026-11-03 / Ref: backup/restore 0039 green; server-move plan draf
   `SC_BUILD_*` / `SC_SPHINX_*` build paths/limits, `SC_MEDIA_ROOT`
   (media storage), `SC_BACKUP_DISPATCH` / `SC_BACKUP_ROOT` (backups) and
   optional `SC_BACKUP_*` size/entry/TTL overrides; optional
-  `SCRIPTORIUM_RATELIMIT_LOGIN_MAX` / `_WINDOW_S` (0019). Packaged
-  example at `packaging/config.env.example` (0600 seed).
+  `SCRIPTORIUM_RATELIMIT_LOGIN_MAX` / `_WINDOW_S` (0019); TLS keys
+  `SC_TLS_BIND` (default `0.0.0.0:443`), `SC_HTTP_HOST`/`SC_HTTP_PORT`
+  (default `0.0.0.0:80`), `SC_TLS_ROOT`, optional `SC_TLS_CERT`/
+  `SC_TLS_KEY`, `SC_TLS_REDIRECT_HOST`, `SC_TLS_HSTS_MAX_AGE` (0040).
+  One no-shell-evaluation loader reads `/etc/scriptorium/config.env`
+  (env wins; empty env still wins). Packaged example at
+  `packaging/config.env.example` (0600 seed).

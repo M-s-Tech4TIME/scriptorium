@@ -1,6 +1,6 @@
 # Codebase map — "Where is X? Where do I change Y?"
 
-Last updated: 2026-10-31 / Ref: editor/content completion 0038
+Last updated: 2026-11-04 / Ref: server-move/first-run + built-in TLS (0040)
 
 | Want | Edit |
 |---|---|
@@ -15,6 +15,9 @@ Last updated: 2026-10-31 / Ref: editor/content completion 0038
 | Media uploads / references / build copying | `backend/app/routers/media.py`, `backend/app/media.py`, `frontend/src/editor/media.ts`, migration `0009_media_assets.py` (0038) |
 | Document history / restore | `backend/app/routers/documents.py`, `frontend/src/editor/HistoryPanel.tsx` (0024/0038) |
 | Public-name registry / aliases / tombstones | `backend/app/models.py` (`PublicName`), `backend/app/routers/athenaeums.py`, migration `0008_url_durability.py` (0036) |
+| CLI first-run / move / verify | `backend/app/cli.py` + `backend/app/backup/` + `backend/app/config.py` (0040) |
+| Built-in TLS | `backend/app/tls/` (`state`, `crypto`, `manager`, `worker`, `redirect`, `middleware`) + `packaging/systemd/scriptorium-{web,redirect,tls-renew}.*` (0040) |
+| Shared config loader | `backend/app/config.py` (no shell evaluation; env wins) |
 | DB schema change | `backend/alembic/versions/` + `docs/technology/` + changelog, same commit |
 | Packaging/layout | `packaging/nfpm.yaml`, `packaging/systemd/*` (Q1–Q9, FHS) |
 | Decision | `docs/decisions/NNNN-*.md` + `brain/DECISIONS-INDEX.md` |

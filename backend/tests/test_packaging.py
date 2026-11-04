@@ -42,7 +42,15 @@ def test_build_venv_script_is_hermetic() -> None:
 
 def test_prod_lock_excludes_dev_tools() -> None:
     lock = (ROOT / "backend" / "requirements.prod.lock").read_text(encoding="utf-8")
-    for runtime in ("fastapi==", "sqlalchemy==", "alembic==", "asyncpg==", "celery=="):
+    for runtime in (
+        "fastapi==",
+        "sqlalchemy==",
+        "alembic==",
+        "asyncpg==",
+        "celery==",
+        "cryptography==",
+        "uvicorn-worker==",
+    ):
         assert f"\n{runtime}" in f"\n{lock}"
     for dev_only in (
         "pytest==",
@@ -65,7 +73,16 @@ def test_app_venv_script_is_pinned_and_relocatable() -> None:
     assert "sys.path.insert" in script
     assert "relocate-venv.sh" in script
     assert "/opt/scriptorium/backend/.venv" in script
-    for pinned in ("fastapi", "sqlalchemy", "alembic", "asyncpg", "celery", "pydantic"):
+    for pinned in (
+        "fastapi",
+        "sqlalchemy",
+        "alembic",
+        "asyncpg",
+        "celery",
+        "pydantic",
+        "cryptography",
+        "uvicorn-worker",
+    ):
         assert pinned in script
 
 
@@ -165,6 +182,62 @@ def test_postinst_creates_runtime_dirs_and_seeds_configs() -> None:
         "/opt/scriptorium/redis/bin/redis-server",
     ):
         assert runtime in postinst
+
+
+def test_tls_units_config_and_docs_are_packaged() -> None:
+    """Built-in TLS is the only V1 listener (decision 0040 F-A1/F-J1)."""
+    units = PACKAGING / "systemd"
+    web = (units / "scriptorium-web.service").read_text(encoding="utf-8")
+    assert "app.tls.worker.TlsUvicornWorker" in web
+    assert "Environment=SC_TLS_CERT=/etc/scriptorium/tls/current/fullchain.pem" in web
+    assert "Environment=SC_TLS_KEY=/etc/scriptorium/tls/current/privkey.pem" in web
+    assert "--certfile ${SC_TLS_CERT}" in web
+    assert "--keyfile ${SC_TLS_KEY}" in web
+    assert "AmbientCapabilities=CAP_NET_BIND_SERVICE" in web
+    assert "ExecReload=/bin/kill -s HUP $MAINPID" in web
+    assert "ReadOnlyPaths=/opt/scriptorium /etc/scriptorium" in web
+
+    worker = (units / "scriptorium-worker.service").read_text(encoding="utf-8")
+    assert "ProtectSystem=strict" in worker
+    assert "ReadOnlyPaths=/opt/scriptorium /etc/scriptorium" in worker
+
+    redirect = (units / "scriptorium-redirect.service").read_text(encoding="utf-8")
+    assert "app.tls.redirect:app" in redirect
+    assert "--no-proxy-headers" in redirect
+    assert "AmbientCapabilities=CAP_NET_BIND_SERVICE" in redirect
+
+    renew = (units / "scriptorium-tls-renew.service").read_text(encoding="utf-8")
+    assert "scriptorium-admin tls renew" in renew
+    assert "ReadWritePaths=/etc/scriptorium/tls" in renew
+    timer = (units / "scriptorium-tls-renew.timer").read_text(encoding="utf-8")
+    assert "OnCalendar=daily" in timer
+    assert "Persistent=true" in timer
+
+    config = (PACKAGING / "config.env.example").read_text(encoding="utf-8")
+    for key in (
+        "SC_TLS_BIND=0.0.0.0:443",
+        "SC_HTTP_HOST=0.0.0.0",
+        "SC_HTTP_PORT=80",
+        "SC_TLS_ROOT=/etc/scriptorium/tls",
+    ):
+        assert key in config
+
+    postinst = (PACKAGING / "scripts" / "postinst.sh").read_text(encoding="utf-8")
+    assert "groupadd --system scriptorium" in postinst
+    assert "chown -R scriptorium:scriptorium" in postinst
+    assert "chown root:root /etc/scriptorium/tls/ca.key" in postinst
+    assert "systemctl enable scriptorium-tls-renew.timer" in postinst
+
+    nfpm = (PACKAGING / "nfpm.yaml").read_text(encoding="utf-8")
+    for name in (
+        "scriptorium-redirect.service",
+        "scriptorium-tls-renew.service",
+        "scriptorium-tls-renew.timer",
+    ):
+        assert f"src: packaging/systemd/{name}" in nfpm
+    for doc in ("tls.md", "server-move.md", "install.md"):
+        assert f"src: docs/operations/{doc}" in nfpm
+        assert f"dst: /usr/share/doc/scriptorium/{doc}" in nfpm
 
 
 def test_docutils_probe_is_manual_and_forced() -> None:

@@ -15,7 +15,6 @@
 
 from __future__ import annotations
 
-import os
 import uuid
 from datetime import datetime
 from typing import Annotated
@@ -27,6 +26,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.audit import add_audit
 from app.auth import get_current_user_id
+from app.config import get_setting
 from app.db import get_session
 from app.models import Athenaeum, Build, Grimoire, Membership
 from app.sphinx.execute import execute_build_sync, mark_dispatch_failed_sync
@@ -68,7 +68,7 @@ async def _load_athenaeum(athenaeum_id: uuid.UUID, session: AsyncSession) -> Ath
 
 
 def dispatch_mode() -> str:
-    mode = os.environ.get("SC_BUILD_DISPATCH", "celery")
+    mode = get_setting("SC_BUILD_DISPATCH", "celery")
     if mode not in ("celery", "inline"):
         raise RuntimeError(
             f"SC_BUILD_DISPATCH must be 'celery' or 'inline', got {mode!r}."

@@ -6,7 +6,9 @@ requires-python = "==3.14.*"
 dependencies = [
   "fastapi==0.162.0",
   "uvicorn==0.54.0",
+  "uvicorn-worker==0.4.0",
   "gunicorn==26.2.0",
+  "cryptography==50.0.2",
   "sqlalchemy[asyncio]==2.1.6",
   "alembic==1.20.1",
   "asyncpg==0.32.0",
@@ -36,6 +38,7 @@ target-version = "py314"
 python_version = "3.14"
 strict = true
 warn_unused_ignores = true
+mypy_path = "typings"
 
 [[tool.mypy.overrides]]
 # docutils has no type stubs / py.typed; conversion probes validated the API

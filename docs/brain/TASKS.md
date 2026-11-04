@@ -1,8 +1,25 @@
 # TASKS
 
-Last updated: 2026-11-03 / backup/restore phase (0039) + media-build fix
+Last updated: 2026-11-04 / Ref: server-move/first-run + built-in TLS (0040)
 
 ## In progress (max 1–2)
+- [x] Server move/first-run provisioning + built-in TLS (0040): owner
+      rulings A1–M1 + revised F + O1; shared config loader, full CLI
+      (`setup`, `migrate`, `user create/list`, `backup export`,
+      `restore`, `verify`, `tls …`), strict-name move restore, native
+      HTTPS + HTTP→HTTPS 308, local CA lifecycle/import/renew/rollback/
+      prune/HSTS, ownership/sandbox packaging, tests, runbooks, decision
+      0040, and `docs/history/`. Pushed `dev`; CI ×3 green; `main`
+      fast-forwarded identical.
+- [ ] Page aliases: owner-approved later phase; plan/rulings first.
+- [ ] M5: signed package pipeline (lintian/rpmlint, SBOM/provenance,
+      clean-install matrix) and fold the first-run/TLS runbooks into the
+      admin guide.
+- Dedicated SEO phase plan (owner-requested; per-Athenaeum editorial
+  controls; no implementation before plan + rulings). Q-EDITOR-1 remains
+  open/non-blocking.
+
+## Todo (next phases)
 - [x] Backup/restore phase (0039): owner rulings A1/B3/C1/D1/E1;
       Editorial + Full export (ZIP/`.tar.gz`), validation-before-write
       restore, numbered `/b/{n}/` durability, name reclaim/suffix,
@@ -10,49 +27,8 @@ Last updated: 2026-11-03 / backup/restore phase (0039) + media-build fix
       dispatch repair, frontend panel, migration 0010, docs/brain.
       Pushed `31ac99d`; CI-discovered media-build fix `55276ff`; CI ×3
       green.
-- [ ] Server move/first-run provisioning phase (plan drafted
-      `docs/roadmap/server-move-plan.md`; awaiting Q-SM-A…M; no code).
-- [x] Editor/content completion (0038): V1 React app, TipTap surface,
-      tree/history/import, image/GIF media, build media copying,
-      `GET /auth/me`; docs + tests. Pushed as `476dfff`; CI ×3 green
-      (backend 159 passed, no skips, incl. live PG18 media/history and
-      migration 0009).
-- [x] Stack-upgrade phase (0037): bundled Python 3.14.10 + Redis 8.10.2,
-  Node 26.13.0 LTS, Sphinx 9.2.0, current backend/frontend pins, CI/audit
-  gates, support matrix. Pushed as `9d645e3`; CI ×3 green.
-- Dedicated SEO phase plan (owner-requested; per-Athenaeum editorial
-  controls; no implementation before plan + rulings). Q-EDITOR-1 remains
-  open/non-blocking.
-
-## Todo (next phases)
-- [x] M4-C3.5 baseline: 0029 + 0030 + 0031 + 0032 committed/pushed as
-      `b15446f`, CI green ×3 (lint-type-test, security, packaging).
-- [x] Commit Standing Rule 8 (0033) — approved wording, docs/governance.
-- [x] Implement 0034 fixes + regression tests + preview #6.
-- [x] Fix collapsed-panel flash on pager navigation (pre-paint marker) +
-      preview #7 browser verification.
-- [x] 0034 accepted + committed (includes Rule 8).
-- [x] Push `dev` with Rule 8 + 0034 → CI green ×3 (`2680738`).
-- [x] M4-C4 packaging: isolated build venv + `SC_BUILD_PYTHON`,
-      both units `Requires=redis`/`After=redis`, `config.env` build keys
-      (`CELERY_BROKER_URL`, `SC_*`); 0017 docutils-0.23 probe
-      mechanics; M4 report + brain.
-- [x] Commit + push M4-C4 → CI green ×3 (`1add6c8`).
-- [x] Serving phase (0035): A2 latest/stable pointers over immutable
-      numbered builds, B3 private-default visibility, C1 FastAPI serving,
-      D1 public slug + URL shape, E2 manifest/CSP + custom-CSS sandbox;
-      migration 0007, live/unit/theme/browser regressions.
-- [x] Serving closeout: push `6169696` + CI green ×3.
-- [x] URL-durability phase (0036): owner-approved A1/B1/C1/D1/E1/F1;
-      `public_names` registry/migration 0008, owner-only public-slug
-      rename, permanent aliases/tombstones, 308 serving, audit, live/
-      migration tests, docs. Pushed `be5af83`; CI ×3 green.
-- [x] Backup/restore phase (0039): migration 0010, archive/snapshot/
-      export/restore, Full jobs + signed download, frontend panel,
-      packaging config, archive/live tests, docs/brain. Pushed
-      `31ac99d`; media-build fix `55276ff`; CI ×3 green.
-- [ ] Server move/first-run provisioning: dedicated plan drafted
-      (`docs/roadmap/server-move-plan.md`); Q-SM-A…M open; not started.
+- [x] Server move/first-run provisioning + built-in TLS (0040): see
+      above. Pushed `dev`; CI ×3 green; `main` identical.
 - [ ] Page aliases: owner-approved later phase; no implementation yet.
 - [ ] Dedicated SEO phase: owner requested a structured, detailed plan;
       every SEO feature/attribute must be per-Athenaeum editorial-panel

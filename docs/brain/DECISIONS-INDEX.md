@@ -1,6 +1,6 @@
 # DECISIONS-INDEX
 
-Last updated: 2026-11-01 / Ref: backup/restore phase (0039)
+Last updated: 2026-11-04 / Ref: server-move/first-run + built-in TLS (0040)
 
 | ID | One-line | Status | Date | Approver |
 |---|---|---|---|---|
@@ -43,8 +43,9 @@ Last updated: 2026-11-01 / Ref: backup/restore phase (0039)
 | 0037 | Technical-stack upgrade: Python 3.14.10 bundled via PBS, Node 26.13.0 LTS, PostgreSQL 18.6, Redis 8.10.2 bundled + redis-py 6.4.0, Sphinx 9.2.0, FastAPI/SQLA/Alembic/asyncpg/Celery current, frontend React 19.3.1/TipTap 3.32.1/Vite 8.3.5/Vitest 5.0.5/ESLint 10.13.0; support matrix + audit gates; docutils 0.22.4 exception retained | accepted | 2026-10-30 | owner |
 | 0038 | Editor/content completion: V1 React app, image/GIF media with canonical `/_static/media/{uuid}.{ext}` URLs and magic-byte validation, history detail/restore, single-file RST/MyST import; backup/restore (Editorial + Full, numbered URLs preserved), page aliases, M5, and SEO remain separate phases | accepted | 2026-10-31 | owner |
 | 0039 | Backup/restore (A1/B3/C1/D1/E1): Editorial = content/media/names/ever-published successful builds+artifacts, Full adds failed builds/logs/all successful artifacts; both ZIP and `.tar.gz` with one manifest; on-demand no retention (Editorial sync stream, Full Celery job + 15-min single-use signed download); restore creates a fresh Athenaeum owned by the importer, nulls unmatched identities, never exports users/memberships/refresh tokens/audit; reclaim free or same-user-tombstoned names, otherwise auto-suffix; migration 0010 (`public_names.owner_id`, `backup_jobs`) | accepted | 2026-11-01 | owner |
+| 0040 | Server move/first-run + built-in TLS (Q-SM-A…E/G…M = A1/B1/C1/D2/E1/G1/H1/I1/J2/K1/L1/M1; revised F = F-A1…F-L1; O1 ownership): shared no-shell-eval config, CLI setup/migrate/user/backup export/restore/verify, strict-name move restore (API keeps auto-suffix), native HTTPS 443 + HTTP→HTTPS 308, local ECDSA P-384 CA + P-256 leaf, TLS 1.2/1.3 ECDHE+AEAD, daily renewal/5 versions/import/rollback/prune/HSTS, `cryptography` + `uvicorn-worker`, all app paths `scriptorium:scriptorium` except systemd/package metadata, external PG data, and `ca.key` (`root:root 0600`) | accepted | 2026-11-03 (implemented 2026-11-04) | owner |
 
-Full records: `docs/decisions/0001-*.md` … `0039-*.md`.
+Full records: `docs/decisions/0001-*.md` … `0040-*.md`.
 Pending: none.
 
-Last updated: 2026-11-01 / Ref: 0039 backup/restore recorded and implemented
+Last updated: 2026-11-04 / Ref: 0040 server move/first-run + built-in TLS recorded and implemented

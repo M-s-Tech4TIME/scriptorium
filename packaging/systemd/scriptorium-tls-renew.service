@@ -1,0 +1,19 @@
+[Unit]
+Description=Scriptorium TLS renewal (generated certificates only)
+Documentation=file:/usr/share/doc/scriptorium/tls.md
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+EnvironmentFile=/etc/scriptorium/config.env
+ExecStart=/opt/scriptorium/backend/.venv/bin/scriptorium-admin tls renew
+Nice=10
+IOSchedulingClass=idle
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadOnlyPaths=/opt/scriptorium
+ReadWritePaths=/etc/scriptorium/tls

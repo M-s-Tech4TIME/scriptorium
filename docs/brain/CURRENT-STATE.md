@@ -1,14 +1,42 @@
 # CURRENT-STATE
 
-Last updated: 2026-11-03 / Ref: backup/restore 0039 green; server-move plan drafted
+Last updated: 2026-11-04 / Ref: server-move/first-run + built-in TLS (0040)
 
-- **Server-move/first-run plan drafted (2026-11-03):** proposal at
-  `docs/roadmap/server-move-plan.md`; Q-SM-A…M open, no code. It covers
-  first-account CLI bootstrap, preflight/migrate sequencing, headless
-  export/restore, strict name preservation, maintenance-window cutover,
-  TLS/reverse-proxy examples, verification, and rollback. Gaps found: no
-  user-create CLI, incomplete CLI config-file loading, and no global
-  public-name tombstones in per-Athenaeum archives.
+- **Server move/first-run + built-in TLS (0040, 2026-11-04):** owner
+  approved Q-SM-A…E/G…M as recommended, revised Q-SM-F (F-A1…F-L1), and
+  ownership O1. Implemented `app/config.py` (one no-shell-evaluation
+  loader; env wins), the full `app/tls/` stack (local ECDSA P-384 CA +
+  P-256 leaves, hardened ECDHE+AEAD TLS 1.2/1.3, `TlsUvicornWorker`,
+  HTTP→HTTPS `308`, HSTS, import/renew/rollback/prune/history/verify),
+  and the CLI (`setup`, `migrate`, `user create/list`, `backup export`,
+  `restore`, `verify`, `tls …`). CLI restore is strict on names; the API
+  restore keeps 0039 auto-suffix. Packaging adds the redirect and
+  renewal units, TLS config keys, recursive `scriptorium:scriptorium`
+  ownership with `ca.key` forced to `root:root 0600`, and sandboxed
+  read-only code/config. Dependencies: `cryptography==50.0.2`,
+  `uvicorn-worker==0.4.0`; both locks regenerated; local mypy stub added.
+  New regressions: `test_config.py`, `test_tls.py`, `test_tls_redirect.py`,
+  `test_cli.py`, TLS packaging assertions. Local gates: backend
+  **169 passed, 51 skipped** (`-W error`; live PG18/Redis unavailable),
+  ruff/format/mypy clean; packaging 12 passed; frontend
+  typecheck/lint/format/19 Vitest/build/audit pass; docs validator
+  passes; `pip-audit --strict` clean. Docs: decision 0040, approved plan,
+  TLS/server-move/install runbooks, architecture/threat/compatibility/
+  onboarding/structure/roadmap/docs index/changelog, and new
+  `docs/history/` (project history + environment-migration handoff).
+  Implementation commit pushed to `dev`; CI ×3 green; `main`
+  fast-forwarded so both branches are byte-identical. Page aliases, M5,
+  distribution, and SEO remain later; SEO still needs its own plan and
+  owner rulings.
+
+- **Server-move/first-run plan (2026-11-03):** proposal at
+  `docs/roadmap/server-move-plan.md`; Q-SM-A…M were opened and are now
+  resolved by 0040. It covered first-account CLI bootstrap,
+  preflight/migrate sequencing, headless export/restore, strict name
+  preservation, maintenance-window cutover, TLS, verification, and
+  rollback. Gaps found and fixed: no user-create CLI, incomplete CLI
+  config-file loading, and no global public-name tombstones in
+  per-Athenaeum archives (documented as a raw-dump fallback).
 
 - **Backup/restore phase (0039, 2026-11-01):** owner rulings A1/B3/C1/D1/E1
   implemented. Owners export one Athenaeum as ZIP or `.tar.gz` in
@@ -288,11 +316,21 @@ Last updated: 2026-11-03 / Ref: backup/restore 0039 green; server-move plan draf
   rulings(0029) + typography(0030) + second feedback batch(0031) +
   third feedback batch(0032) + Standing Rule 8(0033) +
   fourth feedback(0034) + serving(0035) + URL durability(0036) +
-  backup/restore(0039);
+  stack upgrade(0037) + editor/content(0038) + backup/restore(0039) +
+  server move/first-run + built-in TLS(0040);
   Rules 1–8. M0 locks; M1 green (2539391); M2 A–C green; M3 C1–C6 green
   ×3; M4 C1 `2aed3ef` + C2 `3a15b52` + C3 `1e1637e` green ×3; 0028
   record `556bbce` green ×3; C3.5 baseline `b15446f` green ×3 (0029 +
   0030 + 0031 + 0032; 80 passed / 36 skipped, ruff + mypy strict clean).
+- **Server-move/TLS work (0040, this tranche):** `app/config.py`, the
+  full `app/tls/` lifecycle, CLI first-run/move/verify/TLS, strict-name
+  restore, redirect/renewal units, ownership/sandbox packaging, new
+  regressions, decision 0040, runbooks, and `docs/history/`. Local gates:
+  backend **169 passed, 51 skipped** (`-W error`; live PG18/Redis
+  unavailable), ruff/format/mypy clean; packaging 12 passed; frontend
+  typecheck/lint/format/19 Vitest/build/audit pass; docs validator
+  passes; `pip-audit --strict` clean. Pushed to `dev`; CI ×3 green;
+  `main` fast-forwarded to the same commit.
 - **Serving work (pushed `6169696`, CI ×3):** 0035 schema/migration,
   serving modules/routers, auth access cookie, build manifest/custom CSS,
   tests, docs/brain. Local gates: full suite **147 passed / 1 deselected**
@@ -313,32 +351,26 @@ Last updated: 2026-11-03 / Ref: backup/restore 0039 green; server-move plan draf
   ratelimit tests (PG18 version test excluded locally); ruff/format/mypy/
   compileall clean. Headless Chrome followed an alias `308` to the
   canonical page and loaded its assets.
-- **Last pushed:** `be5af83` — `feat(url): durable public names with
-  aliases and tombstones` (29 files, +1235/−168), pushed `dev`; all
-  three CI workflows green (lint-type-test incl. docs-brain, security,
-  packaging). It sits on `9dbd8a0` — docs closeout for serving (CI ×3
-  green). `6169696` — `feat(serving): publish and serve
-  immutable Sphinx artifacts` (46 files, +2914/−105), pushed `dev`; all
-  three CI workflows green (lint-type-test, security, packaging). It sits
-  on `1add6c8` — `feat(m4-c4): package isolated build venv
-  and docutils probe` (32 files, +645/−101), also green ×3. It sits on
-  `2680738` (0034, 14 files, +410/−76), `cbe2b22` (Standing Rule 8, 12
-  files, +238/−71), and the approved baseline `b15446f`
-  (`feat(m4-c3.5): complete theme feedback passes 0029-0032`, 35 files,
-  +3968/−275). 0034 is the owner-approved fourth batch plus the no-flash
-  collapsed-panel follow-up (preview #7); C4 is the M4 packaging/probe
-  closeout.
-  The exact owner-approved preview #5 artifact is `b15446f`: 0029
-  seven-ruling pass + 0030 vendored Inter + 0031 second batch + 0032
-  unified first-party search (phrase-first, all-word highlight,
-  full-page takeover), centred dialog + x close, clear-only panel field,
-  weight 800, `#D8E7DD` inline code, split panel controls, scrollspy
-  title, island contract fix, link-integrity crawl, and the h2
-  `base_level` staging fix. **0034 is pushed and CI green ×3; preview
-  #7 is browser-verified. M4-C4 is pushed as `1add6c8`, CI green ×3.**
+- **Last pushed:** the 0040 server-move/TLS tranche on `dev`; CI ×3
+  green; `main` fast-forwarded to the same commit. It sits on the 0039
+  backup/restore tranche (`31ac99d` + media-build fix `55276ff` +
+  brain closeout `5051236`), which sits on the 0038 editor/content
+  tranche (`476dfff` + closeout `d635f5a`), the 0037 stack upgrade
+  (`9d645e3` + closeout `a2f3926`), URL durability (`be5af83` +
+  closeout `5822de3`), serving (`6169696` + closeout `9dbd8a0`), and
+  M4-C4 (`1add6c8`). Older approved baseline: `b15446f` (theme feedback
+  passes 0029–0032), `cbe2b22` (Standing Rule 8), `2680738` (0034),
+  `1add6c8` (M4-C4). The exact owner-approved preview #5 artifact is
+  `b15446f`: 0029 seven-ruling pass + 0030 vendored Inter + 0031 second
+  batch + 0032 unified first-party search (phrase-first, all-word
+  highlight, full-page takeover), centred dialog + x close, clear-only
+  panel field, weight 800, `#D8E7DD` inline code, split panel controls,
+  scrollspy title, island contract fix, link-integrity crawl, and the h2
+  `base_level` staging fix.
 - **Remote:** `git@github.com:M-s-Tech4TIME/scriptorium.git` (public).
-  `dev` carries M3 + M4 implementation + serving + URL durability;
-  `main` stays at release point (ff-only).
+  `dev` carries M3 + M4 implementation + serving + URL durability +
+  backup/restore + server move/TLS; `main` is fast-forwarded to the same
+  commit at each closeout (0013).
 - **Known/limitations (documented, not bugs):** docutils 0.22.4 inline
   markup does not nest — 0017 fail-loud matrix in
   `docs/technology/conversion.md`; RST writer rejects mark-run edge spaces,
@@ -365,3 +397,11 @@ Last updated: 2026-11-03 / Ref: backup/restore 0039 green; server-move plan draf
   site; conflicting public names are auto-suffixed and conflicting aliases
   are skipped with an audit-meta warning. Full restore omits queued/running
   builds (terminal imported builds keep their numbers; gaps are valid).
+  Server move/TLS (0040): the supported move is content-only per
+  Athenaeum; global tombstones for deleted Athenaeums are not carried
+  (raw dump fallback); imported certificates are never auto-renewed;
+  there is no ACME/reverse proxy/HSTS preload; losing the local CA key
+  without a backup requires generating a new CA and re-trusting clients;
+  live CLI/backup tests are CI-only here. Page aliases, M5,
+  distribution, and SEO remain later; SEO requires its own plan and
+  owner rulings.

@@ -22,6 +22,11 @@ jobs:
           test -f packaging/systemd/scriptorium-redis.service
           test -f packaging/systemd/scriptorium-web.service
           test -f packaging/systemd/scriptorium-worker.service
+          test -f packaging/systemd/scriptorium-redirect.service
+          test -f packaging/systemd/scriptorium-tls-renew.service
+          test -f packaging/systemd/scriptorium-tls-renew.timer
+          test -f docs/operations/tls.md
+          test -f docs/operations/server-move.md
           test -f scripts/probe-docutils-023.sh
           test -f .github/workflows/docutils-probe.yml
           for script in packaging/scripts/*.sh; do sh -n "$script"; done
@@ -32,8 +37,18 @@ jobs:
           grep -q '^After=.*scriptorium-redis.service' packaging/systemd/scriptorium-worker.service
           grep -q '^Type=notify$' packaging/systemd/scriptorium-redis.service
           grep -q '^ExecStart=/opt/scriptorium/redis/bin/redis-server' packaging/systemd/scriptorium-redis.service
+          grep -q 'app.tls.worker.TlsUvicornWorker' packaging/systemd/scriptorium-web.service
+          grep -q '^AmbientCapabilities=CAP_NET_BIND_SERVICE$' packaging/systemd/scriptorium-web.service
+          grep -q '^AmbientCapabilities=CAP_NET_BIND_SERVICE$' packaging/systemd/scriptorium-redirect.service
+          grep -q 'app.tls.redirect:app' packaging/systemd/scriptorium-redirect.service
+          grep -q '^OnCalendar=daily$' packaging/systemd/scriptorium-tls-renew.timer
+          grep -q '^ExecStart=/opt/scriptorium/backend/.venv/bin/scriptorium-admin tls renew$' packaging/systemd/scriptorium-tls-renew.service
+          grep -q '^SC_TLS_BIND=' packaging/config.env.example
+          grep -q '^SC_TLS_ROOT=' packaging/config.env.example
           grep -q '^CELERY_BROKER_URL=' packaging/config.env.example
           grep -q '^SC_BUILD_PYTHON=/opt/scriptorium/build-venv/bin/python$' packaging/config.env.example
+          grep -q 'cryptography==50.0.2' backend/requirements.prod.lock
+          grep -q 'uvicorn-worker==0.4.0' backend/requirements.prod.lock
           grep -q 'PYTHON_VERSION=3.14.10' packaging/scripts/fetch-python.sh
           grep -q 'REDIS_VERSION=8.10.2' packaging/scripts/build-redis.sh
           grep -q 'python-runtime' packaging/nfpm.yaml

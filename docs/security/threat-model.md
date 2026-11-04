@@ -1,6 +1,6 @@
 # Threat model (initial, Q22 / §10)
 
-Last updated: 2026-11-01 / Ref: backup/restore phase (0039)
+Last updated: 2026-11-04 / Ref: server-move/first-run + built-in TLS (0040)
 
 ## Primary risk: untrusted content → Sphinx code exec
 - Generated-only `conf.py`; extension allowlist (any addition = Rule 4 + record).
@@ -56,6 +56,72 @@ Last updated: 2026-11-01 / Ref: backup/restore phase (0039)
   preserved, never echoed into a scheme/host. Alias redirects are `308`
   with `no-cache` (public) or `private, no-store` + `Vary: Cookie` +
   `X-Robots-Tag` (private).
+
+## Transport risks → built-in TLS (0040)
+- **Plaintext exposure:** there is no plaintext application listener. The
+  web tier serves HTTPS only on `SC_TLS_BIND` (default 443); the separate
+  port-80 service only returns `308` to HTTPS. Both use
+  `CAP_NET_BIND_SERVICE` and run as `scriptorium`, not root.
+- **Weak protocol/cipher downgrade:** TLS 1.2 minimum and TLS 1.3 only;
+  TLS 1.2 is ECDHE + AEAD (AES-GCM/ChaCha20-Poly1305). CBC, RSA key
+  exchange, 3DES, RC4, NULL, compression, renegotiation, and session
+  tickets are disabled. SHA-256 or stronger signatures are required.
+- **Certificate/key compromise:** the local CA key is `root:root 0600`
+  and never leaves the host in normal operation; leaf keys are `0600`;
+  fullchains are `0644`; version directories are `0750`. The service
+  cannot read the CA key. Back it up only as a root secret.
+- **Untrusted imported material:** import validates PEM shape, dates,
+  key strength/match, signature hash, `serverAuth` EKU, SAN presence, and
+  internal chain links before an atomic install. An imported external
+  root is not added to the system trust store; trust remains the
+  operator's responsibility.
+- **Failed rotation / lockout:** activation reloads `scriptorium-web` and
+  restores the previous certificate/state if the reload fails. Rollback
+  validates the target version first. Pruning protects the active
+  version.
+- **Redirect Host injection / open redirect:** the port-80 service never
+  reflects an arbitrary `Host`. It honors the header only when it matches
+  a current certificate SAN, otherwise `SC_TLS_REDIRECT_HOST`, otherwise
+  a certificate SAN, otherwise returns `400`.
+- **HSTS lock-in:** HSTS is off by default, has no preload, and should be
+  enabled only after clients trust the CA. `tls hsts` reverts state if
+  the live reload fails.
+- **Proxy-header spoofing:** Uvicorn proxy headers are disabled and
+  `X-Forwarded-For` is untrusted; rate limiting keys on the socket peer.
+  Do not place an untrusted proxy in front of the app (F-L1).
+
+## Provisioning and move risks (0040)
+- **Privilege boundary:** `scriptorium-admin` refuses to run as any user
+  other than root or `scriptorium`. `setup`/`verify` are read-only;
+  `migrate` is explicit and refuses PG < 18; `postinst` never touches the
+  database or generates certificates.
+- **Ownership drift:** every Scriptorium-managed path is
+  `scriptorium:scriptorium`; the accepted exceptions are systemd unit
+  files/package metadata (root), the external PostgreSQL data directory
+  (`postgres`), and `ca.key` (`root:root 0600`). `postinst` reapplies the
+  recursive ownership and then forces the CA key back to root.
+- **First-account bootstrap abuse:** there is no open registration and no
+  environment-secret bootstrap. `user create` is a privileged CLI action;
+  passwords come from a TTY prompt or `--password-stdin`, never argv;
+  hashes are Argon2id; policy is 12–1024 characters with no composition
+  rules (B1). `user list` never prints hashes.
+- **Move archive exposure:** archives contain all content and media.
+  Transfer only over SSH/HTTPS, keep them `0600`, verify SHA-256 on the
+  destination, and delete temporary copies. The supported move is
+  content-only; users, memberships, refresh tokens, and audit rows are
+  never exported. Raw `pg_dump` + filesystem copy is the documented
+  ops-only full-fidelity fallback and is treated as a root secret.
+- **URL/name integrity on move:** CLI restore is strict: any live name or
+  another owner's tombstone that conflicts with the archive fails before
+  writes. `--force` bypasses only the empty-target guard, never name
+  strictness. The API owner restore retains 0039 auto-suffix behaviour.
+- **Restore jail:** the move path reuses the 0039 validation-before-write
+  core (manifest/inventory/hashes/sizes, fresh UUIDs, artifact/media
+  jails, cleanup on failure); there is no second restore implementation.
+- **New-host secret:** generate a new `SECRET_KEY` on the destination;
+  refresh tokens are not exported and users re-authenticate. Config is
+  one no-shell-evaluation loader shared by CLI and services, with a real
+  environment variable winning over the file.
 
 ## App risks → mitigations
 - XSS (built HTML + editor): output encoding, strict served-artifact CSP

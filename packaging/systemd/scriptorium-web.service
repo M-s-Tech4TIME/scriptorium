@@ -1,15 +1,32 @@
 [Unit]
-Description=Scriptorium web (FastAPI gunicorn+uvicorn)
+Description=Scriptorium web (FastAPI gunicorn+uvicorn, built-in TLS)
+Documentation=file:/usr/share/doc/scriptorium/tls.md
 Requires=scriptorium-redis.service
-After=network.target postgresql.service scriptorium-redis.service
+Wants=scriptorium-redirect.service
+After=network-online.target postgresql.service scriptorium-redis.service
+
 [Service]
 User=scriptorium
 Group=scriptorium
 WorkingDirectory=/opt/scriptorium/backend
+Environment=SC_TLS_BIND=0.0.0.0:443
+Environment=SC_TLS_CERT=/etc/scriptorium/tls/current/fullchain.pem
+Environment=SC_TLS_KEY=/etc/scriptorium/tls/current/privkey.pem
 EnvironmentFile=/etc/scriptorium/config.env
-ExecStart=/opt/scriptorium/backend/.venv/bin/gunicorn app.main:app -k uvicorn.workers.UvicornWorker --bind 127.0.0.1:8470 --workers 3
+ExecStart=/opt/scriptorium/backend/.venv/bin/gunicorn app.main:app -k app.tls.worker.TlsUvicornWorker --bind ${SC_TLS_BIND} --workers 3 --certfile ${SC_TLS_CERT} --keyfile ${SC_TLS_KEY}
+ExecReload=/bin/kill -s HUP $MAINPID
 Restart=on-failure
+RestartSec=2
+LimitNOFILE=65536
 NoNewPrivileges=true
 PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadOnlyPaths=/opt/scriptorium /etc/scriptorium
+ReadWritePaths=/var/lib/scriptorium /var/log/scriptorium /var/cache/scriptorium
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+
 [Install]
 WantedBy=multi-user.target

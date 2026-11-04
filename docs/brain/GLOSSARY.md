@@ -1,6 +1,6 @@
 # GLOSSARY
 
-Last updated: 2026-10-28 / Ref: 0036 URL durability
+Last updated: 2026-11-04 / Ref: 0040 server move/first-run + built-in TLS
 
 - **Athenaeum (Library):** one user's complete documentation project — the library layer (`athenaeums`, 0020).
 - **Grimoire-category (Section):** a folder/section inside a Library grouping Grimoires (`grimoire_categories`, per-Athenaeum, 0020 Q-M3-9=A). **Single membership**: a Grimoire belongs to exactly one Section or Uncategorized; "same book on two shelves" is served by duplication (0022/0023 record), not shared membership.
@@ -17,5 +17,11 @@ Last updated: 2026-10-28 / Ref: 0036 URL durability
 - **Public-name tombstone:** a `public_names` row left after Athenaeum deletion (`athenaeum_id NULL`); old URLs return `404` and the name can never be claimed again (0036).
 - **Manifest:** `manifest.json` beside a build's `html/`, listing artifact inventory/SHA-256, inline-script CSP hashes, identity, and custom-CSS hash; the serving/export contract (0035 E2).
 - **Custom CSS:** bounded, namespaced owner skin input materialized as external `_static/custom.css` at build time; no at-rules/remote assets/scripts (0035 E2).
+- **TLS root:** `SC_TLS_ROOT` (default `/etc/scriptorium/tls`) holding `ca.pem`, `ca.key`, `state.json`, `current`, and versioned leaves (0040).
+- **Local CA:** Scriptorium-generated ECDSA P-384 trust anchor (10 years); its private key is `root:root 0600`, the one app-path ownership exception (0040 O1/F-B1).
+- **Leaf certificate:** ECDSA P-256 server certificate (90 days, `serverAuth`, DNS/IP SANs) issued by the local CA; `fullchain.pem` = leaf + CA (0040).
+- **TLS version:** one immutable directory under `$SC_TLS_ROOT/versions/` containing `fullchain.pem`, `privkey.pem`, and `meta.json`; activation swaps `current` atomically (0040).
+- **TLS mode:** `generated` (renewable by Scriptorium) or `imported` (validated external PEM; never auto-renewed) (0040 F-F1).
+- **Strict move restore:** CLI restore mode that fails before writes on a live-name or another owner's tombstone conflict instead of suffixing; the API restore keeps 0039 auto-suffix (0040 I1).
 - **Allowlist:** owner-approved suppression/exception with scope + expiry + decision ref (Rule 6).
 - **Gate:** blocking CI check; failing gate blocks merge/push completion.

@@ -1,0 +1,27 @@
+[Unit]
+Description=Scriptorium HTTP→HTTPS redirect (port 80)
+Documentation=file:/usr/share/doc/scriptorium/tls.md
+After=network-online.target
+Before=scriptorium-web.service
+
+[Service]
+User=scriptorium
+Group=scriptorium
+WorkingDirectory=/opt/scriptorium/backend
+Environment=SC_HTTP_HOST=0.0.0.0
+Environment=SC_HTTP_PORT=80
+EnvironmentFile=/etc/scriptorium/config.env
+ExecStart=/opt/scriptorium/backend/.venv/bin/uvicorn app.tls.redirect:app --host ${SC_HTTP_HOST} --port ${SC_HTTP_PORT} --no-proxy-headers --workers 1 --log-level warning
+Restart=on-failure
+RestartSec=2
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadOnlyPaths=/opt/scriptorium /etc/scriptorium
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+
+[Install]
+WantedBy=multi-user.target

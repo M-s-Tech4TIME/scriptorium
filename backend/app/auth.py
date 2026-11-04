@@ -14,7 +14,6 @@
 
 from __future__ import annotations
 
-import os
 import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Annotated
@@ -27,6 +26,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import get_setting
 from app.db import get_session
 from app.models import Membership, RefreshToken
 
@@ -43,7 +43,7 @@ class AuthError(Exception):
 
 
 def get_secret() -> str:
-    secret = os.environ.get("SECRET_KEY")
+    secret = get_setting("SECRET_KEY")
     if not secret:
         raise RuntimeError("SECRET_KEY is not set — refusing to mint tokens.")
     return secret
