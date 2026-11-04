@@ -60,7 +60,7 @@ built-in TLS contract.
 | 2026-10-31 | Editor/content completion | 0038 | `476dfff` | V1 React app, TipTap surface, tree/history/import, image/GIF media, build media copy |
 | 2026-11-01 | Backup/restore | 0039 | `31ac99d`, `55276ff` | Editorial/Full ZIP/`.tar.gz`, validated restore, numbered URL preservation, Full jobs |
 | 2026-11-03 | Server-move plan | Q-SM-A…M | `6e53875` | Plan + questions only; no implementation before rulings |
-| 2026-11-04 | Server move/first-run + built-in TLS | 0040 | this tranche | CLI first-run/move/verify, shared config, native HTTPS + redirect, local CA lifecycle, ownership/sandbox, runbooks |
+| 2026-11-04 | Server move/first-run + built-in TLS | 0040 | `f7f6d06`, `09850d6` | CLI first-run/move/verify, shared config, native HTTPS + redirect, local CA lifecycle, ownership/sandbox, runbooks |
 
 Every tranche above was committed with docs/brain updates and, from
 Rule 7 onward, verified green in all three CI workflows before the next
@@ -299,9 +299,11 @@ plus the lockfiles.
 ## 10. Branch and release state at this record
 
 - Remote: `git@github.com:M-s-Tech4TIME/scriptorium.git` (public).
-- `dev` carries all implementation through decision 0040; `main` is
-  fast-forwarded to the same commit at closeout so both branches are
-  byte-identical (0013).
+- `dev` carries all implementation through decision 0040. The 0040
+  implementation is `f7f6d06`; the CI-discovered test-isolation fix is
+  `09850d6`. All three workflows are green on `09850d6`. A docs-only
+  closeout commit follows and `main` is fast-forwarded to that final
+  `dev` commit, so both branches are byte-identical (0013).
 - Before this tranche: `dev` `6e53875`, `main` `03f9466`.
 - Release promotion is ff-only; never rewrite `main`. Feature work lands
   on `dev` first and must be CI-green before promotion.

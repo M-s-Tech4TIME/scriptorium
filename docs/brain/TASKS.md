@@ -9,9 +9,9 @@ Last updated: 2026-11-04 / Ref: server-move/first-run + built-in TLS (0040)
       `restore`, `verify`, `tls …`), strict-name move restore, native
       HTTPS + HTTP→HTTPS 308, local CA lifecycle/import/renew/rollback/
       prune/HSTS, ownership/sandbox packaging, tests, runbooks, decision
-      0040, and `docs/history/`. Pushed `dev` as `f7f6d06`; first CI run
-      found a test-isolation defect, fixed in a follow-up commit; `main`
-      follows only after CI ×3 is green.
+      0040, and `docs/history/`. Implementation `f7f6d06`; first CI run
+      found a test-isolation defect, fixed in `09850d6`; CI ×3 green and
+      `main` fast-forwarded to the final `dev` closeout commit.
 - [ ] Page aliases: owner-approved later phase; plan/rulings first.
 - [ ] M5: signed package pipeline (lintian/rpmlint, SBOM/provenance,
       clean-install matrix) and fold the first-run/TLS runbooks into the
@@ -29,8 +29,8 @@ Last updated: 2026-11-04 / Ref: server-move/first-run + built-in TLS (0040)
       Pushed `31ac99d`; CI-discovered media-build fix `55276ff`; CI ×3
       green.
 - [x] Server move/first-run provisioning + built-in TLS (0040): see
-      above. Pushed `dev` as `f7f6d06`; CI-discovered test-isolation fix
-      follows; `main` identical after CI ×3 is green.
+      above. Implementation `f7f6d06` + CI-isolation fix `09850d6`;
+      CI ×3 green; `main` identical at the final closeout commit.
 - [ ] Page aliases: owner-approved later phase; no implementation yet.
 - [ ] Dedicated SEO phase: owner requested a structured, detailed plan;
       every SEO feature/attribute must be per-Athenaeum editorial-panel

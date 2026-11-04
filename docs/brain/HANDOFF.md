@@ -55,11 +55,12 @@ binding record is `docs/decisions/0040-server-move-first-run.md`.
   and CI's ambient `DATABASE_URL` leaked into config tests. CLI tests now
   use `monkeypatch.setenv`, and config tests clear the specific ambient
   keys they assert.
-- **Closeout in progress:** implementation commit `f7f6d06` was pushed
-  to `dev`; the first CI run was red on the isolation defect above and
-  is being fixed in a follow-up commit. `main` is fast-forwarded only
-  after CI ×3 is green; the exact closeout hash/result is recorded in
-  the final sync.
+- **Closeout:** implementation `f7f6d06` was pushed to `dev`; the first
+  CI run was red on the isolation defect above, fixed in `09850d6`. All
+  three workflows are green on `09850d6`, and `main` is fast-forwarded to
+  the final `dev` closeout commit so both branches are byte-identical.
+  The live CI run is the coverage for the CLI/backup tests that skip in
+  this local environment.
 - **Known limits:** local live PG18/Redis is unavailable here (Docker
   socket denied), so live tests are CI-only; TypeScript ESLint remains
   blocked by `typescript-eslint`'s TS <6.1 peer range (`tsc --noEmit`

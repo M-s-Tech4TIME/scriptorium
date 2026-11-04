@@ -72,10 +72,10 @@ Last updated: 2026-11-04 / Ref: server-move/first-run + built-in TLS (0040)
   with `ca.key` root-only, sandboxed read-only code/config, new redirect
   and renewal units, `cryptography 50.0.2` + `uvicorn-worker 0.4.0`, and
   `docs/history/` (project history + environment-migration handoff).
-  Pushed `dev` as `f7f6d06`; the first CI run found a test-isolation
-  defect, fixed in a follow-up commit; `main` follows only after CI ×3 is
-  green. Page aliases, M5, distribution, and the dedicated SEO phase
-  remain later; distribution awaits Q-DIST-A…D.
+  Implementation `f7f6d06`; the first CI run found a test-isolation
+  defect, fixed in `09850d6`; CI ×3 green and `main` fast-forwarded to
+  the final `dev` closeout commit. Page aliases, M5, distribution, and
+  the dedicated SEO phase remain later; distribution awaits Q-DIST-A…D.
   Owner ruled the artifact
   to be a portable static website + design mandates (security parity;
   structure locked, skin open). Terminology: "grimoire" everywhere

@@ -26,10 +26,11 @@ At the start of the 0040 closeout:
 | Redis | 8.10.2 (bundled in packages; Docker image in dev/CI) |
 | Package manager | nfpm 2.x (validated 2.48.0) |
 
-At closeout the 0040 commit is pushed to `dev`, CI is verified green in
-all three workflows, and `main` is fast-forwarded to the same commit so
-both branches are byte-identical (decision 0013). `HANDOFF.md` records
-the exact closeout hash and CI result.
+At closeout: implementation `f7f6d06`; the first CI run found a
+test-isolation defect, fixed in `09850d6`; all three workflows are green
+on `09850d6`; the docs-only closeout commit is fast-forwarded to `main`
+so both branches are byte-identical (decision 0013). `HANDOFF.md`
+records the live result.
 
 ## 2. What lives in git vs. what must be transferred
 

@@ -169,8 +169,10 @@ numbered `/b/{n}/` URLs, and makes Scriptorium terminate HTTPS itself.
   docs validator passes; `pip-audit --strict` reports no known
   vulnerabilities.
 - Live CLI/backup tests run in CI against PostgreSQL 18.6 and Redis.
-- Closeout push and CI ×3 verification are recorded in
-  `docs/brain/HANDOFF.md`; do not treat local skips as live coverage.
+- Closeout: implementation `f7f6d06` plus the CI-discovered
+  test-isolation fix `09850d6`; all three workflows green. `main` is
+  fast-forwarded to the final `dev` closeout commit so both branches are
+  byte-identical. Do not treat local skips as live coverage.
 
 ## Known limits (unchanged or newly explicit)
 
