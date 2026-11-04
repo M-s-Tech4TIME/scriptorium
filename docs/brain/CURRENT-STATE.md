@@ -6,8 +6,9 @@ Last updated: 2026-11-04 / Ref: server-move/first-run + built-in TLS (0040); Dep
   `docker` ecosystem from `.github/dependabot.yml`; the repository has no
   Dockerfile or Kubernetes manifest, so scheduled Dependabot Updates
   runs failed with `dependency_file_not_found`. Config-only; see
-  `docs/changelog/2026-11-04-dependabot-cleanup.md`. CI results are
-  recorded in the closeout commit.
+  `docs/changelog/2026-11-04-dependabot-cleanup.md`. Pushed as `5d6e4da`;
+  CI ×3 green (lint `41756639817`, security `41756639699`, packaging
+  `41756639708`); `main` fast-forwarded to the final closeout commit.
 
 - **Server move/first-run + built-in TLS (0040, 2026-11-04):** owner
   approved Q-SM-A…E/G…M as recommended, revised Q-SM-F (F-A1…F-L1), and

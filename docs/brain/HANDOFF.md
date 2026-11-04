@@ -8,8 +8,9 @@ Owner approved removing the unused `docker` ecosystem from
 `.github/dependabot.yml` (added in `9d645e3`). No Dockerfile or
 Kubernetes manifest exists, so scheduled Dependabot Updates runs failed
 with `dependency_file_not_found`. The change is config-only; see
-`docs/changelog/2026-11-04-dependabot-cleanup.md`. CI results are
-recorded in the closeout commit.
+`docs/changelog/2026-11-04-dependabot-cleanup.md`. Pushed as `5d6e4da`;
+CI ×3 green (lint `41756639817`, security `41756639699`, packaging
+`41756639708`); `main` fast-forwarded to the final closeout commit.
 
 ## Current tranche (2026-11-04): server move/first-run + built-in TLS 0040
 

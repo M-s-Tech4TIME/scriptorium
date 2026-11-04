@@ -23,7 +23,9 @@ CI housekeeping, not a product change.
 
 - The edited YAML parses with PyYAML.
 - `scripts/validate-docs.sh` and `git diff --check` pass locally.
-- CI ×3 results and the `main` fast-forward are recorded in the
-  closeout commit.
+- CI ×3 green on `dev` (`5d6e4da`): lint `41756639817`, security
+  `41756639699`, packaging `41756639708`.
+- `main` fast-forwarded to the final closeout commit; both branches are
+  byte-identical.
 - The scheduled Dependabot Updates run is expected to stop reporting the
   missing Dockerfile on its next weekly run.
