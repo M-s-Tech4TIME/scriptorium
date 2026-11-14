@@ -4,26 +4,26 @@ version = "0.0.0"
 description = "Scriptorium backend (M1: schema + migrate CLI + health)"
 requires-python = "==3.14.*"
 dependencies = [
-  "fastapi==0.162.0",
+  "fastapi==0.162.4",
   "uvicorn==0.54.0",
   "uvicorn-worker==0.4.0",
-  "gunicorn==26.2.0",
+  "gunicorn==27.0.0",
   "cryptography==50.0.2",
-  "sqlalchemy[asyncio]==2.1.6",
+  "sqlalchemy[asyncio]==2.1.8",
   "alembic==1.20.1",
   "asyncpg==0.32.0",
-  "celery==5.6.3",
-  "redis==6.4.0",
-  "pydantic==2.14.1",
+  "celery==5.7.0",
+  "redis==8.1.0",
+  "pydantic==2.14.3",
   "argon2-cffi==25.1.0",
   "PyJWT==2.15.1",
   "sphinx==9.2.0",
-  "docutils==0.22.4",
-  "myst-parser==5.1.0",
+  "docutils==0.23",
+  "myst-parser==5.2.0",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest==9.2.0", "ruff==0.17.3", "mypy==2.4.1", "pip-audit==2.10.1", "httpx==0.28.1", "types-Pygments==2.21.0.20260819"]
+dev = ["pytest==9.2.0", "ruff==0.17.4", "mypy==2.4.1", "pip-audit==2.10.1", "httpx==0.28.1", "types-Pygments==2.21.0.20260819"]
 
 [project.scripts]
 scriptorium-admin = "app.cli:main"
